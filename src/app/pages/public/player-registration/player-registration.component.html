@@ -1,0 +1,92 @@
+<div class="public-registration">
+  <div class="registration-card">
+    <div class="registration-header">
+      <img *ngIf="auction?.logo" [src]="auction?.logo" alt="Auction logo">
+      <h1>{{auction?.auctionName || 'Cricket Auction'}}</h1>
+      <p>Player Self Registration</p>
+    </div>
+
+    <div *ngIf="loading" class="message">Loading registration...</div>
+
+    <div *ngIf="!loading && !registrationEnabled" class="message closed">
+      Player registration is currently closed.
+    </div>
+
+    <div *ngIf="!loading && registrationEnabled && submitted" class="message success">
+      Registration submitted successfully. Your name will appear in the player list.
+    </div>
+
+    <form *ngIf="!loading && registrationEnabled && !submitted" [formGroup]="form" (ngSubmit)="submit()">
+      <div class="photo-row">
+        <img *ngIf="photoPreview" [src]="photoPreview" alt="Player photo">
+        <div *ngIf="!photoPreview" class="photo-placeholder">Photo</div>
+        <input type="file" accept="image/*" (change)="onPhotoChange($event)">
+        <small *ngIf="uploadingPhoto">Uploading photo...</small>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          First Name *
+          <input formControlName="firstName">
+        </label>
+
+        <label>
+          Last Name *
+          <input formControlName="lastName">
+        </label>
+
+        <label>
+          Mobile Number *
+          <input type="tel" maxlength="10" formControlName="mobile" (keypress)="allowOnlyNumbers($event)">
+        </label>
+
+        <label>
+          Player Type *
+          <select formControlName="playerType">
+            <option value="">Select</option>
+            <option>Batsman</option>
+            <option>Bowler</option>
+            <option>All Rounder</option>
+            <option>Wicket Keeper</option>
+          </select>
+        </label>
+
+        <label>
+          T-Shirt Size *
+          <select formControlName="tshirtSize">
+            <option value="">Select</option>
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+            <option>XL</option>
+            <option>XXL</option>
+          </select>
+        </label>
+
+        <label>
+          Trouser Size *
+          <select formControlName="trouserSize">
+            <option value="">Select</option>
+            <option>28</option>
+            <option>30</option>
+            <option>32</option>
+            <option>34</option>
+            <option>36</option>
+            <option>38</option>
+            <option>40</option>
+            <option>42</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Note
+        <textarea rows="3" formControlName="note"></textarea>
+      </label>
+
+      <button type="submit" [disabled]="saving">
+        {{saving ? 'Submitting...' : 'Submit Registration'}}
+      </button>
+    </form>
+  </div>
+</div>

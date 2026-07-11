@@ -1,0 +1,80 @@
+<div class="user-page">
+  <div class="page-header">
+    <div>
+      <h2>User Control</h2>
+      <p>Manage app roles for Firebase Auth users.</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="newUser()">New User</button>
+  </div>
+
+  <div class="user-layout">
+    <section class="form-panel">
+      <h3>{{editingUser ? 'Edit User' : 'Add User'}}</h3>
+      <p class="hint">{{editingUser ? 'Update user role and status.' : 'Create login access with email and password.'}}</p>
+
+      <form [formGroup]="form" (ngSubmit)="save()">
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input class="form-control" formControlName="email" [readonly]="editingUser">
+        </div>
+
+        <div class="mb-3" *ngIf="!editingUser">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" formControlName="password">
+          <small class="hint">Minimum 6 characters.</small>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Display Name</label>
+          <input class="form-control" formControlName="displayName">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Role</label>
+          <select class="form-control" formControlName="role">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <label class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" formControlName="active">
+          <span class="form-check-label">Active</span>
+        </label>
+
+        <button class="btn btn-success w-100" type="submit" [disabled]="loading">
+          {{loading ? 'Saving...' : 'Save User'}}
+        </button>
+      </form>
+    </section>
+
+    <section class="list-panel">
+      <h3>Registered Users</h3>
+
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{user.displayName}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.role}}</td>
+            <td>{{user.active ? 'Active' : 'Inactive'}}</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-2" type="button" (click)="edit(user)">Edit</button>
+              <button class="btn btn-danger btn-sm" type="button" (click)="delete(user)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>

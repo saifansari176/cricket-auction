@@ -1,0 +1,184 @@
+<div class="dashboard-page">
+  <div class="summary-grid">
+    <button type="button" class="summary-card" [class.active]="activeList === 'players'" (click)="showList('players')">
+      <span>Total Players</span>
+      <strong>{{players.length}}</strong>
+    </button>
+
+    <button type="button" class="summary-card" [class.active]="activeList === 'teams'" (click)="showList('teams')">
+      <span>Total Teams</span>
+      <strong>{{teams.length}}</strong>
+    </button>
+
+    <button type="button" class="summary-card" [class.active]="activeList === 'available'" (click)="showList('available')">
+      <span>Available Players</span>
+      <strong>{{availablePlayers.length}}</strong>
+    </button>
+
+    <button type="button" class="summary-card" [class.active]="activeList === 'sold'" (click)="showList('sold')">
+      <span>Sold Players</span>
+      <strong>{{soldPlayers.length}}</strong>
+    </button>
+
+    <button type="button" class="summary-card" [class.active]="activeList === 'unsold'" (click)="showList('unsold')">
+      <span>Unsold Players</span>
+      <strong>{{unsoldPlayers.length}}</strong>
+    </button>
+  </div>
+
+  <div class="list-panel">
+    <div class="panel-header">
+      <h3>{{activeTitle}}</h3>
+      <span *ngIf="loading">Loading...</span>
+      <span *ngIf="!loading">{{activeFilteredCount}} Records</span>
+    </div>
+
+    <div class="table-filter">
+      <input
+        type="search"
+        [(ngModel)]="tableFilter"
+        [placeholder]="'Search ' + activeTitle.toLowerCase()">
+    </div>
+
+    <table *ngIf="activeList === 'players'" class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>
+            <div class="type-header">
+              <span>Type</span>
+              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                <option value="">All</option>
+                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+              </select>
+            </div>
+          </th>
+          <th>Status</th>
+          <th>Base Bid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let player of filteredPlayers; let i = index">
+          <td>{{i + 1}}</td>
+          <td>{{player.firstName}} {{player.lastName}}</td>
+          <td>{{player.playerType}}</td>
+          <td>{{player.status}}</td>
+          <td>{{player.baseBid}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table *ngIf="activeList === 'teams'" class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Team</th>
+          <th>Owner</th>
+          <th>Remaining</th>
+          <th>Players Bought</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let team of filteredTeams; let i = index">
+          <td>{{i + 1}}</td>
+          <td>{{team.teamName}}</td>
+          <td>{{team.ownerName}}</td>
+          <td>{{team.remainingPoints}}</td>
+          <td>{{team.playersBought}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table *ngIf="activeList === 'sold'" class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>
+            <div class="type-header">
+              <span>Type</span>
+              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                <option value="">All</option>
+                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+              </select>
+            </div>
+          </th>
+          <th>Team</th>
+          <th>Sold Amount</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let player of filteredSoldPlayers; let i = index">
+          <td>{{i + 1}}</td>
+          <td>{{player.playerName}}</td>
+          <td>{{getBidPlayerType(player)}}</td>
+          <td>{{player.teamName}}</td>
+          <td>{{player.bidAmount}}</td>
+          <td>{{player.soldDate | date:'medium'}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table *ngIf="activeList === 'available'" class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>
+            <div class="type-header">
+              <span>Type</span>
+              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                <option value="">All</option>
+                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+              </select>
+            </div>
+          </th>
+          <th>Status</th>
+          <th>Base Bid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let player of filteredAvailablePlayers; let i = index">
+          <td>{{i + 1}}</td>
+          <td>{{player.firstName}} {{player.lastName}}</td>
+          <td>{{player.playerType}}</td>
+          <td>{{player.status}}</td>
+          <td>{{player.baseBid}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table *ngIf="activeList === 'unsold'" class="table table-bordered table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Player</th>
+          <th>
+            <div class="type-header">
+              <span>Type</span>
+              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                <option value="">All</option>
+                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+              </select>
+            </div>
+          </th>
+          <th>Base Bid</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let player of filteredUnsoldPlayers; let i = index">
+          <td>{{i + 1}}</td>
+          <td>{{player.firstName}} {{player.lastName}}</td>
+          <td>{{player.playerType}}</td>
+          <td>{{player.baseBid}}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && activeFilteredCount === 0" class="empty-state">
+      No records matched your filter.
+    </div>
+  </div>
+</div>

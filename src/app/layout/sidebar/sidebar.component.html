@@ -1,0 +1,55 @@
+<div class="sidebar" *ngIf="currentUser$ | async as user">
+    <h3 class="logo">🏏 Cricket Auction</h3>
+
+    <a routerLink="/dashboard" routerLinkActive="active">
+        📊 Dashboard
+    </a>
+
+    <a
+        href="/auction-settings"
+        routerLink="/auction-settings"
+        routerLinkActive="active"
+        (click)="navigate($event, '/auction-settings')">
+        ⚙️ Auction Settings
+    </a>
+
+    <a
+        routerLink="/users"
+        routerLinkActive="active">
+        👤 User Control
+    </a>
+
+    <div class="menu-title">Players</div>
+
+    <a routerLink="/players" routerLinkActive="active">
+        📋 Player List
+    </a>
+
+    <a routerLink="/players/add" routerLinkActive="active">
+        ➕ Add Player
+    </a>
+
+    <div class="menu-title">Teams</div>
+
+    <a routerLink="/teams" routerLinkActive="active">
+        🏆 Team List
+    </a>
+
+    <a routerLink="/teams/add" routerLinkActive="active">
+        ➕ Add Team
+    </a>
+
+    <div class="menu-title">Auction</div>
+
+    <a routerLink="/auction" routerLinkActive="active">
+        💰 Live Auction
+    </a>
+
+    <a routerLink="/reports" routerLinkActive="active">
+        📈 Reports
+    </a>
+
+    <a routerLink="/settings" routerLinkActive="active">
+        ⚙️ Settings
+    </a>
+</div>

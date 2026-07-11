@@ -1,0 +1,311 @@
+.auction-page {
+  height: calc(100vh - 126px);
+  padding: 10px;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(0, 255, 255, .18), transparent 28%),
+    radial-gradient(circle at 80% 20%, rgba(255, 208, 0, .14), transparent 24%),
+    linear-gradient(180deg, #07131f, #0d2035);
+  color: #fff;
+  display: grid;
+  grid-template-rows: auto minmax(230px, 1fr) auto auto auto auto;
+  gap: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+  align-items: start;
+}
+
+.auction-page.fullscreen-mode,
+.auction-page:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  padding: 12px;
+  border-radius: 0;
+}
+
+.auction-page.fullscreen-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+.fullscreen-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.auction-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 10px;
+  padding: 6px 12px;
+}
+
+.auction-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #fff;
+  padding: 3px;
+}
+
+.auction-header h1 {
+  margin: 0;
+  font-size: clamp(20px, 2.6vw, 28px);
+  font-weight: 700;
+}
+
+.auction-header p {
+  margin: 0;
+  color: #d6d6d6;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.player-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  position: relative;
+  z-index: 1;
+  padding: 4px 0 0;
+  align-self: center;
+}
+
+.player-image {
+  width: min(320px, 32vh);
+  height: min(320px, 32vh);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid #fff;
+  background: #fff;
+  box-shadow: 0 0 35px rgba(0, 255, 255, .28);
+}
+
+.info-bar {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 10px;
+  max-width: 950px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.info-box {
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 10px;
+  padding: 7px 10px;
+  text-align: center;
+  min-width: 0;
+}
+
+.info-box span {
+  display: block;
+  color: #cfd6df;
+  margin-bottom: 3px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+}
+
+.info-box h2,
+.info-box h1 {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.info-box h2 {
+  font-size: clamp(20px, 2.3vw, 28px);
+}
+
+.center {
+  background: linear-gradient(90deg, #004e92, #000428);
+}
+
+.center h1 {
+  font-size: clamp(18px, 2.2vw, 26px);
+}
+
+.center small {
+  color: #9fdcff;
+  font-size: 13px;
+}
+
+.bid {
+  color: #ffd000;
+  text-shadow: 0 0 12px rgba(255, 208, 0, .55);
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  min-width: 126px;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 9px;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sold {
+  background: #198754;
+}
+
+.unsold {
+  background: #dc3545;
+}
+
+.undo {
+  background: #fd7e14;
+}
+
+.next {
+  background: #0d6efd;
+}
+
+.highest-team {
+  width: fit-content;
+  margin: 0 auto;
+  background: #00b050;
+  color: white;
+  padding: 5px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.highest-team strong {
+  margin-left: 6px;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--team-count), minmax(0, 1fr));
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden;
+  align-self: end;
+}
+
+.team-card {
+  background: linear-gradient(180deg, rgba(15, 32, 52, .98), rgba(12, 25, 42, .98));
+  border: 1px solid rgba(148, 163, 184, .32);
+  border-radius: 10px;
+  padding: 6px;
+  text-align: center;
+}
+
+.team-card.active {
+  border-color: #00ff6a;
+}
+
+.team-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 5px;
+  color: #cbd5e1;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.team-info span {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.team-info strong {
+  color: #fff;
+}
+
+.team-bid-btn {
+  width: 100%;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb, #0f5fd7);
+  color: white;
+  padding: 7px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.team-name {
+  display: block;
+  color: #fff;
+  font-size: clamp(10px, .85vw, 13px);
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.bid-amount {
+  display: block;
+  color: #dbeafe;
+  font-size: clamp(9px, .75vw, 11px);
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.team-bid-btn:disabled {
+  opacity: .55;
+}
+
+.completed {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 700;
+}
+
+@media (max-width: 991px) {
+  .auction-page {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
+  .info-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .player-image {
+    width: 190px;
+    height: 190px;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}

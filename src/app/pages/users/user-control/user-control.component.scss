@@ -1,0 +1,59 @@
+.user-page {
+  display: block;
+}
+
+.page-header,
+.user-layout {
+  display: flex;
+  gap: 18px;
+}
+
+.page-header {
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.page-header h2,
+.page-header p,
+.form-panel h3,
+.list-panel h3 {
+  margin: 0;
+}
+
+.page-header p,
+.hint {
+  color: #64748b;
+}
+
+.form-panel,
+.list-panel {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.form-panel {
+  flex: 0 0 360px;
+}
+
+.list-panel {
+  flex: 1;
+  overflow-x: auto;
+}
+
+.hint {
+  margin: 6px 0 14px;
+}
+
+@media (max-width: 991px) {
+  .page-header,
+  .user-layout {
+    flex-direction: column;
+  }
+
+  .form-panel {
+    flex: none;
+  }
+}

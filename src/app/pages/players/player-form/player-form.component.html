@@ -1,0 +1,181 @@
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="text-center p-4">
+
+            <img *ngIf="auction?.logo" [src]="auction?.logo" width="120">
+
+            <h2 class="mt-3">
+
+                {{auction?.auctionName}}
+
+            </h2>
+
+            <h4>
+
+                Player Registration Form
+
+            </h4>
+
+        </div>
+
+        <div class="card-body">
+
+            <form [formGroup]="form">
+
+                <div class="row">
+
+                    <div class="col-md-12 mb-3 text-center">
+
+                        <img *ngIf="form.value.photo" [src]="form.value.photo" width="120" class="rounded-circle mb-3">
+
+                        <input type="file" class="form-control" (change)="onPhotoChange($event)">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>First Name *</label>
+
+                        <input class="form-control" formControlName="firstName">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>Last Name *</label>
+
+                        <input class="form-control" formControlName="lastName">
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>Player Type *</label>
+
+                        <select class="form-select" formControlName="playerType">
+
+                            <option value="">Select</option>
+
+                            <option>Batsman</option>
+
+                            <option>Bowler</option>
+
+                            <option>All Rounder</option>
+
+                            <option>Wicket Keeper</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>Mobile Number <span class="text-danger">*</span></label>
+
+                        <input type="tel" maxlength="10" class="form-control" formControlName="mobile"
+                            placeholder="Enter 10 digit mobile number" (keypress)="allowOnlyNumbers($event)">
+
+                        <div class="text-danger mt-1"
+                            *ngIf="form.controls.mobile.touched && form.controls.mobile.invalid">
+
+                            <small *ngIf="form.controls.mobile.errors?.['required']">
+                                Mobile Number is required.
+                            </small>
+
+                            <small *ngIf="form.controls.mobile.errors?.['pattern']">
+                                Mobile Number must be exactly 10 digits.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>T-Shirt Size *</label>
+
+                        <select class="form-select" formControlName="tshirtSize">
+
+                            <option value="">Select</option>
+
+                            <option>S</option>
+
+                            <option>M</option>
+
+                            <option>L</option>
+
+                            <option>XL</option>
+
+                            <option>XXL</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>Trouser Size *</label>
+
+                        <select class="form-select" formControlName="trouserSize">
+
+                            <option value="">Select</option>
+
+                            <option>28</option>
+
+                            <option>30</option>
+
+                            <option>32</option>
+
+                            <option>34</option>
+
+                            <option>36</option>
+
+                            <option>38</option>
+
+                            <option>40</option>
+
+                            <option>42</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>Base Bid *</label>
+
+                        <input type="number" class="form-control" formControlName="baseBid">
+
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+
+                        <label>Note</label>
+
+                        <textarea rows="4" class="form-control" formControlName="note">
+
+                        </textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="text-center">
+
+                    <button class="btn btn-success btn-lg" type="button" (click)="save()">
+
+                        Submit Registration
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

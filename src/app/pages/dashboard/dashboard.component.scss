@@ -1,0 +1,125 @@
+.dashboard-page {
+  padding: 4px;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.summary-card {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.summary-card.active {
+  border-color: #2563eb;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, .16);
+}
+
+.summary-card span {
+  display: block;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.summary-card strong {
+  color: #0f172a;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.list-panel {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.panel-header h3 {
+  margin: 0;
+}
+
+.panel-header span {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.table-filter {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.table-filter input,
+.table-filter select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.table-filter input:focus,
+.table-filter select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.type-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  position: relative;
+}
+
+.type-header select {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.type-header select option {
+  color: #0f172a;
+}
+
+.type-header::after {
+  content: '⏷';
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+  position: absolute;
+  right: 2px;
+}
+
+.empty-state {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  padding: 18px;
+  text-align: center;
+}

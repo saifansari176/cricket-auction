@@ -1,0 +1,31 @@
+<div class="message-backdrop" *ngIf="message$ | async as message">
+  <div class="message-modal" [ngClass]="'message-' + message.type">
+    <div class="message-icon">
+      <span *ngIf="message.type === 'success'">✓</span>
+      <span *ngIf="message.type === 'error'">!</span>
+      <span *ngIf="message.type === 'warning'">⚠</span>
+      <span *ngIf="message.type === 'info'">i</span>
+      <span *ngIf="message.type === 'confirm'">?</span>
+    </div>
+
+    <div class="message-content">
+      <h3>{{ message.title }}</h3>
+      <p>{{ message.message }}</p>
+    </div>
+
+    <div class="message-actions">
+      <button
+        type="button"
+        class="btn btn-light"
+        *ngIf="message.showCancel"
+        (click)="close(false)"
+      >
+        {{ message.cancelText || 'Cancel' }}
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="close(true)">
+        {{ message.confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="login-page">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="login()">
+    <div class="brand">
+      <h1>Cricket Auction</h1>
+      <p>Sign in to continue</p>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      {{errorMessage}}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input
+        type="email"
+        class="form-control"
+        [class.is-invalid]="email.invalid && (email.touched || email.dirty)"
+        formControlName="email"
+        placeholder="admin@example.com">
+
+      <div class="invalid-feedback" *ngIf="email.hasError('required')">
+        Email is required.
+      </div>
+
+      <div class="invalid-feedback" *ngIf="email.hasError('email')">
+        Enter a valid email address.
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Password</label>
+      <input
+        type="password"
+        class="form-control"
+        [class.is-invalid]="password.invalid && (password.touched || password.dirty)"
+        formControlName="password"
+        placeholder="Minimum 6 characters">
+
+      <div class="invalid-feedback" *ngIf="password.hasError('required')">
+        Password is required.
+      </div>
+
+      <div class="invalid-feedback" *ngIf="password.hasError('minlength')">
+        Password must be at least 6 characters.
+      </div>
+    </div>
+
+    <button class="btn btn-primary w-100" type="submit" [disabled]="loading || form.invalid">
+      {{loading ? 'Signing in...' : 'Login'}}
+    </button>
+  </form>
+</div>

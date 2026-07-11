@@ -1,0 +1,208 @@
+<div class="settings-page">
+  <div class="settings-header">
+    <div>
+      <h2>Auction Settings</h2>
+      <p *ngIf="isAdmin">Manage all registered auctions. Select one before opening auction pages.</p>
+      <p *ngIf="!isAdmin">Select one of your auctions, or register a new auction to continue.</p>
+    </div>
+
+    <button type="button" class="btn btn-primary" (click)="createNewAuction()">
+      Register New Auction
+    </button>
+  </div>
+
+     <section *ngIf="!showForm && activeAuction && selectedAuctionId" class="auction-list-panel mt-3" style="width: 100%;">
+      <div class="panel-title">
+        <h3>Selected Auction Details</h3>
+        <span>Active now</span>
+      </div>
+  
+      <div class="settings-summary">
+        <div>
+          <span>Auction</span>
+          <strong>{{activeAuction.auctionName}}</strong>
+        </div>
+        <div>
+          <span>Date</span>
+          <strong>{{activeAuction.auctionDate | date:'mediumDate'}}</strong>
+        </div>
+        <div>
+          <span>Points / Team</span>
+          <strong>{{activeAuction.pointsPerTeam}}</strong>
+        </div>
+        <div>
+          <span>Players / Team</span>
+          <strong>{{activeAuction.playersPerTeam}}</strong>
+        </div>
+        <div>
+          <span>Base Price</span>
+          <strong>{{activeAuction.basePlayerPrice || activeAuction.minimumBid}}</strong>
+        </div>
+      </div>
+    </section>
+
+  <section *ngIf="!showForm" class="auction-list-panel" style="width: 100%;">
+    <div class="panel-title">
+      <h3>Registered Auctions</h3>
+      <span>{{auctions.length}} Saved</span>
+    </div>
+
+    <div *ngIf="!selectedAuctionId && auctions.length > 0" class="empty-state">
+      Please select an auction to continue.
+    </div>
+
+    <div *ngIf="loading" class="empty-state">Loading auctions...</div>
+
+    <div *ngIf="!loading && auctions.length > 0" class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th class="logo-column">Logo</th>
+            <th>Auction Name</th>
+            <th>Date</th>
+            <th>Points / Team</th>
+            <th>Players / Team</th>
+            <th>Base Price</th>
+            <th>Bid Increase</th>
+            <th *ngIf="isAdmin">Created By</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let auction of auctions" [class.table-primary]="selectedAuctionId === auction.id">
+            <td>
+              <img
+                *ngIf="auction.logo"
+                [src]="auction.logo"
+                alt=""
+                class="auction-thumb"
+                width="42"
+                height="42">
+              <span *ngIf="!auction.logo" class="logo-placeholder">-</span>
+            </td>
+            <td>
+              <strong>{{auction.auctionName}}</strong>
+              <div *ngIf="selectedAuctionId === auction.id" class="active-label">Active Auction</div>
+            </td>
+            <td>{{auction.auctionDate | date:'mediumDate'}}</td>
+            <td>{{auction.pointsPerTeam}}</td>
+            <td>{{auction.playersPerTeam}}</td>
+            <td>{{auction.basePlayerPrice || auction.minimumBid}}</td>
+            <td>{{auction.bidIncreaseBy}}</td>
+            <td *ngIf="isAdmin">{{auction.createdByEmail || '-'}}</td>
+            <td class="action-cell">
+              <button
+                type="button"
+                class="btn btn-success btn-sm me-2"
+                *ngIf="selectedAuctionId !== auction.id"
+                (click)="activateAuction(auction)">
+                Select
+              </button>
+
+              <button type="button" class="btn btn-warning btn-sm me-2" (click)="editAuction(auction)">
+                Edit
+              </button>
+
+              <button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="!loading && auctions.length === 0" class="empty-state">
+      No auction registered yet. Click Register New Auction to create one.
+    </div>
+  </section>
+
+
+  <section *ngIf="showForm" class="form-panel">
+    <div class="panel-title">
+      <h3>{{selectedAuctionId ? 'Edit Auction' : 'Register Auction'}}</h3>
+      <span>{{selectedAuctionId ? 'Save will update and activate this auction.' : 'Save will register and activate this auction.'}}</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <div class="logo-row">
+        <div class="logo-preview">
+          <img *ngIf="logoPreview" [src]="logoPreview" alt="Auction Logo Preview">
+          <span *ngIf="!logoPreview">Logo</span>
+        </div>
+
+        <div class="logo-upload">
+          <label class="form-label">Auction Logo</label>
+          <input
+            type="file"
+            class="form-control"
+            accept="image/*"
+            (change)="onLogoChange($event)">
+          <small>{{uploading ? 'Uploading...' : 'Upload a logo for this auction.'}}</small>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label class="form-label">Auction Name</label>
+          <input type="text" class="form-control" formControlName="auctionName">
+        </div>
+
+        <div>
+          <label class="form-label">Auction Date</label>
+          <input type="date" class="form-control" formControlName="auctionDate">
+        </div>
+
+        <div>
+          <label class="form-label">Points Per Team</label>
+          <input type="number" class="form-control" formControlName="pointsPerTeam">
+        </div>
+
+        <div>
+          <label class="form-label">Players Per Team</label>
+          <input type="number" class="form-control" formControlName="playersPerTeam">
+        </div>
+
+        <div>
+          <label class="form-label">Base Player Price</label>
+          <input type="number" class="form-control" formControlName="basePlayerPrice">
+        </div>
+
+        <div>
+          <label class="form-label">Minimum Bid</label>
+          <input type="number" class="form-control" formControlName="minimumBid">
+        </div>
+
+        <div>
+          <label class="form-label">Bid Increase By</label>
+          <input type="number" class="form-control" formControlName="bidIncreaseBy">
+        </div>
+      </div>
+
+      <div class="settings-summary">
+        <div>
+          <span>Max Team Budget</span>
+          <strong>{{form.value.pointsPerTeam || 0}}</strong>
+        </div>
+        <div>
+          <span>Required Squad</span>
+          <strong>{{form.value.playersPerTeam || 0}}</strong>
+        </div>
+        <div>
+          <span>Opening Bid</span>
+          <strong>{{form.value.basePlayerPrice || form.value.minimumBid || 0}}</strong>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-outline-secondary" type="button" (click)="cancelForm()">
+          Cancel
+        </button>
+
+        <button class="btn btn-success px-4" type="submit" [disabled]="loading || uploading">
+          {{ loading ? 'Saving...' : 'Save & Activate' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

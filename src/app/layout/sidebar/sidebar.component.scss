@@ -1,0 +1,41 @@
+.sidebar{
+    width:260px;
+    height:100vh;
+    background:#1e293b;
+    color:#fff;
+    position:fixed;
+    z-index:1000;
+    overflow-y:auto;
+}
+
+.logo{
+    padding:20px;
+    text-align:center;
+    font-size:22px;
+    border-bottom:1px solid #334155;
+}
+
+.menu-title{
+    padding:15px 20px 5px;
+    font-size:13px;
+    color:#94a3b8;
+    text-transform:uppercase;
+}
+
+.sidebar a{
+    position:relative;
+    z-index:1;
+    display:block;
+    padding:12px 20px;
+    color:#fff;
+    cursor:pointer;
+    text-decoration:none;
+}
+
+.sidebar a:hover{
+    background:#2563eb;
+}
+
+.active{
+    background:#2563eb;
+}

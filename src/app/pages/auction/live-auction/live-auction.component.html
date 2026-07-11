@@ -1,0 +1,78 @@
+<div #auctionPage class="auction-page" [class.fullscreen-mode]="isFullscreen">
+  <button
+    type="button"
+    class="fullscreen-toggle"
+    (click)="toggleFullscreen()"
+    [attr.aria-label]="isFullscreen ? 'Exit fullscreen live auction' : 'Open fullscreen live auction'"
+    [title]="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
+    <span>{{ isFullscreen ? '×' : '⛶' }}</span>
+  </button>
+
+  <div class="auction-header">
+    <img *ngIf="auction?.logo" [src]="auction?.logo" class="auction-logo">
+
+    <div>
+      <h1>{{auction?.auctionName}}</h1>
+      <p>LIVE PLAYER AUCTION</p>
+    </div>
+  </div>
+
+  <div *ngIf="currentPlayer" class="player-section">
+    <img [src]="currentPlayer.photo || 'assets/no-player.png'" class="player-image">
+  </div>
+
+  <div *ngIf="currentPlayer" class="info-bar">
+    <div class="info-box">
+      <span>BASE PRICE</span>
+      <h2>₹{{currentPlayer.baseBid}}</h2>
+    </div>
+
+    <div class="info-box center">
+      <span>PLAYER</span>
+      <h1>{{currentPlayer.firstName}} {{currentPlayer.lastName}}</h1>
+      <small>{{currentPlayer.playerType}}</small>
+    </div>
+
+    <div class="info-box">
+      <span>CURRENT BID</span>
+      <h2 class="bid">₹{{currentBid}}</h2>
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="sold" (click)="sold()">SOLD</button>
+    <button class="unsold" (click)="unsold()">UNSOLD</button>
+    <button class="undo" (click)="undoLastBid()">UNDO</button>
+    <button class="next" (click)="nextPlayer()">MARK UNSOLD & NEXT</button>
+  </div>
+
+  <div *ngIf="highestTeam" class="highest-team">
+    Highest Bid <strong>{{highestTeam.teamName}}</strong>
+  </div>
+
+  <div class="teams-grid" [style.--team-count]="teams.length || 1">
+    <div
+      *ngFor="let team of teams; trackBy: trackByTeam"
+      class="team-card"
+      [class.active]="highestTeam?.id==team.id">
+
+      <div class="team-info">
+        <span>Remaining<br><strong>₹{{team.remainingPoints}}</strong></span>
+        <span>Purchased<br><strong>{{team.playersBought}}</strong></span>
+      </div>
+
+      <button
+        class="team-bid-btn"
+        [disabled]="!canBid(team)"
+        [title]="team.teamName + ' - BID ₹' + nextBid"
+        (click)="bid(team)">
+        <span class="team-name">{{team.teamName}}</span>
+        <span class="bid-amount">BID ₹{{nextBid}}</span>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!currentPlayer" class="completed">
+    Auction Completed
+  </div>
+</div>

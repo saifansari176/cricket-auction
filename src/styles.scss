@@ -1,1 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.share-btn {
+  border: 0;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-weight: 800;
+}
+
+.registration-toggle {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0;
+}

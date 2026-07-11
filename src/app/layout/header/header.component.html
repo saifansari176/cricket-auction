@@ -1,0 +1,121 @@
+<header class="app-header">
+    <div class="brand">
+        <button type="button" class="menu-btn" (click)="toggleMenu()" aria-label="Open menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <a class="brand-home" routerLink="/dashboard" aria-label="Go to dashboard">
+            <div class="brand-mark">CA</div>
+
+            <div>
+                <h4>Cricket Auction</h4>
+                <p>Management Console</p>
+            </div>
+        </a>
+    </div>
+
+    <nav class="desktop-nav">
+        <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+
+        <div class="nav-group">
+            <button type="button">Players <span>▾</span></button>
+            <div class="nav-dropdown">
+                <a routerLink="/players" routerLinkActive="active">Player List</a>
+                <a routerLink="/players/add" routerLinkActive="active">Add Player</a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <button type="button">Teams <span>▾</span></button>
+            <div class="nav-dropdown">
+                <a routerLink="/teams" routerLinkActive="active">Team List</a>
+                <a routerLink="/teams/add" routerLinkActive="active">Add Team</a>
+            </div>
+        </div>
+
+        <div class="nav-group">
+            <button type="button">Auction <span>▾</span></button>
+            <div class="nav-dropdown">
+                <a routerLink="/auction" routerLinkActive="active">Live Auction</a>
+                <a routerLink="/auction-settings" routerLinkActive="active">Auction Settings</a>
+                <a routerLink="/reports" routerLinkActive="active">Reports</a>
+            </div>
+        </div>
+
+        <a routerLink="/users" routerLinkActive="active">Users</a>
+    </nav>
+
+    <div class="user" *ngIf="currentUser$ | async as user">
+        <label class="registration-toggle">
+            <input type="checkbox" [checked]="registrationLinkEnabled" (change)="toggleRegistrationLink()">
+            Registration Link
+        </label>
+
+        <button type="button" class="share-btn" (click)="shareRegistrationLink()">
+            Share Link
+        </button>
+
+        <div class="account-chip">
+            <span class="avatar">{{(user.displayName || user.email || 'U').charAt(0)}}</span>
+            <span class="account-text">
+                <strong>{{user.displayName || user.email}}</strong>
+                <small>{{user.role}}</small>
+            </span>
+        </div>
+
+        <button type="button" class="logout-btn" (click)="logout()">
+            Logout
+        </button>
+    </div>
+</header>
+
+<div class="current-auction-bar" *ngIf="currentAuction?.auctionName">
+    <span>Current Auction</span>
+    <strong>{{currentAuction?.auctionName}}</strong>
+</div>
+
+<div class="menu-backdrop" *ngIf="menuOpen" (click)="closeMenu()"></div>
+
+<aside class="menu-panel" [class.open]="menuOpen">
+    <div class="menu-panel-header">
+        <div>
+            <h3>Cricket Auction</h3>
+            <p>Navigation</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeMenu()" aria-label="Close menu">×</button>
+    </div>
+
+    <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
+    <a routerLink="/auction-settings" routerLinkActive="active" (click)="closeMenu()">Auction Settings</a>
+    <a routerLink="/users" routerLinkActive="active" (click)="closeMenu()">User Control</a>
+
+    <button type="button" class="accordion-title" (click)="toggleSection('players')">
+        Players
+        <span>{{openSection === 'players' ? '−' : '+'}}</span>
+    </button>
+    <div class="accordion-body" *ngIf="openSection === 'players'">
+        <a routerLink="/players" routerLinkActive="active" (click)="closeMenu()">Player List</a>
+        <a routerLink="/players/add" routerLinkActive="active" (click)="closeMenu()">Add Player</a>
+    </div>
+
+    <button type="button" class="accordion-title" (click)="toggleSection('teams')">
+        Teams
+        <span>{{openSection === 'teams' ? '−' : '+'}}</span>
+    </button>
+    <div class="accordion-body" *ngIf="openSection === 'teams'">
+        <a routerLink="/teams" routerLinkActive="active" (click)="closeMenu()">Team List</a>
+        <a routerLink="/teams/add" routerLinkActive="active" (click)="closeMenu()">Add Team</a>
+    </div>
+
+    <button type="button" class="accordion-title" (click)="toggleSection('auction')">
+        Auction
+        <span>{{openSection === 'auction' ? '−' : '+'}}</span>
+    </button>
+    <div class="accordion-body" *ngIf="openSection === 'auction'">
+        <a routerLink="/auction" routerLinkActive="active" (click)="closeMenu()">Live Auction</a>
+        <a routerLink="/reports" routerLinkActive="active" (click)="closeMenu()">Reports</a>
+        <a routerLink="/settings" routerLinkActive="active" (click)="closeMenu()">Settings</a>
+    </div>
+</aside>

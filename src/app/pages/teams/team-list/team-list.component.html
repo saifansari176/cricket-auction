@@ -1,0 +1,127 @@
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between mb-3">
+
+        <h3>Team List</h3>
+
+        <div>
+
+            <a
+                routerLink="/teams/add"
+                class="btn btn-success me-2">
+
+                Add Team
+
+            </a>
+
+            <button
+                class="btn btn-primary"
+                (click)="exportExcel()">
+
+                Export Excel
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <table class="table table-bordered table-hover">
+
+        <thead class="table-dark">
+
+            <tr>
+
+                <th>#</th>
+
+                <th>Logo</th>
+
+                <th>Team Name</th>
+
+                <th>Owner Name</th>
+
+                <th>Total Points</th>
+
+                <th>Remaining</th>
+
+                <th>Players</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            <tr *ngFor="let team of teams; let i=index">
+
+                <td>{{i+1}}</td>
+
+                <td>
+
+                    <img
+                        [src]="team.logo"
+                        width="50"
+                        height="50"
+                        class="rounded-circle">
+
+                </td>
+
+                <td>
+
+                    {{team.teamName}}
+
+                </td>
+
+                <td>
+
+                    {{team.ownerName}}
+
+                </td>
+
+                <td>
+
+                    {{team.totalPoints}}
+
+                </td>
+
+                <td>
+
+                    {{team.remainingPoints}}
+
+                </td>
+
+                <td>
+
+                    {{team.playersBought}}
+
+                </td>
+
+                <td>
+
+                    <a
+                        [routerLink]="['/teams/edit',team.id!]"
+                        class="btn btn-warning btn-sm me-2">
+
+                        Edit
+
+                    </a>
+
+                    <button
+                        class="btn btn-danger btn-sm"
+                        (click)="deleteTeam(team.id!)">
+
+                        Delete
+
+                    </button>
+
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>

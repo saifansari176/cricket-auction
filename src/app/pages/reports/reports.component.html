@@ -1,0 +1,79 @@
+<div class="reports-page">
+  <div class="page-title">
+    <h2>Auction Reports</h2>
+    <p>Click a team to view purchased players.</p>
+  </div>
+
+  <div *ngIf="loading" class="empty-state">Loading reports...</div>
+
+  <ng-container *ngIf="!loading">
+    <div class="team-cards">
+      <button
+        *ngFor="let team of teams"
+        type="button"
+        class="team-card"
+        [class.active]="selectedTeam?.id === team.id"
+        (click)="selectTeam(team)">
+        <span class="team-name">{{team.teamName}}</span>
+        <span>Players: {{team.playersBought || 0}}</span>
+        <span>Remaining: {{team.remainingPoints || 0}}</span>
+        <span>Spent: {{getTeamSpent(team)}}</span>
+      </button>
+    </div>
+
+    <div class="players-panel">
+      <div class="panel-header">
+        <h3>{{selectedTeam?.teamName || 'Select Team'}}</h3>
+        <span>{{filteredSelectedTeamPlayers.length}} / {{selectedTeamPlayers.length}} Purchased Players</span>
+      </div>
+
+      <div *ngIf="selectedTeamPlayers.length > 0" class="table-filter">
+        <input
+          type="search"
+          [(ngModel)]="playerFilter"
+          placeholder="Search purchased players">
+      </div>
+
+      <table *ngIf="selectedTeamPlayers.length > 0" class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Player Name</th>
+            <th>
+              <div class="type-header">
+                <span>Type</span>
+                <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                  <option value="">All</option>
+                  <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Sold Amount</th>
+            <th>Sold Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of filteredSelectedTeamPlayers; let i = index">
+            <td>{{i + 1}}</td>
+            <td>{{player.playerName}}</td>
+            <td>{{getBidPlayerType(player)}}</td>
+            <td>{{player.bidAmount}}</td>
+            <td>{{player.soldDate | date:'medium'}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div *ngIf="selectedTeam && selectedTeamPlayers.length === 0" class="empty-state">
+        No purchased players found for this team.
+      </div>
+
+      <div *ngIf="selectedTeamPlayers.length > 0 && filteredSelectedTeamPlayers.length === 0" class="empty-state">
+        No purchased players matched your filter.
+      </div>
+
+      <div *ngIf="!selectedTeam" class="empty-state">
+        No teams found.
+      </div>
+    </div>
+  </ng-container>
+</div>
