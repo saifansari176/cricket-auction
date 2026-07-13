@@ -1,6 +1,6 @@
 .app-header {
     min-height:76px;
-    background:rgba(255,255,255,.96);
+    background:rgb(190 216 255);
     border-bottom:1px solid #e2e8f0;
     box-shadow:0 8px 24px rgba(15,23,42,.08);
     display:flex;
@@ -119,9 +119,6 @@
 
 .desktop-nav {
     gap:6px;
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    border-radius:14px;
     padding:6px;
 }
 
@@ -144,7 +141,6 @@
 }
 
 .desktop-nav a:hover,
-.desktop-nav a.active,
 .nav-group:hover button,
 .nav-group:focus-within button {
     background:#2563eb;
@@ -186,9 +182,6 @@
 
 .account-chip {
     gap:10px;
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    border-radius:14px;
     padding:7px 10px;
 }
 

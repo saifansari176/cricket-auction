@@ -75,4 +75,19 @@
   <div *ngIf="!currentPlayer" class="completed">
     Auction Completed
   </div>
+
+  <div *ngIf="showUnsoldAnimation" class="unsold-stamp">
+    UNSOLD
+  </div>
+
+  <div *ngIf="showSoldAnimation" class="sold-animation">
+    <div class="fireworks">
+      <span></span><span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="sold-badge">
+      <div class="badge-text">SOLD</div>
+      <div class="team-text">{{soldToTeamName}}</div>
+    </div>
+  </div>
 </div>

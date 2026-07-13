@@ -10,7 +10,7 @@
             <div class="brand-mark">CA</div>
 
             <div>
-                <h4>Cricket Auction</h4>
+                <h4>Cricbids</h4>
                 <p>Management Console</p>
             </div>
         </a>
@@ -71,8 +71,7 @@
     </div>
 </header>
 
-<div class="current-auction-bar" *ngIf="currentAuction?.auctionName">
-    <span>Current Auction</span>
+<div class="current-auction-bar fs-3" *ngIf="currentAuction?.auctionName">
     <strong>{{currentAuction?.auctionName}}</strong>
 </div>
 
@@ -81,7 +80,7 @@
 <aside class="menu-panel" [class.open]="menuOpen">
     <div class="menu-panel-header">
         <div>
-            <h3>Cricket Auction</h3>
+            <h3>Cricbids</h3>
             <p>Navigation</p>
         </div>
         <button type="button" class="close-btn" (click)="closeMenu()" aria-label="Close menu">×</button>

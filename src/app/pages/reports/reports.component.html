@@ -24,7 +24,16 @@
     <div class="players-panel">
       <div class="panel-header">
         <h3>{{selectedTeam?.teamName || 'Select Team'}}</h3>
-        <span>{{filteredSelectedTeamPlayers.length}} / {{selectedTeamPlayers.length}} Purchased Players</span>
+        <div class="header-actions">
+          <span>{{filteredSelectedTeamPlayers.length}} / {{selectedTeamPlayers.length}} Purchased Players</span>
+          <button 
+            *ngIf="selectedTeamPlayers.length > 0"
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="downloadTableData()">
+            📥 Download
+          </button>
+        </div>
       </div>
 
       <div *ngIf="selectedTeamPlayers.length > 0" class="table-filter">
@@ -48,17 +57,22 @@
                 </select>
               </div>
             </th>
+            <th>Mobile Number</th>
+            <th>T-Shirt Size</th>
             <th>Sold Amount</th>
-            <th>Sold Date</th>
+            <!-- <th>Sold Date</th> -->
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let player of filteredSelectedTeamPlayers; let i = index">
+            <!-- {{player | json}} -->
             <td>{{i + 1}}</td>
             <td>{{player.playerName}}</td>
             <td>{{getBidPlayerType(player)}}</td>
+            <td>{{getBidPlayerMobile(player)}}</td>
+            <td>{{getBidPlayerTshirtSize(player)}}</td>
             <td>{{player.bidAmount}}</td>
-            <td>{{player.soldDate | date:'medium'}}</td>
+            <!-- <td>{{player.soldDate | date:'medium'}}</td> -->
           </tr>
         </tbody>
       </table>

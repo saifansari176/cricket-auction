@@ -21,6 +21,9 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   loading = false;
   bidHistory: { team: Team; bid: number }[] = [];
   isFullscreen = false;
+  showUnsoldAnimation = false;
+  showSoldAnimation = false;
+  soldToTeamName = '';
 
   constructor(
     private playerService: PlayerService,
@@ -36,7 +39,18 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     try {
       this.auction = await this.auctionService.get();
       await this.loadTeams();
-      await this.loadNextPlayer();
+      const selectedPlayer = this.auctionService.selectedPlayer$.value;
+      if (selectedPlayer?.id) {
+        const player = await this.playerService.getPlayerById(selectedPlayer.id);
+        if (player) {
+          this.setCurrentPlayer(player);
+          this.auctionService.clearSelectedPlayer();
+        } else {
+          await this.loadNextPlayer();
+        }
+      } else {
+        await this.loadNextPlayer();
+      }
     } finally {
       this.loading = false;
     }
@@ -116,16 +130,26 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
       this.message.warning('Select a team and place a bid before marking this player as sold.');
       return;
     }
-    await this.auctionService.saveBid({ playerId: this.currentPlayer.id, playerName: this.playerName, teamId: this.highestTeam.id, teamName: this.highestTeam.teamName, bidAmount: this.currentBid, sold: true, soldDate: new Date().toISOString() });
+    await this.auctionService.saveBid({ playerId: this.currentPlayer.id, playerName: this.playerName, teamId: this.highestTeam.id, teamName: this.highestTeam.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer.mobile, tshirtSize: this.currentPlayer.tshirtSize,  sold: true, soldDate: new Date().toISOString() });
     await this.playerService.markSold(this.currentPlayer.id, this.highestTeam.id, this.currentBid);
     await this.teamService.updateTeamPoints(this.highestTeam.id, this.currentBid);
-    this.updateSoldTeamOnScreen(this.highestTeam.id, this.currentBid);
+    this.updateSoldTeamOnScreen(this.highestTeam.id, this.currentBid);    
+    this.soldToTeamName = this.highestTeam.teamName;
+    this.showSoldAnimation = true;
+    
     await this.loadTeams();
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    this.showSoldAnimation = false;
+    
     await this.loadNextPlayer();
   }
 
   async unsold(): Promise<void> {
     if (!this.currentPlayer?.id) return;
+    this.showUnsoldAnimation = true;
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    this.showUnsoldAnimation = false;
+    
     await this.playerService.markUnsold(this.currentPlayer.id);
     await this.loadNextPlayer();
   }

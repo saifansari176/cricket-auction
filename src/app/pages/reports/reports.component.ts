@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import * as XLSX from 'xlsx';
 
 import { AuctionBid } from '../../core/models/bid';
 import { Player } from '../../core/models/player';
@@ -76,6 +77,8 @@ export class ReportsComponent implements OnInit {
         player.teamName,
         this.getBidPlayerType(player),
         player.bidAmount,
+        this.getBidPlayerMobile(player),
+        this.getBidPlayerTshirtSize(player),
         player.soldDate
       ].some((value) => String(value ?? '').toLowerCase().includes(filter))
     );
@@ -89,10 +92,67 @@ export class ReportsComponent implements OnInit {
     return this.players.find((player) => player.id === bid.playerId)?.playerType || '-';
   }
 
+  getBidPlayerMobile(bid: AuctionBid): string {
+    return bid.mobile || this.players.find((player) => player.id === bid.playerId)?.mobile || '-';
+  }
+
+  getBidPlayerTshirtSize(bid: AuctionBid): string {
+    return bid.tshirtSize || this.players.find((player) => player.id === bid.playerId)?.tshirtSize || '-';
+  }
+
   private matchesPlayerType(playerId: string): boolean {
     const type = this.playerTypeFilter.trim().toLowerCase();
     if (!type) return true;
 
     return this.players.find((player) => player.id === playerId)?.playerType.toLowerCase() === type;
+  }
+
+  downloadTableData(): void {
+    if (!this.selectedTeam || this.selectedTeamPlayers.length === 0) {
+      return;
+    }
+
+    const data = this.selectedTeamPlayers.map((player, index) => ({
+      '#': index + 1,
+      'Player Name': player.playerName,
+      'Type': this.getBidPlayerType(player),
+      'Mobile Number': this.getBidPlayerMobile(player),
+      'T-Shirt Size': this.getBidPlayerTshirtSize(player),
+      'Sold Amount': player.bidAmount
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    worksheet['!cols'] = [
+      { wch: 5 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, this.selectedTeam.teamName);
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    this.downloadFile(blob, `${this.selectedTeam.teamName}_Purchased_Players.xlsx`);
+  }
+
+  private downloadFile(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 }

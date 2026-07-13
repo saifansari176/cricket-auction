@@ -71,7 +71,7 @@ export class PlayerFormComponent {
 
     note: [''],
 
-    photo: [''],
+    photo: ['', Validators.required],
 
     status: ['Available']
 
@@ -237,6 +237,12 @@ export class PlayerFormComponent {
 
     }
 
+  }
+
+  // =========================================
+
+  cancel(): void {
+    this.router.navigate(['/players']);
   }
 
 }

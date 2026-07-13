@@ -44,6 +44,7 @@
       <thead class="table-dark">
         <tr>
           <th>#</th>
+          <th>Photo</th>
           <th>Player</th>
           <th>
             <div class="type-header">
@@ -54,6 +55,7 @@
               </select>
             </div>
           </th>
+          <th>Mobile</th>
           <th>Status</th>
           <th>Base Bid</th>
         </tr>
@@ -61,8 +63,10 @@
       <tbody>
         <tr *ngFor="let player of filteredPlayers; let i = index">
           <td>{{i + 1}}</td>
+          <td><img [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="img-dashboard-fluid"></td>
           <td>{{player.firstName}} {{player.lastName}}</td>
           <td>{{player.playerType}}</td>
+          <td>{{player.mobile}}</td>
           <td>{{player.status}}</td>
           <td>{{player.baseBid}}</td>
         </tr>
@@ -137,6 +141,7 @@
           </th>
           <th>Status</th>
           <th>Base Bid</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -146,6 +151,15 @@
           <td>{{player.playerType}}</td>
           <td>{{player.status}}</td>
           <td>{{player.baseBid}}</td>
+          <td>
+            <button 
+              type="button" 
+              class="btn btn-sm btn-auction"
+              (click)="startAuction(player)"
+              title="Start auction for this player">
+              🔨 Auction
+            </button>
+          </td>
         </tr>
       </tbody>
     </table>

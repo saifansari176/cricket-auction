@@ -14,6 +14,10 @@ export interface AuctionBid {
 
   bidAmount: number;
 
+  mobile: string;
+
+  tshirtSize: string;
+
   sold: boolean;
 
   soldDate: string;

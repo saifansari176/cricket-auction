@@ -110,6 +110,8 @@
 
                             <option>XXL</option>
 
+                            <option>XXXL</option>
+
                         </select>
 
                     </div>
@@ -150,6 +152,22 @@
 
                     </div>
 
+                    <div class="col-md-6 mb-3" *ngIf="isEdit">
+
+                        <label>Status</label>
+
+                        <select class="form-select" formControlName="status">
+
+                            <option value="Available">Available</option>
+
+                            <option value="Unsold">Unsold</option>
+
+                            <option value="Sold">Sold</option>
+
+                        </select>
+
+                    </div>
+
                     <div class="col-md-12 mb-3">
 
                         <label>Note</label>
@@ -162,11 +180,17 @@
 
                 </div>
 
-                <div class="text-center">
+                <div class="text-center button-group">
 
                     <button class="btn btn-success btn-lg" type="button" (click)="save()">
 
-                        Submit Registration
+                        {{isEdit ? 'Update Player' : 'Submit Registration'}}
+
+                    </button>
+
+                    <button class="btn btn-secondary btn-lg" type="button" (click)="cancel()">
+
+                        Cancel
 
                     </button>
 

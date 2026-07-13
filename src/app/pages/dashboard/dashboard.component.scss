@@ -2,6 +2,11 @@
   padding: 4px;
 }
 
+.img-dashboard-fluid {
+    height: 100px;
+    width: 100px;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -122,4 +127,23 @@
   color: #64748b;
   padding: 18px;
   text-align: center;
+}
+
+.btn-auction {
+  background-color: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-auction:hover {
+  background-color: #d97706;
 }

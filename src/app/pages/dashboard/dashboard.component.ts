@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { AuctionBid } from '../../core/models/bid';
 import { Player } from '../../core/models/player';
@@ -31,7 +32,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private playerService: PlayerService,
     private teamService: TeamService,
-    private auctionService: AuctionService
+    private auctionService: AuctionService,
+    private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -200,5 +202,13 @@ export class DashboardComponent implements OnInit {
     if (!type) return true;
 
     return this.players.find((player) => player.id === playerId)?.playerType.toLowerCase() === type;
+  }
+
+  startAuction(player: Player): void {
+    if (!player.id) return;
+    
+    const playerName = `${player.firstName} ${player.lastName}`;
+    this.auctionService.setSelectedPlayer(player.id, playerName);
+    this.router.navigate(['/auction']);
   }
 }
