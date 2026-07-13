@@ -71,7 +71,7 @@
     </div>
 </header>
 
-<div class="current-auction-bar fs-3" *ngIf="currentAuction?.auctionName">
+<div class="current-auction-bar fs-3" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction')">
     <strong>{{currentAuction?.auctionName}}</strong>
 </div>
 

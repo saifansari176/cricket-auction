@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router,
+    public router: Router,
     private auctionService: AuctionService,
     private registrationLinkService: PlayerRegistrationLinkService,
     private message: MessageService
