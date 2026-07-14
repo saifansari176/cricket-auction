@@ -18,7 +18,33 @@
   </div>
 
   <div *ngIf="currentPlayer" class="player-section">
-    <img [src]="currentPlayer.photo || 'assets/no-player.png'" class="player-image">
+    <div *ngIf="!highestTeam" class="player-center">
+      <img
+        [src]="currentPlayer.photo || 'assets/no-player.png'"
+        alt="Player image"
+        class="player-image" />
+    </div>
+
+    <div *ngIf="highestTeam" class="player-bid-layout">
+      <div class="half player-half">
+        <img
+          [src]="currentPlayer.photo || 'assets/no-player.png'"
+          alt="Player image"
+          class="player-image" />
+      </div>
+
+      <div class="half team-half">
+        <div class="highest-team">
+          <div class="highest-label">HIGHEST BID</div>
+          
+          <img
+            [src]="highestTeam.logo || 'assets/no-team.png'"
+            alt="Highest team image"
+            class="team-image" />
+          <div class="highest-bid-amount">{{highestTeam.teamName }}</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="currentPlayer" class="info-bar">
@@ -43,12 +69,12 @@
     <button class="sold" (click)="sold()">SOLD</button>
     <button class="unsold" (click)="unsold()">UNSOLD</button>
     <button class="undo" (click)="undoLastBid()">UNDO</button>
-    <button class="next" (click)="nextPlayer()">MARK UNSOLD & NEXT</button>
+    <button class="next" (click)="nextPlayer()">LOAD PLAYER</button>
   </div>
 
-  <div *ngIf="highestTeam" class="highest-team">
+  <!-- <div *ngIf="highestTeam" class="highest-team">
     Highest Bid <strong>{{highestTeam.teamName}}</strong>
-  </div>
+  </div> -->
 
   <div class="teams-grid" [style.--team-count]="teams.length || 1">
     <div

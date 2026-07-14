@@ -154,7 +154,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     await this.loadNextPlayer();
   }
 
-  async nextPlayer(): Promise<void> { await this.unsold(); }
+  async nextPlayer(): Promise<void> { await this.loadNextPlayer(); }
   isHighestBidder(team: Team): boolean { return this.highestTeam?.id === team.id; }
   get playerName(): string { return this.currentPlayer ? `${this.currentPlayer.firstName} ${this.currentPlayer.lastName}` : ''; }
   trackByTeam(_index: number, team: Team): string | undefined { return team.id; }

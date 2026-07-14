@@ -80,20 +80,81 @@
 
 .player-section {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   min-height: 0;
   position: relative;
   z-index: 1;
   padding: 4px 0 0;
   align-self: center;
+  background: linear-gradient(90deg, #004e92, #000428);
 }
 
+.player-center {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.player-bid-layout {
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.player-section .half {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+
 .player-image {
-  width: min(320px, 32vh);
-  height: min(320px, 32vh);
-  border-radius: 50%;
-  object-fit: cover;
+    height: auto;
+    max-height: 50vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 0 35px rgba(0, 255, 255, 0.28);
+    padding: 0;
+}
+
+.team-half {
+  padding: 0 8px;
+}
+
+.highest-team {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.highest-label {
+  color: #cfd6df;
+  font-size: 20px;
+  letter-spacing: 15px;
+}
+
+.highest-team-name {
+  color: #fff;
+  font-size: clamp(20px, 3vw, 30px);
+  font-weight: 900;
+  text-align: center;
+}
+
+.team-image {
+  width: 100%;
+  height: auto;
+  max-height: 32vh;
+  object-fit: contain;
+  border-radius: 8px;
   border: 6px solid #fff;
   background: #fff;
   box-shadow: 0 0 35px rgba(0, 255, 255, .28);
@@ -192,10 +253,9 @@
 .highest-team {
   width: fit-content;
   margin: 0 auto;
-  background: #00b050;
   color: white;
   padding: 5px 18px;
-  border-radius: 999px;
+  border-radius: 9px;
   font-size: 14px;
   font-weight: 700;
 }

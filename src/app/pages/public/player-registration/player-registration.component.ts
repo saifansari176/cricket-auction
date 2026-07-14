@@ -42,9 +42,9 @@ export class PlayerRegistrationComponent implements OnDestroy {
     mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
     playerType: ['', Validators.required],
     tshirtSize: ['', Validators.required],
-    trouserSize: ['', Validators.required],
+    trouserSize: [''],
     note: [''],
-    photo: ['']
+    photo: ['', Validators.required]
   });
 
   ngOnDestroy(): void {

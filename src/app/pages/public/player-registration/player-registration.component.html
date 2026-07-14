@@ -18,26 +18,47 @@
 
     <form *ngIf="!loading && registrationEnabled && !submitted" [formGroup]="form" (ngSubmit)="submit()">
       <div class="photo-row">
-        <img *ngIf="photoPreview" [src]="photoPreview" alt="Player photo">
-        <div *ngIf="!photoPreview" class="photo-placeholder">Photo</div>
-        <input type="file" accept="image/*" (change)="onPhotoChange($event)">
-        <small *ngIf="uploadingPhoto">Uploading photo...</small>
+        <div class="photo-loader" *ngIf="uploadingPhoto">
+          <div class="spinner" aria-label="Uploading"></div>
+          <div class="loader-text">Uploading photo...</div>
+        </div>
+
+        <img *ngIf="photoPreview && !uploadingPhoto" [src]="photoPreview" alt="Player photo">
+        <div *ngIf="!photoPreview && !uploadingPhoto" class="photo-placeholder">Photo</div>
+
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onPhotoChange($event)"
+        />
+        <small class="error text-danger" *ngIf="form.get('photo')?.touched && form.get('photo')?.invalid">
+          Photo is required.
+        </small>
       </div>
 
       <div class="form-grid">
         <label>
           First Name *
           <input formControlName="firstName">
+          <small class="error" *ngIf="form.get('firstName')?.touched && form.get('firstName')?.invalid">
+            First name is required.
+          </small>
         </label>
 
         <label>
           Last Name *
           <input formControlName="lastName">
+          <small class="error" *ngIf="form.get('lastName')?.touched && form.get('lastName')?.invalid">
+            Last name is required.
+          </small>
         </label>
 
         <label>
           Mobile Number *
           <input type="tel" maxlength="10" formControlName="mobile" (keypress)="allowOnlyNumbers($event)">
+          <small class="error" *ngIf="form.get('mobile')?.touched && form.get('mobile')?.invalid">
+            Enter a valid 10-digit mobile number.
+          </small>
         </label>
 
         <label>
@@ -49,6 +70,9 @@
             <option>All Rounder</option>
             <option>Wicket Keeper</option>
           </select>
+          <small class="error" *ngIf="form.get('playerType')?.touched && form.get('playerType')?.invalid">
+            Player type is required.
+          </small>
         </label>
 
         <label>
@@ -59,8 +83,13 @@
             <option>M</option>
             <option>L</option>
             <option>XL</option>
-            <option>XXL</option>
+            <option>2XL</option>
+            <option>3XL</option>
+            <option>4XL</option>
           </select>
+          <small class="error" *ngIf="form.get('tshirtSize')?.touched && form.get('tshirtSize')?.invalid">
+            T-shirt size is required.
+          </small>
         </label>
 
         <label>
@@ -76,7 +105,11 @@
             <option>40</option>
             <option>42</option>
           </select>
+          <small class="error" *ngIf="form.get('trouserSize')?.touched && form.get('trouserSize')?.invalid">
+            Trouser size is required.
+          </small>
         </label>
+
       </div>
 
       <label>

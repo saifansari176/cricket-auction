@@ -26,33 +26,52 @@
 
                 <div class="row">
 
-                    <div class="col-md-12 mb-3 text-center">
-
+                    <div class="col-md-12 mb-3">
+                        <label>Photo <span class="text-danger">*</span></label>
                         <img *ngIf="form.value.photo" [src]="form.value.photo" width="120" class="rounded-circle mb-3">
 
                         <input type="file" class="form-control" (change)="onPhotoChange($event)">
+                        <div class="text-danger mt-1"
+                            *ngIf="form.controls.photo.touched && form.controls.photo.invalid">
 
+                            <small *ngIf="form.controls.photo.errors?.['required']">
+                                Player Picture is required.
+                            </small>
+
+                        </div>
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>First Name *</label>
+                        <label>First Name<span class="text-danger">*</span></label>
 
                         <input class="form-control" formControlName="firstName">
+                         <div class="text-danger mt-1"
+                            *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid">
+
+                            <small *ngIf="form.controls.firstName.errors?.['required']">
+                                First Name is required.
+                            </small>
+
+                        </div>
 
                     </div>
 
                     <div class="col-md-6 mb-3">
-
-                        <label>Last Name *</label>
-
+                    
+                        <label>Last Name<span class="text-danger">*</span></label>
+                    
                         <input class="form-control" formControlName="lastName">
-
+                        <div class="text-danger mt-1" *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">
+                            <small *ngIf="form.controls.lastName.errors?.['required']">
+                                Last Name is required.
+                            </small>
+                        </div>
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Player Type *</label>
+                        <label>Player Type<span class="text-danger">*</span></label>
 
                         <select class="form-select" formControlName="playerType">
 
@@ -67,7 +86,11 @@
                             <option>Wicket Keeper</option>
 
                         </select>
-
+                         <div class="text-danger mt-1" *ngIf="form.controls.playerType.touched && form.controls.playerType.invalid">
+                            <small *ngIf="form.controls.playerType.errors?.['required']">
+                                Player Type is required.
+                            </small>
+                        </div>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -94,7 +117,7 @@
 
                     <div class="col-md-6 mb-3">
 
-                        <label>T-Shirt Size *</label>
+                        <label>T-Shirt Size<span class="text-danger">*</span></label>
 
                         <select class="form-select" formControlName="tshirtSize">
 
@@ -108,17 +131,23 @@
 
                             <option>XL</option>
 
-                            <option>XXL</option>
+                            <option>2XL</option>
 
-                            <option>XXXL</option>
+                            <option>3XL</option>
+
+                            <option>4XL</option>
 
                         </select>
-
+ <div class="text-danger mt-1" *ngIf="form.controls.tshirtSize.touched && form.controls.tshirtSize.invalid">
+                            <small *ngIf="form.controls.tshirtSize.errors?.['required']">
+                                T-Shirt Size is required.
+                            </small>
+                        </div>
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Trouser Size *</label>
+                        <label>Trouser Size</label>
 
                         <select class="form-select" formControlName="trouserSize">
 
@@ -140,13 +169,19 @@
 
                             <option>42</option>
 
+                            <option>44</option>
+
+                            <option>46</option>
+                            
+                            <option>48</option>
+
                         </select>
 
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Base Bid *</label>
+                        <label>Base Bid</label>
 
                         <input type="number" class="form-control" formControlName="baseBid">
 

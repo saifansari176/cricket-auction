@@ -65,9 +65,9 @@ export class PlayerFormComponent {
 
     tshirtSize: ['', Validators.required],
 
-    trouserSize: ['', Validators.required],
+    trouserSize: [''],
 
-    baseBid: [0, Validators.required],
+    baseBid: [0],
 
     note: [''],
 
