@@ -12,6 +12,7 @@ import {
 } from '@angular/router';
 
 import { PlayerService } from '../../../core/services/player.service';
+import { TeamService } from '../../../core/services/team.service';
 import { AuctionService } from '../../../core/services/auction.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Player } from '../../../core/models/player';
@@ -35,6 +36,7 @@ export class PlayerFormComponent {
   route = inject(ActivatedRoute);
 
   playerService = inject(PlayerService);
+  teamService = inject(TeamService);
   auctionService = inject(AuctionService);
   storageService = inject(StorageService);
   message = inject(MessageService);
@@ -174,6 +176,16 @@ export class PlayerFormComponent {
     if (this.isEdit) {
 
       await this.playerService.updatePlayer(player);
+
+      if (this.existingPlayer?.status === 'Sold' && player.status !== 'Sold') {
+        await this.auctionService.deletePlayerBids(this.playerId);
+        await this.teamService.reconcileTeams(
+          Number(this.auction?.pointsPerTeam || 0),
+          Number(this.auction?.playersPerTeam || 0)
+        );
+      } else {
+        await this.auctionService.syncPlayerBidDetails(player);
+      }
 
       this.message.success('Player updated successfully.');
 

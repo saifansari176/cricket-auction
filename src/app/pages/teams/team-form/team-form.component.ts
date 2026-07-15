@@ -178,7 +178,7 @@ if (!settings) {
       totalPoints: Number(settings?.pointsPerTeam || 0),
 
       remainingPoints: this.isEdit
-        ? Number(this.existingTeam?.remainingPoints || settings?.pointsPerTeam || 0)
+        ? Number(this.existingTeam?.remainingPoints ?? settings?.pointsPerTeam ?? 0)
         : Number(settings?.pointsPerTeam || 0),
 
       playerLimit: Number(settings?.playersPerTeam || 0),
@@ -200,6 +200,10 @@ if (!settings) {
 
         return;
 
+      }
+
+      if (this.existingTeam?.teamName !== team.teamName) {
+        await this.auctionService.syncTeamBidDetails(this.teamId, team.teamName);
       }
 
       this.message.success('Team updated successfully.');

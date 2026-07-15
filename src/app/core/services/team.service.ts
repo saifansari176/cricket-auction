@@ -38,13 +38,16 @@ export class TeamService {
 
     team.auctionId = team.auctionId || await this.auctionService.getActiveAuctionId();
 
-    const teams = await this.getTeams();
+    if (!team.auctionId) return false;
+
+    const teams = (await this.firebase.getAll<Team>(this.collection))
+      .filter((existingTeam) => existingTeam.auctionId === team.auctionId);
 
     const exists = teams.some(
 
       x =>
-        x.teamName.toLowerCase() ===
-        team.teamName.toLowerCase()
+        this.normaliseTeamName(x.teamName) ===
+        this.normaliseTeamName(team.teamName)
 
     );
 
@@ -87,15 +90,18 @@ await this.firebase.add(
 
     team.auctionId = team.auctionId || await this.auctionService.getActiveAuctionId();
 
-    const teams = await this.getTeams();
+    if (!team.auctionId) return false;
+
+    const teams = (await this.firebase.getAll<Team>(this.collection))
+      .filter((existingTeam) => existingTeam.auctionId === team.auctionId);
 
     const duplicate = teams.find(
 
       x =>
 
-        x.teamName.toLowerCase() ===
+        this.normaliseTeamName(x.teamName) ===
 
-          team.teamName.toLowerCase()
+          this.normaliseTeamName(team.teamName)
 
         &&
 
@@ -163,6 +169,32 @@ await this.firebase.delete(
 
     await this.updateTeam(team);
 
+  }
+
+  async reconcileTeams(pointsPerTeam: number, playersPerTeam: number): Promise<void> {
+    const [teams, bids] = await Promise.all([
+      this.getTeams(),
+      this.auctionService.getBids()
+    ]);
+
+    const soldBids = bids.filter((bid) => bid.sold);
+
+    await Promise.all(teams.map((team) => {
+      const teamBids = soldBids.filter((bid) => bid.teamId === team.id);
+      const spentPoints = teamBids.reduce((total, bid) => total + Number(bid.bidAmount || 0), 0);
+
+      return this.updateTeam({
+        ...team,
+        totalPoints: Number(pointsPerTeam),
+        remainingPoints: Number(pointsPerTeam) - spentPoints,
+        playerLimit: Number(playersPerTeam),
+        playersBought: teamBids.length
+      });
+    }));
+  }
+
+  private normaliseTeamName(teamName: string): string {
+    return String(teamName || '').trim().toLocaleLowerCase();
   }
 
 }

@@ -1,7 +1,11 @@
 /* You can add global styles to this file, and also import other style files */
 
+html { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { overflow-x: hidden; }
+img { max-width: 100%; }
 
 .share-btn {
   border: 0;
@@ -20,4 +24,33 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   font-size: 13px;
   font-weight: 800;
   margin: 0;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 576px) {
+  .table-responsive > .table {
+    min-width: 640px;
+    margin-bottom: 0;
+  }
+
+}
+
+@media (max-width: 991px) {
+  .auction-page .teams-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    overflow: visible;
+  }
+}
+
+@media (max-width: 480px) {
+  .current-auction-bar {
+    flex-wrap: wrap;
+    padding-inline: 12px;
+    text-align: center;
+  }
 }

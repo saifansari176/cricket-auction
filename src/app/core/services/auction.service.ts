@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AuctionSettings } from '../models/auction-settings';
 import { AuctionBid } from '../models/bid';
+import { Player } from '../models/player';
 import { AuthService } from './auth.service';
 import { FirebaseService } from './firestore.service';
 
@@ -82,7 +83,18 @@ export class AuctionService {
 
     const current = await this.get();
 
-    return current?.activeAuctionId || current?.id || '';
+    if (current?.activeAuctionId) {
+      return current.activeAuctionId;
+    }
+
+    const auctions = await this.getAuctions();
+
+    if (auctions.length !== 1 || !auctions[0].id) {
+      return '';
+    }
+
+    await this.setActiveAuction(auctions[0].id);
+    return auctions[0].id;
 
   }
 
@@ -225,6 +237,47 @@ export class AuctionService {
 
     );
 
+  }
+
+  async deletePlayerBids(playerId: string): Promise<void> {
+    const bids = await this.getPlayerHistory(playerId);
+
+    await Promise.all(
+      bids
+        .filter((bid) => !!bid.id)
+        .map((bid) => this.firebase.delete(this.bidsCollection, bid.id!))
+    );
+  }
+
+  async syncPlayerBidDetails(player: Player): Promise<void> {
+    if (!player.id) return;
+
+    const bids = await this.getPlayerHistory(player.id);
+    const playerName = `${player.firstName} ${player.lastName}`.trim();
+
+    await Promise.all(
+      bids
+        .filter((bid) => !!bid.id)
+        .map((bid) => this.firebase.update(this.bidsCollection, bid.id!, {
+          ...bid,
+          playerName,
+          mobile: player.mobile,
+          tshirtSize: player.tshirtSize
+        }))
+    );
+  }
+
+  async syncTeamBidDetails(teamId: string, teamName: string): Promise<void> {
+    const bids = await this.getBids();
+
+    await Promise.all(
+      bids
+        .filter((bid) => bid.teamId === teamId && !!bid.id)
+        .map((bid) => this.firebase.update(this.bidsCollection, bid.id!, {
+          ...bid,
+          teamName
+        }))
+    );
   }
 
   async clearAuctionHistory(): Promise<void> {

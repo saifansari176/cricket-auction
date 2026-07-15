@@ -2,11 +2,15 @@
   <form class="login-card" [formGroup]="form" (ngSubmit)="login()">
     <div class="brand">
       <h1>Cricbids</h1>
-      <p>Sign in to continue</p>
+      <p>{{isRegistering ? 'Create your account' : 'Sign in to continue'}}</p>
     </div>
 
     <div class="alert alert-danger" *ngIf="errorMessage">
       {{errorMessage}}
+    </div>
+
+    <div class="alert alert-success" *ngIf="successMessage">
+      {{successMessage}}
     </div>
 
     <div class="mb-3">
@@ -18,11 +22,11 @@
         formControlName="email"
         placeholder="admin@example.com">
 
-      <div class="invalid-feedback" *ngIf="email.hasError('required')">
+      <div class="invalid-feedback" *ngIf="email.hasError('required') && (email.touched || email.dirty)">
         Email is required.
       </div>
 
-      <div class="invalid-feedback" *ngIf="email.hasError('email')">
+      <div class="invalid-feedback" *ngIf="email.hasError('email') && (email.touched || email.dirty)">
         Enter a valid email address.
       </div>
     </div>
@@ -36,17 +40,50 @@
         formControlName="password"
         placeholder="Minimum 6 characters">
 
-      <div class="invalid-feedback" *ngIf="password.hasError('required')">
+      <div class="invalid-feedback" *ngIf="password.hasError('required') && (password.touched || password.dirty)">
         Password is required.
       </div>
 
-      <div class="invalid-feedback" *ngIf="password.hasError('minlength')">
+      <div class="invalid-feedback" *ngIf="password.hasError('minlength') && (password.touched || password.dirty)">
         Password must be at least 6 characters.
       </div>
     </div>
 
-    <button class="btn btn-primary w-100" type="submit" [disabled]="loading || form.invalid">
-      {{loading ? 'Signing in...' : 'Login'}}
+    <div class="mb-3" *ngIf="isRegistering">
+      <label class="form-label">Display Name</label>
+      <input
+        type="text"
+        class="form-control"
+        [class.is-invalid]="displayName.invalid && (displayName.touched || displayName.dirty)"
+        formControlName="displayName"
+        placeholder="Your name">
+      <div class="invalid-feedback" *ngIf="displayName.invalid && (displayName.touched || displayName.dirty)">
+        Display name must be at least 2 characters.
+      </div>
+    </div>
+
+    <div class="mb-3" *ngIf="isRegistering">
+      <label class="form-label">Confirm Password</label>
+      <input
+        type="password"
+        class="form-control"
+        [class.is-invalid]="confirmPassword.invalid && (confirmPassword.touched || confirmPassword.dirty)"
+        formControlName="confirmPassword"
+        placeholder="Re-enter your password">
+      <div class="invalid-feedback" *ngIf="confirmPassword.hasError('required') && (confirmPassword.touched || confirmPassword.dirty)">
+        Confirm your password.
+      </div>
+      <div class="invalid-feedback" *ngIf="confirmPassword.hasError('mismatch') && (confirmPassword.touched || confirmPassword.dirty)">
+        Passwords do not match.
+      </div>
+    </div>
+
+    <button class="btn btn-primary w-100" type="submit" [disabled]="loading">
+      {{loading ? (isRegistering ? 'Creating account...' : 'Signing in...') : (isRegistering ? 'Register' : 'Login')}}
+    </button>
+
+    <button class="btn btn-link w-100 mt-2" type="button" (click)="setRegisterMode(!isRegistering)" [disabled]="loading">
+      {{isRegistering ? 'Already have an account? Login' : 'New here? Register'}}
     </button>
   </form>
 </div>

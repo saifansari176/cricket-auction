@@ -40,6 +40,8 @@
         [placeholder]="'Search ' + activeTitle.toLowerCase()">
     </div>
 
+    <div class="table-responsive">
+
     <table *ngIf="activeList === 'players'" class="table table-bordered table-hover">
       <thead class="table-dark">
         <tr>
@@ -190,6 +192,8 @@
         </tr>
       </tbody>
     </table>
+
+    </div>
 
     <div *ngIf="!loading && activeFilteredCount === 0" class="empty-state">
       No records matched your filter.

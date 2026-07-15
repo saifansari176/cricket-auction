@@ -167,3 +167,20 @@
   padding: 18px;
   text-align: center;
 }
+
+@media (max-width: 576px) {
+  .page-title,
+  .panel-header,
+  .header-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .team-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .players-panel {
+    padding: 12px;
+  }
+}

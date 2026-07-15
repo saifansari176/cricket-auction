@@ -58,6 +58,15 @@ export class HeaderComponent implements OnInit {
     this.openSection = this.openSection === section ? '' : section;
   }
 
+  closeSectionOnFocusOut(event: FocusEvent, section: string): void {
+    const nextFocusedElement = event.relatedTarget as Node | null;
+    const accordion = event.currentTarget as HTMLElement;
+
+    if (this.openSection === section && !accordion.contains(nextFocusedElement)) {
+      this.openSection = '';
+    }
+  }
+
   closeMenu(): void {
     this.menuOpen = false;
   }

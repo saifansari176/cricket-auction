@@ -3,25 +3,26 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../../firebase.config';
 import { cloudinaryConfig } from '../../../environments/cloudinary.config';
 import { CloudinaryService } from './cloudinary.service';
+import { LoadingService } from './loading.service';
 
 @Injectable({ providedIn: 'root' })
 export class StorageService {
-  constructor(private cloudinaryService: CloudinaryService) {}
+  constructor(private cloudinaryService: CloudinaryService, private loading: LoadingService) {}
 
   async uploadPlayerImage(file: File): Promise<string> {
     if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
       throw new Error('Cloudinary is not configured for player image upload.');
     }
 
-    return this.cloudinaryService.uploadFile(file);
+    return this.loading.track(() => this.cloudinaryService.uploadFile(file));
   }
 
   async uploadTeamLogo(file: File): Promise<string> {
-    return this.uploadRemoteFile(file, 'teams');
+    return this.loading.track(() => this.uploadRemoteFile(file, 'teams'));
   }
 
   async uploadAuctionLogo(file: File): Promise<string> {
-    return this.uploadRemoteFile(file, 'auction');
+    return this.loading.track(() => this.uploadRemoteFile(file, 'auction'));
   }
 
   private async uploadRemoteFile(file: File, folder: string): Promise<string> {

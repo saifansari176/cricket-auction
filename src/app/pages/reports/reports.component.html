@@ -43,7 +43,8 @@
           placeholder="Search purchased players">
       </div>
 
-      <table *ngIf="selectedTeamPlayers.length > 0" class="table table-bordered table-hover">
+      <div *ngIf="selectedTeamPlayers.length > 0" class="table-responsive">
+      <table class="table table-bordered table-hover">
         <thead class="table-dark">
           <tr>
             <th>#</th>
@@ -76,6 +77,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
 
       <div *ngIf="selectedTeam && selectedTeamPlayers.length === 0" class="empty-state">
         No purchased players found for this team.

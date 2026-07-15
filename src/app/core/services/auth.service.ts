@@ -14,6 +14,7 @@ import { BehaviorSubject } from 'rxjs';
 import { auth, firebaseConfig } from '../../../firebase.config';
 import { AppUser } from '../models/app-user';
 import { FirebaseService } from './firestore.service';
+import { LoadingService } from './loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,7 @@ export class AuthService {
 
   currentUser$ = new BehaviorSubject<AppUser | null>(null);
 
-  constructor(private firebase: FirebaseService) {
+  constructor(private firebase: FirebaseService, private loading: LoadingService) {
     onAuthStateChanged(auth, async (firebaseUser) => {
       const appUser = firebaseUser ? await this.loadOrCreateProfile(firebaseUser) : null;
 
@@ -42,21 +43,49 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<AppUser | null> {
-    const credential = await signInWithEmailAndPassword(auth, email, password);
-    const appUser = await this.loadOrCreateProfile(credential.user);
+    return this.loading.track(async () => {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const appUser = await this.loadOrCreateProfile(credential.user);
 
-    if (!appUser.active) {
-      await this.logout();
-      throw new Error('This user account is inactive.');
-    }
+      if (!appUser.active) {
+        await signOut(auth);
+        throw new Error('This user account is inactive.');
+      }
 
-    this.currentUser$.next(appUser);
-    return appUser;
+      this.currentUser$.next(appUser);
+      return appUser;
+    });
+  }
+
+  async register(email: string, password: string, displayName: string): Promise<AppUser> {
+    return this.loading.track(async () => {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(credential.user, { displayName });
+
+      const users = await this.getUsers();
+      const now = new Date().toISOString();
+      const profile: AppUser = {
+        uid: credential.user.uid,
+        email,
+        displayName,
+        role: users.length === 0 ? 'admin' : 'user',
+        active: true,
+        createdAt: now,
+        updatedAt: now
+      };
+
+      await this.firebase.set(this.usersCollection, credential.user.uid, profile);
+      const appUser = { ...profile, id: credential.user.uid };
+      this.currentUser$.next(appUser);
+      return appUser;
+    });
   }
 
   async logout(): Promise<void> {
-    await signOut(auth);
-    this.currentUser$.next(null);
+    await this.loading.track(async () => {
+      await signOut(auth);
+      this.currentUser$.next(null);
+    });
   }
 
   async waitForUser(): Promise<AppUser | null> {

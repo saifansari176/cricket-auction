@@ -93,7 +93,7 @@
     height:40px;
     border-radius:10px;
     background:#f1f5f9;
-    display:flex;
+    display:none;
     flex-direction:column;
     justify-content:center;
     gap:4px;
@@ -302,9 +302,42 @@
     padding-left:12px;
 }
 
+.menu-user {
+    display:none;
+}
+
 @media (max-width: 1180px) {
     .desktop-nav {
         display:none;
+    }
+
+    .menu-btn {
+        display:flex;
+    }
+
+    .app-header > .user {
+        display:none;
+    }
+
+    .menu-user {
+        display:block;
+    }
+
+    .menu-user .account-chip {
+        background:#1e293b;
+        margin-bottom:8px;
+    }
+
+    .menu-user .account-text strong,
+    .menu-user .account-text small,
+    .menu-user .registration-toggle {
+        color:#e2e8f0;
+    }
+
+    .menu-user .share-btn,
+    .menu-user .logout-btn {
+        width:100%;
+        margin-bottom:8px;
     }
 }
 
@@ -320,8 +353,4 @@
         min-width:0;
     }
 
-    .user {
-        width:100%;
-        justify-content:space-between;
-    }
 }

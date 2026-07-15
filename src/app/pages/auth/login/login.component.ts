@@ -20,11 +20,19 @@ export class LoginComponent {
 
   loading = false;
   errorMessage = '';
+  successMessage = '';
+  isRegistering = false;
 
   form = this.fb.group({
+    displayName: [''],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    confirmPassword: ['']
   });
+
+  get displayName() {
+    return this.form.controls.displayName;
+  }
 
   get email() {
     return this.form.controls.email;
@@ -32,6 +40,21 @@ export class LoginComponent {
 
   get password() {
     return this.form.controls.password;
+  }
+
+  get confirmPassword() {
+    return this.form.controls.confirmPassword;
+  }
+
+  setRegisterMode(isRegistering: boolean): void {
+    this.isRegistering = isRegistering;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    this.displayName.setValidators(isRegistering ? [Validators.required, Validators.minLength(2)] : []);
+    this.confirmPassword.setValidators(isRegistering ? [Validators.required] : []);
+    this.displayName.updateValueAndValidity();
+    this.confirmPassword.updateValueAndValidity();
   }
 
   async login(): Promise<void> {
@@ -44,12 +67,32 @@ export class LoginComponent {
     this.errorMessage = '';
 
     try {
-      await this.authService.login(
-        this.form.value.email || '',
-        this.form.value.password || ''
-      );
+      if (this.isRegistering) {
+        if (this.password.value !== this.confirmPassword.value) {
+          this.confirmPassword.setErrors({ mismatch: true });
+          this.confirmPassword.markAsTouched();
+          this.loading = false;
+          return;
+        }
 
-      await this.router.navigateByUrl('/auction-settings');
+        await this.authService.register(
+          this.form.value.email || '',
+          this.form.value.password || '',
+          this.form.value.displayName || ''
+        );
+
+        await this.authService.logout();
+        this.setRegisterMode(false);
+        this.form.reset();
+        this.successMessage = 'Registration successful. Please login with your new account.';
+      } else {
+        await this.authService.login(
+          this.form.value.email || '',
+          this.form.value.password || ''
+        );
+
+        await this.router.navigateByUrl('/auction-settings');
+      }
     } catch (error: unknown) {
       this.errorMessage = this.getLoginErrorMessage(this.getErrorCode(error), this.getErrorMessage(error));
     }
@@ -69,6 +112,10 @@ export class LoginComponent {
         return 'Too many failed attempts. Please try again later.';
       case 'auth/network-request-failed':
         return 'Network error. Please check your connection.';
+      case 'auth/email-already-in-use':
+        return 'An account already exists for this email address.';
+      case 'auth/weak-password':
+        return 'Password must be at least 6 characters.';
       default:
         return fallback || 'Unable to login.';
     }

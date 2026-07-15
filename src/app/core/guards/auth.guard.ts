@@ -49,5 +49,7 @@ export const auctionSelectionGuard: CanActivateFn = async () => {
   const router = inject(Router);
   const activeAuctionId = await auctionService.getActiveAuctionId();
 
-  return activeAuctionId ? true : router.createUrlTree(['/auction-settings']);
+  return activeAuctionId ? true : router.createUrlTree(['/auction-settings'], {
+    queryParams: { selection: 'required' }
+  });
 };

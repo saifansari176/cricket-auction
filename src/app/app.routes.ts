@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { auctionSelectionGuard, authGuard, guestGuard } from './core/guards/auth.guard';
+import { adminGuard, auctionSelectionGuard, authGuard, guestGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -113,7 +113,7 @@ export const routes: Routes = [
 
   {
     path: 'users',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadComponent: () =>
       import('./pages/users/user-control/user-control.component').then(m => m.UserControlComponent),
   },

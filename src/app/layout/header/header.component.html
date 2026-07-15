@@ -7,7 +7,7 @@
         </button>
 
         <a class="brand-home" routerLink="/dashboard" aria-label="Go to dashboard">
-            <div class="brand-mark">CA</div>
+            <img src="/cricbids-logo.png" class="brand-mark" alt="CRICBIDS logo">
 
             <div>
                 <h4>Cricbids</h4>
@@ -44,7 +44,7 @@
             </div>
         </div>
 
-        <a routerLink="/users" routerLinkActive="active">Users</a>
+        <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active">Users</a>
     </nav>
 
     <div class="user" *ngIf="currentUser$ | async as user">
@@ -88,8 +88,9 @@
 
     <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
     <a routerLink="/auction-settings" routerLinkActive="active" (click)="closeMenu()">Auction Settings</a>
-    <a routerLink="/users" routerLinkActive="active" (click)="closeMenu()">User Control</a>
+    <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active" (click)="closeMenu()">User Control</a>
 
+    <div class="menu-accordion" (focusout)="closeSectionOnFocusOut($event, 'players')">
     <button type="button" class="accordion-title" (click)="toggleSection('players')">
         Players
         <span>{{openSection === 'players' ? '−' : '+'}}</span>
@@ -99,6 +100,9 @@
         <a routerLink="/players/add" routerLinkActive="active" (click)="closeMenu()">Add Player</a>
     </div>
 
+    </div>
+
+    <div class="menu-accordion" (focusout)="closeSectionOnFocusOut($event, 'teams')">
     <button type="button" class="accordion-title" (click)="toggleSection('teams')">
         Teams
         <span>{{openSection === 'teams' ? '−' : '+'}}</span>
@@ -108,6 +112,9 @@
         <a routerLink="/teams/add" routerLinkActive="active" (click)="closeMenu()">Add Team</a>
     </div>
 
+    </div>
+
+    <div class="menu-accordion" (focusout)="closeSectionOnFocusOut($event, 'auction')">
     <button type="button" class="accordion-title" (click)="toggleSection('auction')">
         Auction
         <span>{{openSection === 'auction' ? '−' : '+'}}</span>
@@ -116,5 +123,30 @@
         <a routerLink="/auction" routerLinkActive="active" (click)="closeMenu()">Live Auction</a>
         <a routerLink="/reports" routerLinkActive="active" (click)="closeMenu()">Reports</a>
         <a routerLink="/settings" routerLinkActive="active" (click)="closeMenu()">Settings</a>
+    </div>
+
+    </div>
+
+    <div class="menu-user" *ngIf="currentUser$ | async as user">
+        <label class="registration-toggle">
+            <input type="checkbox" [checked]="registrationLinkEnabled" (change)="toggleRegistrationLink()">
+            Registration Link
+        </label>
+
+        <button type="button" class="share-btn" (click)="shareRegistrationLink()">
+            Share Link
+        </button>
+
+        <div class="account-chip">
+            <span class="avatar">{{(user.displayName || user.email || 'U').charAt(0)}}</span>
+            <span class="account-text">
+                <strong>{{user.displayName || user.email}}</strong>
+                <small>{{user.role}}</small>
+            </span>
+        </div>
+
+        <button type="button" class="logout-btn" (click)="logout(); closeMenu()">
+            Logout
+        </button>
     </div>
 </aside>

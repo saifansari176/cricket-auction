@@ -6,6 +6,7 @@ import {
   Validators
 } from '@angular/forms';
 import { AuctionService } from '../../../core/services/auction.service';
+import { TeamService } from '../../../core/services/team.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { MessageService } from '../../../core/services/message.service';
@@ -27,6 +28,7 @@ export class AuctionSettingsComponent {
   private fb = inject(FormBuilder);
 
   private auctionService = inject(AuctionService);
+  private teamService = inject(TeamService);
 
   private storageService = inject(StorageService);
   private message = inject(MessageService);
@@ -373,6 +375,11 @@ export class AuctionSettingsComponent {
       this.loading = true;
 
       const savedAuctionId = await this.auctionService.save(settings, this.selectedAuctionId || undefined);
+
+      await this.teamService.reconcileTeams(
+        settings.pointsPerTeam,
+        settings.playersPerTeam
+      );
 
       await this.loadAuctions();
 

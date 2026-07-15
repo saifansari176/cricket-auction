@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 
 import { db } from '../../../firebase.config';
+import { LoadingService } from './loading.service';
 
 type FirestorePayload = object & { id?: unknown };
 
@@ -19,19 +20,21 @@ type FirestorePayload = object & { id?: unknown };
   providedIn: 'root'
 })
 export class FirebaseService {
+  constructor(private loading: LoadingService) {}
 
   // ==========================
   // Get All Documents
   // ==========================
 
   async getAll<T>(collectionName: string): Promise<T[]> {
+    return this.loading.track(async () => {
+      const snapshot = await getDocs(collection(db, collectionName));
 
-  const snapshot = await getDocs(collection(db, collectionName));
-
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as T[];
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as T[];
+    });
 
 }
 
@@ -40,19 +43,13 @@ export class FirebaseService {
   // ==========================
 
   async getById<T>(collectionName: string, id: string): Promise<T | null> {
+    return this.loading.track(async () => {
+      const snapshot = await getDoc(doc(db, collectionName, id));
 
-  const snapshot = await getDoc(
-    doc(db, collectionName, id)
-  );
+      if (!snapshot.exists()) return null;
 
-  if (!snapshot.exists()) {
-    return null;
-  }
-
-  return {
-    id: snapshot.id,
-    ...snapshot.data()
-  } as T;
+      return { id: snapshot.id, ...snapshot.data() } as T;
+    });
 
 }
 
@@ -61,13 +58,11 @@ export class FirebaseService {
   // ==========================
 
   async add<T extends FirestorePayload>(collectionName: string, data: T) {
-
     const payload = this.withoutId(data);
-
-    return await addDoc(
+    return this.loading.track(() => addDoc(
       collection(db, collectionName),
       payload
-    );
+    ));
 
   }
 
@@ -76,13 +71,11 @@ export class FirebaseService {
   // ==========================
 
   async set<T extends FirestorePayload>(collectionName: string, id: string, data: T) {
-
     const payload = this.withoutId(data);
-
-    await setDoc(
+    await this.loading.track(() => setDoc(
       doc(db, collectionName, id),
       payload
-    );
+    ));
 
   }
 
@@ -91,13 +84,11 @@ export class FirebaseService {
   // ==========================
 
   async update<T extends FirestorePayload>(collectionName: string, id: string, data: T) {
-
     const payload = this.withoutId(data);
-
-    await updateDoc(
+    await this.loading.track(() => updateDoc(
       doc(db, collectionName, id),
       payload
-    );
+    ));
 
   }
 
@@ -106,10 +97,9 @@ export class FirebaseService {
   // ==========================
 
   async delete(collectionName: string, id: string) {
-
-    await deleteDoc(
+    await this.loading.track(() => deleteDoc(
       doc(db, collectionName, id)
-    );
+    ));
 
   }
 
