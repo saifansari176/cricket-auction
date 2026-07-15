@@ -7,7 +7,7 @@
     align-items:center;
     justify-content:space-between;
     gap:18px;
-    padding:0 28px;
+    padding:0 28px 0 10px;
     position:sticky;
     top:0;
     z-index:900;
@@ -48,10 +48,9 @@
 }
 
 .brand-mark {
-    width:42px;
-    height:42px;
+    width:100px;
+    height:75px;
     border-radius:10px;
-    background:linear-gradient(135deg,#2563eb,#0f172a);
     color:#fff;
     display:flex;
     align-items:center;
