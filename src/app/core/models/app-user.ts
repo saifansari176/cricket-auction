@@ -7,6 +7,8 @@ export interface AppUser {
   displayName: string;
   role: UserRole;
   active: boolean;
+  teamLimit?: number;
+  playerLimit?: number;
   createdAt?: string;
   updatedAt?: string;
 }

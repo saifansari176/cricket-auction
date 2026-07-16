@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import * as XLSX from 'xlsx';
 
 import { AuctionBid } from '../../core/models/bid';
 import { Player } from '../../core/models/player';
@@ -210,5 +211,28 @@ export class DashboardComponent implements OnInit {
     const playerName = `${player.firstName} ${player.lastName}`;
     this.auctionService.setSelectedPlayer(player.id, playerName);
     this.router.navigate(['/auction']);
+  }
+
+  downloadAvailablePlayersExcel(): void {
+    const data = this.filteredAvailablePlayers.map((player) => ({
+      'First Name': player.firstName,
+      'Last Name': player.lastName,
+      'Mobile Number': player.mobile,
+      'T-Shirt Size': player.tshirtSize,
+      Photo: player.photo
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    worksheet['!cols'] = [
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 60 }
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Available Players');
+    XLSX.writeFile(workbook, 'Available-Players.xlsx');
   }
 }

@@ -169,6 +169,14 @@ export class AuctionService {
     }
 
   }
+
+  async updateAuctionAccess(auctionId: string, teamLimit: number, playerLimit: number): Promise<void> {
+    await this.firebase.update(this.settingsCollection, auctionId, {
+      teamLimit,
+      playerLimit,
+      updatedAt: new Date().toISOString()
+    });
+  }
   
   async saveBid(bid: AuctionBid): Promise<void> {
 
@@ -247,6 +255,10 @@ export class AuctionService {
         .filter((bid) => !!bid.id)
         .map((bid) => this.firebase.delete(this.bidsCollection, bid.id!))
     );
+  }
+
+  async deleteBid(bidId: string): Promise<void> {
+    await this.firebase.delete(this.bidsCollection, bidId);
   }
 
   async syncPlayerBidDetails(player: Player): Promise<void> {

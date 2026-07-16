@@ -5,10 +5,13 @@
       <p>Manage app roles for Firebase Auth users.</p>
     </div>
 
-    <button class="btn btn-primary" type="button" (click)="newUser()">New User</button>
+    <div class="tab-actions">
+      <button class="btn btn-primary" type="button" [class.active-tab]="activeTab === 'users'" (click)="activeTab = 'users'">Users</button>
+      <button class="btn btn-outline-primary" type="button" [class.active-tab]="activeTab === 'auction-access'" (click)="activeTab = 'auction-access'">User Auction Access</button>
+    </div>
   </div>
 
-  <div class="user-layout">
+  <div class="user-layout" *ngIf="activeTab === 'users'">
     <section class="form-panel">
       <h3>{{editingUser ? 'Edit User' : 'Add User'}}</h3>
       <p class="hint">{{editingUser ? 'Update user role and status.' : 'Create login access with email and password.'}}</p>
@@ -79,4 +82,33 @@
       </div>
     </section>
   </div>
+
+  <section class="list-panel" *ngIf="activeTab === 'auction-access'">
+    <h3>User Auction Access</h3>
+    <p class="hint">Select an auction to set the number of teams and players allowed for that auction.</p>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+          <tr><th>Auction</th><th>Owner</th><th>Team Limit</th><th>Player Limit</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let auction of auctions">
+            <td>{{auction.auctionName}}</td>
+            <td>{{auction.createdByEmail || auction.createdBy}}</td>
+            <td>{{auction.teamLimit ?? 2}}</td>
+            <td>{{auction.playerLimit ?? 10}}</td>
+            <td><button class="btn btn-warning btn-sm" type="button" (click)="editAuctionAccess(auction)">Edit Access</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <form class="access-form" *ngIf="editingAuction" [formGroup]="accessForm" (ngSubmit)="saveAuctionAccess()">
+      <h4>{{editingAuction.auctionName}}</h4>
+      <div class="mb-3"><label class="form-label">Team Limit</label><input type="number" min="1" class="form-control" formControlName="teamLimit"></div>
+      <div class="mb-3"><label class="form-label">Player Limit</label><input type="number" min="1" class="form-control" formControlName="playerLimit"></div>
+      <button class="btn btn-success" type="submit">Save Auction Access</button>
+    </form>
+  </section>
 </div>

@@ -84,6 +84,7 @@ export class PlayerFormComponent {
   async ngOnInit() {
 
     this.auction = await this.auctionService.get();
+    this.form.patchValue({ baseBid: this.getAuctionBaseBid() });
 
     const id = this.route.snapshot.paramMap.get('id');
 
@@ -121,7 +122,7 @@ export class PlayerFormComponent {
 
       trouserSize: player.trouserSize,
 
-      baseBid: player.baseBid,
+      baseBid: this.getAuctionBaseBid(),
 
       note: player.note,
 
@@ -161,7 +162,7 @@ export class PlayerFormComponent {
 
       trouserSize: this.form.value.trouserSize!,
 
-      baseBid: Number(this.form.value.baseBid),
+      baseBid: this.getAuctionBaseBid(),
 
       note: this.form.value.note || '',
 
@@ -191,6 +192,11 @@ export class PlayerFormComponent {
 
     }
     else {
+
+      if (!await this.playerService.canAddPlayer()) {
+        this.message.warning('Player limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789.');
+        return;
+      }
 
       const saved = await this.playerService.savePlayer(player);
 
@@ -224,6 +230,12 @@ export class PlayerFormComponent {
 
     }
 
+    if (!file.type.startsWith('image/')) {
+      this.message.warning('Please select an image file.');
+      input.value = '';
+      return;
+    }
+
     try {
       const uploadedUrl = await this.storageService.uploadPlayerImage(file);
       this.form.patchValue({
@@ -249,6 +261,10 @@ export class PlayerFormComponent {
 
     }
 
+  }
+
+  private getAuctionBaseBid(): number {
+    return Number(this.auction?.basePlayerPrice ?? this.auction?.minimumBid ?? 0);
   }
 
   // =========================================

@@ -5,6 +5,7 @@ import { Player } from '../../../core/models/player';
 import * as XLSX from 'xlsx';
 import { CommonModule } from '@angular/common';
 import { MessageService } from '../../../core/services/message.service';
+import { AuctionService } from '../../../core/services/auction.service';
 
 @Component({
   selector: 'app-player-list',
@@ -19,6 +20,7 @@ export class PlayerListComponent {
 
   constructor(
     private playerService: PlayerService,
+    private auctionService: AuctionService,
     private message: MessageService
   ) {}
 
@@ -28,6 +30,10 @@ export class PlayerListComponent {
 
   async loadPlayers() {
     this.players = await this.playerService.getPlayers();
+    const auction = await this.auctionService.get();
+    const baseBid = Number(auction?.basePlayerPrice ?? auction?.minimumBid ?? 0);
+
+    this.players = this.players.map((player) => ({ ...player, baseBid }));
   }
 
   async deletePlayer(id: string) {
@@ -97,7 +103,11 @@ export class PlayerListComponent {
       const workbook = XLSX.read(result, { type: 'binary' });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const excelData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
-      const existingPlayers = await this.playerService.getPlayers();
+      const [existingPlayers, auction] = await Promise.all([
+        this.playerService.getPlayers(),
+        this.auctionService.get()
+      ]);
+      const baseBid = Number(auction?.basePlayerPrice ?? auction?.minimumBid ?? 0);
 
       let imported = 0;
       let skipped = 0;
@@ -122,7 +132,7 @@ export class PlayerListComponent {
           playerType: this.getCellValue(row, 'Player Type'),
           tshirtSize: this.getCellValue(row, 'T-Shirt Size'),
           trouserSize: this.getCellValue(row, 'Trouser Size'),
-          baseBid: Number(this.getCellValue(row, 'Base Bid') || 0),
+          baseBid,
           note: this.getCellValue(row, 'Note'),
           photo: this.normalizePhotoUrl(row['Photo']),
           status: 'Available'

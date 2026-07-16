@@ -6,6 +6,7 @@ import {
   Validators
 } from '@angular/forms';
 import { AuctionService } from '../../../core/services/auction.service';
+import { PlayerService } from '../../../core/services/player.service';
 import { TeamService } from '../../../core/services/team.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuctionSettings } from '../../../core/models/auction-settings';
@@ -28,6 +29,7 @@ export class AuctionSettingsComponent {
   private fb = inject(FormBuilder);
 
   private auctionService = inject(AuctionService);
+  private playerService = inject(PlayerService);
   private teamService = inject(TeamService);
 
   private storageService = inject(StorageService);
@@ -65,6 +67,10 @@ export class AuctionSettingsComponent {
     bidIncreaseBy: [0, [Validators.required, Validators.min(1)]],
 
     playersPerTeam: [0, [Validators.required, Validators.min(1)]],
+
+    teamLimit: [2, [Validators.required, Validators.min(1)]],
+
+    playerLimit: [10, [Validators.required, Validators.min(1)]],
 
     basePlayerPrice: [0]
 
@@ -140,6 +146,10 @@ export class AuctionSettingsComponent {
       bidIncreaseBy: Number(auction.bidIncreaseBy),
 
       playersPerTeam: Number(auction.playersPerTeam),
+
+      teamLimit: Number(auction.teamLimit ?? 2),
+
+      playerLimit: Number(auction.playerLimit ?? 10),
 
       basePlayerPrice: Number(auction.basePlayerPrice)
 
@@ -221,6 +231,10 @@ export class AuctionSettingsComponent {
       bidIncreaseBy: 0,
 
       playersPerTeam: 0,
+
+      teamLimit: 2,
+
+      playerLimit: 10,
 
       basePlayerPrice: 0
 
@@ -310,6 +324,12 @@ export class AuctionSettingsComponent {
 
     }
 
+    if (!file.type.startsWith('image/')) {
+      this.message.warning('Please select an image file.');
+      input.value = '';
+      return;
+    }
+
     this.uploading = true;
 
     try {
@@ -367,6 +387,10 @@ export class AuctionSettingsComponent {
 
       playersPerTeam: Number(this.form.value.playersPerTeam),
 
+      teamLimit: Number(this.form.value.teamLimit),
+
+      playerLimit: Number(this.form.value.playerLimit),
+
       basePlayerPrice: Number(this.form.value.basePlayerPrice)
 
     };
@@ -375,6 +399,11 @@ export class AuctionSettingsComponent {
       this.loading = true;
 
       const savedAuctionId = await this.auctionService.save(settings, this.selectedAuctionId || undefined);
+
+      await this.playerService.updateBaseBidForAuction(
+        savedAuctionId,
+        settings.basePlayerPrice
+      );
 
       await this.teamService.reconcileTeams(
         settings.pointsPerTeam,

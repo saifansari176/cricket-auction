@@ -29,8 +29,18 @@
   <div class="list-panel">
     <div class="panel-header">
       <h3>{{activeTitle}}</h3>
-      <span *ngIf="loading">Loading...</span>
-      <span *ngIf="!loading">{{activeFilteredCount}} Records</span>
+      <div class="panel-actions">
+        <button
+          *ngIf="activeList === 'available'"
+          type="button"
+          class="btn btn-primary btn-sm"
+          [disabled]="filteredAvailablePlayers.length === 0"
+          (click)="downloadAvailablePlayersExcel()">
+          &#128229; Download
+        </button>
+        <span *ngIf="loading">Loading...</span>
+        <span *ngIf="!loading">{{activeFilteredCount}} Records</span>
+      </div>
     </div>
 
     <div class="table-filter">

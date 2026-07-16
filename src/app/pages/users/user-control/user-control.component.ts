@@ -5,6 +5,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AppUser, UserRole } from '../../../core/models/app-user';
 import { AuthService } from '../../../core/services/auth.service';
 import { MessageService } from '../../../core/services/message.service';
+import { AuctionService } from '../../../core/services/auction.service';
+import { AuctionSettings } from '../../../core/models/auction-settings';
 
 @Component({
   selector: 'app-user-control',
@@ -17,10 +19,14 @@ export class UserControlComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private message = inject(MessageService);
+  private auctionService = inject(AuctionService);
 
   users: AppUser[] = [];
   loading = false;
   editingUser: AppUser | null = null;
+  activeTab: 'users' | 'auction-access' = 'users';
+  auctions: AuctionSettings[] = [];
+  editingAuction: AuctionSettings | null = null;
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -30,8 +36,14 @@ export class UserControlComponent implements OnInit {
     active: [true]
   });
 
+  accessForm = this.fb.group({
+    teamLimit: [2, [Validators.required, Validators.min(1)]],
+    playerLimit: [10, [Validators.required, Validators.min(1)]]
+  });
+
   async ngOnInit(): Promise<void> {
     await this.loadUsers();
+    await this.loadAuctions();
   }
 
   async loadUsers(): Promise<void> {
@@ -120,5 +132,30 @@ export class UserControlComponent implements OnInit {
     await this.authService.deleteUser(user.uid);
     await this.loadUsers();
     this.loading = false;
+  }
+
+  async loadAuctions(): Promise<void> {
+    this.auctions = await this.auctionService.getAuctions();
+  }
+
+  editAuctionAccess(auction: AuctionSettings): void {
+    this.editingAuction = auction;
+    this.accessForm.patchValue({
+      teamLimit: auction.teamLimit ?? 2,
+      playerLimit: auction.playerLimit ?? 10
+    });
+  }
+
+  async saveAuctionAccess(): Promise<void> {
+    if (!this.editingAuction?.id || this.accessForm.invalid) return;
+
+    await this.auctionService.updateAuctionAccess(
+      this.editingAuction.id,
+      Number(this.accessForm.value.teamLimit),
+      Number(this.accessForm.value.playerLimit)
+    );
+    await this.loadAuctions();
+    this.editingAuction = null;
+    this.message.success('Auction access updated successfully.');
   }
 }

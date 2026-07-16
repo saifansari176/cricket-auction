@@ -22,6 +22,24 @@ export class PlayerService {
 
   }
 
+  async updateBaseBidForAuction(auctionId: string, baseBid: number): Promise<void> {
+    if (!auctionId) {
+      return;
+    }
+
+    const players = await this.firebase.getAll<Player>(this.collection);
+    const price = Number(baseBid || 0);
+
+    await Promise.all(
+      players
+        .filter((player) => player.auctionId === auctionId && player.id)
+        .map((player) => this.firebase.update(this.collection, player.id!, {
+          ...player,
+          baseBid: price
+        }))
+    );
+  }
+
  async getPlayerById(id: string): Promise<Player | null> {
 
     return await this.firebase.getById<Player>(
@@ -36,7 +54,8 @@ async savePlayer(player: Player): Promise<boolean> {
 
     player.auctionId = player.auctionId || activeAuctionId;
 
-    const players = await this.getPlayers();
+    const players = (await this.firebase.getAll<Player>(this.collection))
+      .filter((existingPlayer) => existingPlayer.auctionId === player.auctionId);
     const exists = players.some(
       x => x.mobile === player.mobile
     );
@@ -47,6 +66,8 @@ async savePlayer(player: Player): Promise<boolean> {
 
     }
 
+    if (!await this.canAddPlayer(player.auctionId)) return false;
+
     const { id, ...playerData } = player;
 
 await this.firebase.add(
@@ -56,6 +77,21 @@ await this.firebase.add(
 
     return true;
 
+  }
+
+  async canAddPlayer(auctionId?: string): Promise<boolean> {
+    const user = await this.auctionService.authService.waitForUser();
+    if (this.auctionService.authService.isAdmin(user)) return true;
+
+    const selectedAuction = auctionId ? null : await this.auctionService.get();
+    const resolvedAuctionId = auctionId || selectedAuction?.activeAuctionId || selectedAuction?.id;
+    const auction = resolvedAuctionId
+      ? await this.auctionService.getAuctionById(resolvedAuctionId)
+      : selectedAuction;
+    const players = await this.firebase.getAll<Player>(this.collection);
+    const playerLimit = Number(auction?.playerLimit ?? 10);
+
+    return players.filter((player) => player.auctionId === resolvedAuctionId).length < playerLimit;
   }
 
 async deletePlayer(id: string) {
@@ -113,6 +149,25 @@ async deletePlayer(id: string) {
 
     await this.updatePlayer(player);
 
+  }
+
+  async markAvailable(playerId: string): Promise<Player | null> {
+    const player = await this.getPlayerById(playerId);
+
+    if (!player) {
+      return null;
+    }
+
+    const updatedPlayer: Player = {
+      ...player,
+      status: 'Available',
+      soldToTeamId: '',
+      soldPrice: 0
+    };
+
+    await this.updatePlayer(updatedPlayer);
+
+    return updatedPlayer;
   }
 
  async getAvailablePlayers(): Promise<Player[]> {

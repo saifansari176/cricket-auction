@@ -57,6 +57,8 @@ export class TeamService {
 
     }
 
+    if (!await this.canAddTeam()) return false;
+
 await this.firebase.add(
   this.collection,
   team
@@ -64,6 +66,18 @@ await this.firebase.add(
 
     return true;
 
+  }
+
+  async canAddTeam(): Promise<boolean> {
+    const user = await this.auctionService.authService.waitForUser();
+    if (this.auctionService.authService.isAdmin(user)) return true;
+
+    const selectedAuction = await this.auctionService.get();
+    const auction = selectedAuction?.activeAuctionId || selectedAuction?.id
+      ? await this.auctionService.getAuctionById(selectedAuction.activeAuctionId || selectedAuction.id!)
+      : selectedAuction;
+    const teamLimit = Number(auction?.teamLimit ?? 2);
+    return (await this.getTeams()).length < teamLimit;
   }
 
   // ===============================

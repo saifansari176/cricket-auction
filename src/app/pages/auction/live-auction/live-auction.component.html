@@ -68,7 +68,7 @@
   <div class="action-buttons">
     <button class="sold" (click)="sold()">SOLD</button>
     <button class="unsold" (click)="unsold()">UNSOLD</button>
-    <button class="undo" (click)="undoLastBid()">UNDO</button>
+    <button class="undo" (click)="undoLastBid()" title="Undo the last bid or completed sale">UNDO</button>
     <button class="next" (click)="nextPlayer()">LOAD PLAYER</button>
   </div>
 
@@ -103,17 +103,12 @@
   </div>
 
   <div *ngIf="showUnsoldAnimation" class="unsold-stamp">
-    UNSOLD
+    <span class="unsold-label">UNSOLD</span>
+    <span class="unsold-subtitle">BACK TO THE PLAYER POOL</span>
   </div>
 
-  <div *ngIf="showSoldAnimation" class="sold-animation">
-    <div class="fireworks">
-      <span></span><span></span><span></span><span></span><span></span>
-      <span></span><span></span><span></span><span></span><span></span>
-    </div>
-    <div class="sold-badge">
-      <div class="badge-text">SOLD</div>
-      <div class="team-text">{{soldToTeamName}}</div>
-    </div>
+  <div *ngIf="showSoldAnimation" class="sold-stamp">
+    <span class="sold-label">SOLD</span>
+    <span class="sold-subtitle">{{soldToTeamName}} WINS THE BID</span>
   </div>
 </div>

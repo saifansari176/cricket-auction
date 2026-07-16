@@ -79,7 +79,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
       playerType: this.form.value.playerType || '',
       tshirtSize: this.form.value.tshirtSize || '',
       trouserSize: this.form.value.trouserSize || '',
-      baseBid: Number(this.auction?.basePlayerPrice || this.auction?.minimumBid || 0),
+      baseBid: Number(this.auction?.basePlayerPrice ?? this.auction?.minimumBid ?? 0),
       note: this.form.value.note || '',
       photo: this.form.value.photo || '',
       status: 'Available',
@@ -89,6 +89,11 @@ export class PlayerRegistrationComponent implements OnDestroy {
     this.saving = true;
 
     try {
+      if (!await this.playerService.canAddPlayer(this.auction?.id || this.auction?.activeAuctionId)) {
+        this.message.warning('Player limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789.');
+        return;
+      }
+
       const saved = await this.playerService.savePlayer(player);
 
       if (!saved) {
@@ -110,6 +115,12 @@ export class PlayerRegistrationComponent implements OnDestroy {
     const file = input.files?.[0];
 
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.message.warning('Please select an image file.');
+      input.value = '';
+      return;
+    }
 
     this.setLocalPreview(file);
     this.uploadingPhoto = true;

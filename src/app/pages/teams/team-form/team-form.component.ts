@@ -115,6 +115,12 @@ export class TeamFormComponent {
 
     }
 
+    if (!file.type.startsWith('image/')) {
+      this.message.warning('Please select an image file.');
+      input.value = '';
+      return;
+    }
+
     this.uploading = true;
 
     try {
@@ -210,6 +216,11 @@ if (!settings) {
 
     }
     else {
+
+      if (!await this.teamService.canAddTeam()) {
+        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789.');
+        return;
+      }
 
       const saved =
         await this.teamService.saveTeam(team);

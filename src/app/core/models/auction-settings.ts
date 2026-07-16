@@ -12,6 +12,10 @@ export interface AuctionSettings {
 
   playersPerTeam:number;
 
+  teamLimit?: number;
+
+  playerLimit?: number;
+
   basePlayerPrice:number;
 
   bidIncrement:number;

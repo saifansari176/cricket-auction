@@ -104,7 +104,7 @@ export class AuthService {
     return await this.firebase.getAll<AppUser>(this.usersCollection);
   }
 
-  async createUser(email: string, password: string, displayName: string, role: AppUser['role'], active: boolean): Promise<void> {
+  async createUser(email: string, password: string, displayName: string, role: AppUser['role'], active: boolean, teamLimit = 2, playerLimit = 10): Promise<void> {
     const secondaryAppName = `user-create-${Date.now()}`;
     const secondaryApp: FirebaseApp = initializeApp(firebaseConfig, secondaryAppName);
     const secondaryAuth = getAuth(secondaryApp);
@@ -119,6 +119,8 @@ export class AuthService {
       displayName,
       role,
       active,
+      teamLimit,
+      playerLimit,
       createdAt: now,
       updatedAt: now
     };
@@ -141,6 +143,12 @@ export class AuthService {
 
   async deleteUser(uid: string): Promise<void> {
     await this.firebase.delete(this.usersCollection, uid);
+  }
+
+  getUserLimits(user: AppUser | null = this.currentUser$.value): { teamLimit: number; playerLimit: number } {
+    if (this.isAdmin(user)) return { teamLimit: Infinity, playerLimit: Infinity };
+    const playerLimit = Number(user?.playerLimit ?? 10);
+    return { teamLimit: Math.max(0, Number(user?.teamLimit ?? 2)), playerLimit: playerLimit === 0 ? Infinity : Math.max(0, playerLimit) };
   }
 
   private async loadOrCreateProfile(firebaseUser: User): Promise<AppUser> {

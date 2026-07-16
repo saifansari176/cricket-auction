@@ -29,6 +29,7 @@
         <input
           type="file"
           accept="image/*"
+          accept="image/*"
           (change)="onPhotoChange($event)"
         />
         <small class="error text-danger" *ngIf="form.get('photo')?.touched && form.get('photo')?.invalid">

@@ -135,6 +135,7 @@
           <label class="form-label">Auction Logo</label>
           <input
             type="file"
+            accept="image/*"
             class="form-control"
             accept="image/*"
             (change)="onLogoChange($event)">
@@ -161,6 +162,16 @@
         <div>
           <label class="form-label">Players Per Team</label>
           <input type="number" class="form-control" formControlName="playersPerTeam">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Team Access Limit</label>
+          <input type="number" min="1" class="form-control" formControlName="teamLimit">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Player Access Limit</label>
+          <input type="number" min="1" class="form-control" formControlName="playerLimit">
         </div>
 
         <div>

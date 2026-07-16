@@ -30,7 +30,7 @@
 
                         <img *ngIf="form.value.logo" [src]="form.value.logo" width="120" class="rounded-circle mb-3">
 
-                        <input type="file" class="form-control" (change)="onLogoChange($event)">
+                        <input type="file" accept="image/*" class="form-control" (change)="onLogoChange($event)">
 
                     </div>
 

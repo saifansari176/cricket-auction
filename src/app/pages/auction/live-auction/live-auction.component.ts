@@ -6,8 +6,14 @@ import { Player } from '../../../core/models/player';
 import { Team } from '../../../core/models/team';
 import { AuctionService } from '../../../core/services/auction.service';
 import { MessageService } from '../../../core/services/message.service';
+import { LoadingService } from '../../../core/services/loading.service';
 import { PlayerService } from '../../../core/services/player.service';
 import { TeamService } from '../../../core/services/team.service';
+
+type AuctionAction = {
+  type: 'sold' | 'unsold';
+  playerId: string;
+};
 
 @Component({ selector: 'app-live-auction', standalone: true, imports: [CommonModule], templateUrl: './live-auction.component.html', styleUrls: ['./live-auction.component.scss'] })
 export class LiveAuctionComponent implements OnInit, OnDestroy {
@@ -20,6 +26,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   highestTeam: Team | null = null;
   loading = false;
   bidHistory: { team: Team; bid: number }[] = [];
+  actionHistory: AuctionAction[] = [];
   isFullscreen = false;
   showUnsoldAnimation = false;
   showSoldAnimation = false;
@@ -29,7 +36,8 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     private playerService: PlayerService,
     private teamService: TeamService,
     private auctionService: AuctionService,
-    private message: MessageService
+    private message: MessageService,
+    private loadingService: LoadingService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -114,15 +122,77 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.highestTeam = team;
   }
 
-  undoLastBid(): void {
+  async undoLastBid(): Promise<void> {
     const lastBid = this.bidHistory.pop();
     if (lastBid) {
       this.currentBid = lastBid.bid;
       this.highestTeam = lastBid.team;
       return;
     }
-    this.currentBid = Number(this.currentPlayer?.baseBid || 0);
-    this.highestTeam = null;
+
+    if (this.highestTeam) {
+      this.currentBid = Number(this.currentPlayer?.baseBid || 0);
+      this.highestTeam = null;
+      return;
+    }
+
+    const lastAction = this.actionHistory[this.actionHistory.length - 1];
+
+    if (lastAction?.type === 'unsold') {
+      const restoredPlayer = await this.playerService.markAvailable(lastAction.playerId);
+
+      if (!restoredPlayer) {
+        this.message.error('The unsold player could not be returned to the auction.');
+        return;
+      }
+
+      this.actionHistory.pop();
+      this.setCurrentPlayer(restoredPlayer);
+      this.message.success(`${this.playerName} has been returned to the auction.`, 'Unsold Undone');
+      return;
+    }
+
+    const lastSoldBid = lastAction?.type === 'sold'
+      ? (await this.auctionService.getSoldPlayers())
+          .filter((bid) => bid.playerId === lastAction.playerId)
+          .sort((a, b) => Date.parse(b.soldDate) - Date.parse(a.soldDate))[0]
+      : (await this.auctionService.getSoldPlayers())
+          .sort((a, b) => Date.parse(b.soldDate) - Date.parse(a.soldDate))[0];
+
+    if (!lastSoldBid?.id) {
+      this.message.info('There is no completed sale to undo.');
+      return;
+    }
+
+    const confirmed = await this.message.confirm(
+      `Undo the sale of ${lastSoldBid.playerName}? The player will be returned to the auction.`,
+      'Undo Last Sale',
+      'Undo Sale'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await this.auctionService.deleteBid(lastSoldBid.id);
+    const restoredPlayer = await this.playerService.markAvailable(lastSoldBid.playerId);
+
+    if (!restoredPlayer) {
+      this.message.error('The sale was removed, but the player could not be restored.');
+      return;
+    }
+
+    await this.teamService.reconcileTeams(
+      Number(this.auction?.pointsPerTeam || 0),
+      Number(this.auction?.playersPerTeam || 0)
+    );
+    await this.loadTeams();
+    if (lastAction?.type === 'sold') {
+      this.actionHistory.pop();
+    }
+    this.setCurrentPlayer(restoredPlayer);
+    this.message.success(`${this.playerName} has been returned to the auction.`, 'Sale Undone');
+
   }
 
   async sold(): Promise<void> {
@@ -130,28 +200,39 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
       this.message.warning('Select a team and place a bid before marking this player as sold.');
       return;
     }
-    await this.auctionService.saveBid({ playerId: this.currentPlayer.id, playerName: this.playerName, teamId: this.highestTeam.id, teamName: this.highestTeam.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer.mobile, tshirtSize: this.currentPlayer.tshirtSize,  sold: true, soldDate: new Date().toISOString() });
-    await this.playerService.markSold(this.currentPlayer.id, this.highestTeam.id, this.currentBid);
-    await this.teamService.updateTeamPoints(this.highestTeam.id, this.currentBid);
-    this.updateSoldTeamOnScreen(this.highestTeam.id, this.currentBid);    
     this.soldToTeamName = this.highestTeam.teamName;
     this.showSoldAnimation = true;
-    
-    await this.loadTeams();
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    this.showSoldAnimation = false;
-    
-    await this.loadNextPlayer();
+    const soldPlayerId = this.currentPlayer.id;
+
+    try {
+      await this.loadingService.withoutLoader(async () => {
+        await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerName: this.playerName, teamId: this.highestTeam!.id!, teamName: this.highestTeam!.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer!.mobile, tshirtSize: this.currentPlayer!.tshirtSize, sold: true, soldDate: new Date().toISOString() });
+        await this.playerService.markSold(this.currentPlayer!.id!, this.highestTeam!.id!, this.currentBid);
+        await this.teamService.updateTeamPoints(this.highestTeam!.id!, this.currentBid);
+        this.updateSoldTeamOnScreen(this.highestTeam!.id!, this.currentBid);
+        this.actionHistory.push({ type: 'sold', playerId: soldPlayerId });
+        await this.loadTeams();
+        await this.loadNextPlayer();
+      });
+    } finally {
+      this.showSoldAnimation = false;
+    }
   }
 
   async unsold(): Promise<void> {
     if (!this.currentPlayer?.id) return;
     this.showUnsoldAnimation = true;
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    this.showUnsoldAnimation = false;
-    
-    await this.playerService.markUnsold(this.currentPlayer.id);
-    await this.loadNextPlayer();
+    const unsoldPlayerId = this.currentPlayer.id;
+
+    try {
+      await this.loadingService.withoutLoader(async () => {
+        await this.playerService.markUnsold(this.currentPlayer!.id!);
+        this.actionHistory.push({ type: 'unsold', playerId: unsoldPlayerId });
+        await this.loadNextPlayer();
+      });
+    } finally {
+      this.showUnsoldAnimation = false;
+    }
   }
 
   async nextPlayer(): Promise<void> { await this.loadNextPlayer(); }

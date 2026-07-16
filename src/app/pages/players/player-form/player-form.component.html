@@ -30,7 +30,7 @@
                         <label>Photo <span class="text-danger">*</span></label>
                         <img *ngIf="form.value.photo" [src]="form.value.photo" width="120" class="rounded-circle mb-3">
 
-                        <input type="file" class="form-control" (change)="onPhotoChange($event)">
+                        <input type="file" accept="image/*" class="form-control" (change)="onPhotoChange($event)">
                         <div class="text-danger mt-1"
                             *ngIf="form.controls.photo.touched && form.controls.photo.invalid">
 
@@ -183,7 +183,7 @@
 
                         <label>Base Bid</label>
 
-                        <input type="number" class="form-control" formControlName="baseBid">
+                        <input type="number" class="form-control" formControlName="baseBid" readonly>
 
                     </div>
 

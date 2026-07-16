@@ -14,6 +14,22 @@
   margin-bottom: 18px;
 }
 
+.tab-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.active-tab {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .18);
+}
+
+.access-form {
+  max-width: 420px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #dbe3ef;
+}
+
 .page-header h2,
 .page-header p,
 .form-panel h3,
