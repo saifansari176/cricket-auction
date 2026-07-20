@@ -46,7 +46,7 @@
                         <label>First Name<span class="text-danger">*</span></label>
 
                         <input class="form-control" formControlName="firstName">
-                         <div class="text-danger mt-1"
+                        <div class="text-danger mt-1"
                             *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid">
 
                             <small *ngIf="form.controls.firstName.errors?.['required']">
@@ -58,10 +58,24 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+
+                        <label>Last Name<span class="text-danger">*</span></label>
+
+                        <input class="form-control" formControlName="lastName">
+                        <div class="text-danger mt-1"
+                            *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">
+                            <small *ngIf="form.controls.lastName.errors?.['required']">
+                                Last Name is required.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                         <label>Category</label>
                         <select class="form-select" formControlName="categoryId" (change)="onCategoryChange()">
                             <option value="">Regular Players (default base price)</option>
-                            <option *ngFor="let category of categories" [value]="category.id">{{category.name}} — {{category.basePrice}}</option>
+                            <option *ngFor="let category of categories" [value]="category.id">{{category.name}} —
+                                {{category.basePrice}}</option>
                         </select>
                     </div>
 
@@ -72,22 +86,11 @@
                         <input type="tel" maxlength="3" class="form-control" formControlName="jerseyNumber"
                             placeholder="Enter jersey number" (keypress)="allowOnlyNumbers($event)">
 
-                        <div class="text-danger mt-1" *ngIf="form.controls.jerseyNumber.touched && form.controls.jerseyNumber.invalid">
+                        <div class="text-danger mt-1"
+                            *ngIf="form.controls.jerseyNumber.touched && form.controls.jerseyNumber.invalid">
                             <small>Jersey number must contain up to 3 digits.</small>
                         </div>
 
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                    
-                        <label>Last Name<span class="text-danger">*</span></label>
-                    
-                        <input class="form-control" formControlName="lastName">
-                        <div class="text-danger mt-1" *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">
-                            <small *ngIf="form.controls.lastName.errors?.['required']">
-                                Last Name is required.
-                            </small>
-                        </div>
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -107,7 +110,8 @@
                             <option>Wicket Keeper</option>
 
                         </select>
-                         <div class="text-danger mt-1" *ngIf="form.controls.playerType.touched && form.controls.playerType.invalid">
+                        <div class="text-danger mt-1"
+                            *ngIf="form.controls.playerType.touched && form.controls.playerType.invalid">
                             <small *ngIf="form.controls.playerType.errors?.['required']">
                                 Player Type is required.
                             </small>
@@ -159,7 +163,8 @@
                             <option>4XL</option>
 
                         </select>
- <div class="text-danger mt-1" *ngIf="form.controls.tshirtSize.touched && form.controls.tshirtSize.invalid">
+                        <div class="text-danger mt-1"
+                            *ngIf="form.controls.tshirtSize.touched && form.controls.tshirtSize.invalid">
                             <small *ngIf="form.controls.tshirtSize.errors?.['required']">
                                 T-Shirt Size is required.
                             </small>
@@ -193,7 +198,7 @@
                             <option>44</option>
 
                             <option>46</option>
-                            
+
                             <option>48</option>
 
                         </select>
