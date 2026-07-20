@@ -166,6 +166,8 @@
   text-align: center;
 }
 
+.mobile-auction-list { display: none; }
+
 @media (max-width: 991px) {
   .settings-header,
   .logo-row,
@@ -177,6 +179,18 @@
   .form-grid {
     display: block;
   }
+
+  .desktop-auction-table { display: none; }
+  .mobile-auction-list { display: grid; gap: 10px; }
+  .auction-accordion { border: 1px solid #dbe3ef; border-radius: 10px; overflow: hidden; }
+  .auction-accordion summary { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; list-style: none; }
+  .auction-accordion summary::-webkit-details-marker { display: none; }
+  .auction-accordion summary::after { content: '⏷'; margin-left: auto; font-size: 20px; color: #475569; transition: transform .2s ease; }
+  .auction-accordion[open] summary::after { transform: rotate(180deg); }
+  .auction-accordion summary img, .auction-accordion .logo-placeholder { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: #f1f5f9; display: grid; place-items: center; font-size: 10px; }
+  .auction-accordion summary small { display: block; color: #64748b; }
+  .auction-details { border-top: 1px solid #e2e8f0; padding: 12px; display: grid; gap: 8px; }
+  .auction-details > span { display: flex; justify-content: space-between; color: #64748b; }
 
   .form-grid > div {
     margin-bottom: 14px;

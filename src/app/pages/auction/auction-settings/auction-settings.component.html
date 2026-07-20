@@ -1,13 +1,13 @@
 <div class="settings-page">
   <div class="settings-header">
     <div>
-      <h2>Auction Settings</h2>
-      <p *ngIf="isAdmin">Manage all registered auctions. Select one before opening auction pages.</p>
-      <p *ngIf="!isAdmin">Select one of your auctions, or register a new auction to continue.</p>
+      <h2>Auction Management</h2>
+      <p *ngIf="isAdmin">Manage all registered auctions and their settings.</p>
+      <p *ngIf="!isAdmin">Select one of your auctions, or create a new auction to continue.</p>
     </div>
 
     <button type="button" class="btn btn-primary" (click)="createNewAuction()">
-      Register New Auction
+      Create New Auction
     </button>
   </div>
 
@@ -43,7 +43,7 @@
 
   <section *ngIf="!showForm" class="auction-list-panel" style="width: 100%;">
     <div class="panel-title">
-      <h3>Registered Auctions</h3>
+      <h3>Registered Auction List</h3>
       <span>{{auctions.length}} Saved</span>
     </div>
 
@@ -53,7 +53,11 @@
 
     <div *ngIf="loading" class="empty-state">Loading auctions...</div>
 
-    <div *ngIf="!loading && auctions.length > 0" class="table-responsive">
+    <div *ngIf="!loading && auctions.length > 0" class="mb-3">
+      <input type="search" class="form-control" [(ngModel)]="auctionFilter" placeholder="Search auctions">
+    </div>
+
+    <div *ngIf="!loading && auctions.length > 0" class="table-responsive desktop-auction-table">
       <table class="table table-bordered table-hover align-middle">
         <thead class="table-dark">
           <tr>
@@ -70,7 +74,7 @@
         </thead>
 
         <tbody>
-          <tr *ngFor="let auction of auctions" [class.table-primary]="selectedAuctionId === auction.id">
+          <tr *ngFor="let auction of filteredAuctions" [class.table-primary]="selectedAuctionId === auction.id">
             <td>
               <img
                 *ngIf="auction.logo"
@@ -111,6 +115,15 @@
           </tr>
         </tbody>
       </table>
+    </div>
+    <div *ngIf="!loading && auctions.length > 0" class="mobile-auction-list">
+      <details *ngFor="let auction of filteredAuctions" [open]="selectedAuctionId === auction.id" class="auction-accordion">
+        <summary><img *ngIf="auction.logo" [src]="auction.logo" alt=""><span *ngIf="!auction.logo" class="logo-placeholder">Logo</span><span><strong>{{auction.auctionName}}</strong><small>{{auction.auctionDate | date:'mediumDate'}}</small></span></summary>
+        <div class="auction-details"><span>Points / Team <strong>{{auction.pointsPerTeam}}</strong></span><span>Players / Team <strong>{{auction.playersPerTeam}}</strong></span><span>Base Price <strong>{{auction.basePlayerPrice || auction.minimumBid}}</strong></span><div class="action-cell"><button type="button" class="btn btn-success btn-sm" *ngIf="selectedAuctionId !== auction.id" (click)="activateAuction(auction)">Select</button><button type="button" class="btn btn-warning btn-sm" (click)="editAuction(auction)">Edit</button><button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">Delete</button></div></div>
+      </details>
+    </div>
+    <div *ngIf="!loading && auctions.length > 0 && filteredAuctions.length === 0" class="empty-state">
+      No auctions matched your filter.
     </div>
     <div *ngIf="!loading && auctions.length === 0" class="empty-state">
       No auction registered yet. Click Register New Auction to create one.

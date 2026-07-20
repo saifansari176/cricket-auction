@@ -10,7 +10,13 @@ export interface Player {
 
   mobile: string;
 
+  jerseyNumber: string;
+
   playerType: string;
+
+  categoryId?: string;
+
+  categoryName?: string;
 
   tshirtSize: string;
 

@@ -26,6 +26,10 @@
 
     </div>
 
+    <div class="mb-3">
+        <input type="search" class="form-control" [(ngModel)]="teamFilter" placeholder="Search teams">
+    </div>
+
     <div class="table-responsive">
     <table class="table table-bordered table-hover">
 
@@ -55,7 +59,7 @@
 
         <tbody>
 
-            <tr *ngFor="let team of teams; let i=index">
+            <tr *ngFor="let team of filteredTeams; let i=index">
 
                 <td>{{i+1}}</td>
 

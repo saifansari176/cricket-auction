@@ -96,6 +96,14 @@ export class ReportsComponent implements OnInit {
     return bid.mobile || this.players.find((player) => player.id === bid.playerId)?.mobile || '-';
   }
 
+  getBidPlayerJerseyNumber(bid: AuctionBid): string {
+    return bid.jerseyNumber || this.players.find((player) => player.id === bid.playerId)?.jerseyNumber || '-';
+  }
+
+  getBidPlayerPhoto(bid: AuctionBid): string {
+    return this.players.find((player) => player.id === bid.playerId)?.photo || '';
+  }
+
   getBidPlayerTshirtSize(bid: AuctionBid): string {
     return bid.tshirtSize || this.players.find((player) => player.id === bid.playerId)?.tshirtSize || '-';
   }
@@ -117,6 +125,7 @@ export class ReportsComponent implements OnInit {
       'Player Name': player.playerName,
       'Type': this.getBidPlayerType(player),
       'Mobile Number': this.getBidPlayerMobile(player),
+      'Jersey Number': this.getBidPlayerJerseyNumber(player),
       'T-Shirt Size': this.getBidPlayerTshirtSize(player),
       'Sold Amount': player.bidAmount
     }));

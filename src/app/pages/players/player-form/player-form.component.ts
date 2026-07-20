@@ -18,6 +18,8 @@ import { StorageService } from '../../../core/services/storage.service';
 import { Player } from '../../../core/models/player';
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { MessageService } from '../../../core/services/message.service';
+import { PlayerCategory } from '../../../core/models/player-category';
+import { PlayerCategoryService } from '../../../core/services/player-category.service';
 
 @Component({
   selector: 'app-player-form',
@@ -40,6 +42,7 @@ export class PlayerFormComponent {
   auctionService = inject(AuctionService);
   storageService = inject(StorageService);
   message = inject(MessageService);
+  categoryService = inject(PlayerCategoryService);
 
   auction: AuctionSettings | null = null;
 
@@ -48,6 +51,7 @@ export class PlayerFormComponent {
   playerId = '';
 
   existingPlayer: Player | null = null;
+  categories: PlayerCategory[] = [];
 
   form = this.fb.group({
 
@@ -63,7 +67,11 @@ export class PlayerFormComponent {
       ]
     ],
 
+    jerseyNumber: ['', [Validators.pattern(/^[0-9]{1,3}$/)]],
+
     playerType: ['', Validators.required],
+
+    categoryId: [''],
 
     tshirtSize: ['', Validators.required],
 
@@ -84,6 +92,7 @@ export class PlayerFormComponent {
   async ngOnInit() {
 
     this.auction = await this.auctionService.get();
+    this.categories = await this.categoryService.getCategories(this.auction?.activeAuctionId || this.auction?.id);
     this.form.patchValue({ baseBid: this.getAuctionBaseBid() });
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -116,13 +125,17 @@ export class PlayerFormComponent {
 
       mobile: player.mobile,
 
+      jerseyNumber: player.jerseyNumber || '',
+
       playerType: player.playerType,
+
+      categoryId: player.categoryId || '',
 
       tshirtSize: player.tshirtSize,
 
       trouserSize: player.trouserSize,
 
-      baseBid: this.getAuctionBaseBid(),
+      baseBid: player.baseBid || this.getAuctionBaseBid(),
 
       note: player.note,
 
@@ -156,13 +169,19 @@ export class PlayerFormComponent {
 
       mobile: this.form.value.mobile!,
 
+      jerseyNumber: this.form.value.jerseyNumber || '',
+
       playerType: this.form.value.playerType!,
+
+      categoryId: this.form.value.categoryId || '',
+
+      categoryName: this.getSelectedCategory()?.name || '',
 
       tshirtSize: this.form.value.tshirtSize!,
 
       trouserSize: this.form.value.trouserSize!,
 
-      baseBid: this.getAuctionBaseBid(),
+      baseBid: Number(this.getSelectedCategory()?.basePrice ?? this.getAuctionBaseBid()),
 
       note: this.form.value.note || '',
 
@@ -194,7 +213,7 @@ export class PlayerFormComponent {
     else {
 
       if (!await this.playerService.canAddPlayer()) {
-        this.message.warning('Player limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789.');
+        this.message.warning('Player limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
         return;
       }
 
@@ -261,6 +280,15 @@ export class PlayerFormComponent {
 
     }
 
+  }
+
+  onCategoryChange(): void {
+    const category = this.getSelectedCategory();
+    this.form.patchValue({ baseBid: category ? category.basePrice : this.getAuctionBaseBid() });
+  }
+
+  private getSelectedCategory(): PlayerCategory | undefined {
+    return this.categories.find((category) => category.id === this.form.value.categoryId);
   }
 
   private getAuctionBaseBid(): number {

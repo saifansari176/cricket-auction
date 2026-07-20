@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import * as XLSX from 'xlsx';
 
@@ -13,7 +14,8 @@ import { MessageService } from '../../../core/services/message.service';
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    FormsModule
   ],
   templateUrl: './team-list.component.html',
   styleUrl: './team-list.component.scss'
@@ -23,6 +25,7 @@ export class TeamListComponent {
   teams: Team[] = [];
 
   loading = false;
+  teamFilter = '';
 
   constructor(
     private teamService: TeamService,
@@ -47,6 +50,15 @@ export class TeamListComponent {
 
     this.loading = false;
 
+  }
+
+  get filteredTeams(): Team[] {
+    const filter = this.teamFilter.trim().toLowerCase();
+    if (!filter) return this.teams;
+
+    return this.teams.filter((team) => [
+      team.teamName, team.ownerName, team.totalPoints, team.remainingPoints, team.playersBought
+    ].some((value) => String(value ?? '').toLowerCase().includes(filter)));
   }
 
   // ==============================

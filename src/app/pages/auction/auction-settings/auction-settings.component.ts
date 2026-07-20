@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
   FormBuilder,
+  FormsModule,
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
@@ -19,6 +20,7 @@ import { AppUser } from '../../../core/models/app-user';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     ReactiveFormsModule
   ],
   templateUrl: './auction-settings.component.html',
@@ -43,6 +45,7 @@ export class AuctionSettingsComponent {
   logoPreview = '';
 
   auctions: AuctionSettings[] = [];
+  auctionFilter = '';
 
   activeAuction: AuctionSettings | null = null;
   currentUser: AppUser | null = null;
@@ -76,6 +79,7 @@ export class AuctionSettingsComponent {
 
   });
 
+
   // =====================================
 
   async ngOnInit() {
@@ -94,7 +98,7 @@ export class AuctionSettingsComponent {
 
         const auctionId = data.activeAuctionId || '';
         this.activeAuction = this.auctions.find((auction) => auction.id === auctionId) || data;
-        this.selectedAuctionId = data.activeAuctionId || this.activeAuction.id || '';
+      this.selectedAuctionId = data.activeAuctionId || this.activeAuction.id || '';
 
       }
 
@@ -121,6 +125,17 @@ export class AuctionSettingsComponent {
 
     this.auctions = await this.auctionService.getAuctions();
 
+  }
+
+
+  get filteredAuctions(): AuctionSettings[] {
+    const filter = this.auctionFilter.trim().toLowerCase();
+    if (!filter) return this.auctions;
+
+    return this.auctions.filter((auction) => [
+      auction.auctionName, auction.auctionDate, auction.createdByEmail,
+      auction.pointsPerTeam, auction.playersPerTeam, auction.basePlayerPrice, auction.minimumBid
+    ].some((value) => String(value ?? '').toLowerCase().includes(filter)));
   }
 
   // =====================================
@@ -212,7 +227,7 @@ export class AuctionSettingsComponent {
 
     this.activeAuction = null;
 
-    this.selectedAuctionId = '';
+      this.selectedAuctionId = '';
 
     this.logoPreview = '';
 

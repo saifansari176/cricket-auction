@@ -82,6 +82,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'auction/categories',
+    canActivate: [authGuard, auctionSelectionGuard],
+    loadComponent: () =>
+      import('./pages/auction/player-categories/player-categories.component').then((m) => m.PlayerCategoriesComponent),
+  },
+
+  {
     path: 'auction',
     canActivate: [authGuard, auctionSelectionGuard],
     loadComponent: () =>

@@ -10,6 +10,8 @@ import { Team } from '../../core/models/team';
 import { AuctionService } from '../../core/services/auction.service';
 import { PlayerService } from '../../core/services/player.service';
 import { TeamService } from '../../core/services/team.service';
+import { PlayerCategoryService } from '../../core/services/player-category.service';
+import { PlayerCategory } from '../../core/models/player-category';
 
 type DashboardList = 'players' | 'teams' | 'available' | 'sold' | 'unsold';
 
@@ -29,12 +31,16 @@ export class DashboardComponent implements OnInit {
   loading = false;
   tableFilter = '';
   playerTypeFilter = '';
+  playerStatusFilter = '';
+  categoryFilter = '';
+  categories: PlayerCategory[] = [];
 
   constructor(
     private playerService: PlayerService,
     private teamService: TeamService,
     private auctionService: AuctionService,
-    private router: Router
+    private router: Router,
+    private categoryService: PlayerCategoryService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -52,6 +58,7 @@ export class DashboardComponent implements OnInit {
       this.soldPlayers = soldPlayers;
       this.availablePlayers = players.filter((player) => this.isPlayerStatus(player, 'Available'));
       this.unsoldPlayers = players.filter((player) => player.status === 'Unsold');
+      this.categories = await this.categoryService.getCategories();
     } finally {
       this.loading = false;
     }
@@ -61,6 +68,8 @@ export class DashboardComponent implements OnInit {
     this.activeList = list;
     this.tableFilter = '';
     this.playerTypeFilter = '';
+    this.playerStatusFilter = '';
+    this.categoryFilter = '';
   }
 
   get activeTitle(): string {
@@ -77,7 +86,7 @@ export class DashboardComponent implements OnInit {
 
   get filteredPlayers(): Player[] {
     const filter = this.normalizedFilter;
-    const players = this.filterPlayersByType(this.players);
+    const players = this.filterPlayers(this.players);
     if (!filter) return players;
 
     return players.filter((player) =>
@@ -123,7 +132,9 @@ export class DashboardComponent implements OnInit {
 
   get filteredAvailablePlayers(): Player[] {
     const filter = this.normalizedFilter;
-    const players = this.filterPlayersByType(this.availablePlayers);
+    const players = this.filterPlayers(this.availablePlayers).filter((player) =>
+      !this.categoryFilter || (this.categoryFilter === '__regular__' ? !player.categoryId : player.categoryId === this.categoryFilter)
+    );
     if (!filter) return players;
 
     return players.filter((player) =>
@@ -167,12 +178,27 @@ export class DashboardComponent implements OnInit {
     return Array.from(new Set(this.players.map((player) => player.playerType).filter(Boolean))).sort();
   }
 
+  get playerStatuses(): string[] {
+    return Array.from(new Set(this.players.map((player) => player.status).filter(Boolean))).sort();
+  }
+
   get showPlayerTypeFilter(): boolean {
     return this.activeList !== 'teams';
   }
 
+  get mobilePlayerRows(): any[] {
+    if (this.activeList === 'players') return this.filteredPlayers;
+    if (this.activeList === 'available') return this.filteredAvailablePlayers;
+    if (this.activeList === 'unsold') return this.filteredUnsoldPlayers;
+    return this.filteredSoldPlayers;
+  }
+
   getBidPlayerType(bid: AuctionBid): string {
     return this.players.find((player) => player.id === bid.playerId)?.playerType || '-';
+  }
+
+  getBidPlayerPhoto(bid: AuctionBid): string {
+    return this.players.find((player) => player.id === bid.playerId)?.photo || '';
   }
 
   private get normalizedFilter(): string {
@@ -198,6 +224,11 @@ export class DashboardComponent implements OnInit {
     return players.filter((player) => String(player.playerType || '').toLowerCase() === type);
   }
 
+  private filterPlayers(players: Player[]): Player[] {
+    const status = this.playerStatusFilter.trim().toLowerCase();
+    return this.filterPlayersByType(players).filter((player) => !status || player.status.toLowerCase() === status);
+  }
+
   private matchesPlayerType(playerId: string): boolean {
     const type = this.normalizedPlayerTypeFilter;
     if (!type) return true;
@@ -209,6 +240,7 @@ export class DashboardComponent implements OnInit {
     if (!player.id) return;
     
     const playerName = `${player.firstName} ${player.lastName}`;
+    this.auctionService.setSelectedCategory(player.categoryId || '');
     this.auctionService.setSelectedPlayer(player.id, playerName);
     this.router.navigate(['/auction']);
   }

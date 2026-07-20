@@ -73,13 +73,17 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   }
 
   async loadNextPlayer(): Promise<void> {
-    const availablePlayers = await this.playerService.getAvailablePlayers();
+    const categoryId = this.auctionService.selectedCategoryId$.value;
+    const availablePlayers = (await this.playerService.getAvailablePlayers())
+      .filter((player) => categoryId ? player.categoryId === categoryId : !player.categoryId);
     if (availablePlayers.length > 0) {
       this.setCurrentPlayer(availablePlayers[0]);
       return;
     }
 
-    const unsoldPlayers = (await this.playerService.getPlayers()).filter((player) => player.status === 'Unsold');
+    const unsoldPlayers = (await this.playerService.getPlayers()).filter((player) =>
+      player.status === 'Unsold' && (categoryId ? player.categoryId === categoryId : !player.categoryId)
+    );
     const shouldBringBackUnsold = unsoldPlayers.length > 0
       && await this.message.confirm(
         `All available players are sold.\n\nDo you want to bring back ${unsoldPlayers.length} unsold players?`,
@@ -206,7 +210,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
 
     try {
       await this.loadingService.withoutLoader(async () => {
-        await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerName: this.playerName, teamId: this.highestTeam!.id!, teamName: this.highestTeam!.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer!.mobile, tshirtSize: this.currentPlayer!.tshirtSize, sold: true, soldDate: new Date().toISOString() });
+        await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerName: this.playerName, teamId: this.highestTeam!.id!, teamName: this.highestTeam!.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer!.mobile, jerseyNumber: this.currentPlayer!.jerseyNumber, tshirtSize: this.currentPlayer!.tshirtSize, sold: true, soldDate: new Date().toISOString() });
         await this.playerService.markSold(this.currentPlayer!.id!, this.highestTeam!.id!, this.currentBid);
         await this.teamService.updateTeamPoints(this.highestTeam!.id!, this.currentBid);
         this.updateSoldTeamOnScreen(this.highestTeam!.id!, this.currentBid);

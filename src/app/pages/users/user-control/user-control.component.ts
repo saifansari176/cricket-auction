@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { AppUser, UserRole } from '../../../core/models/app-user';
 import { AuthService } from '../../../core/services/auth.service';
@@ -11,7 +11,7 @@ import { AuctionSettings } from '../../../core/models/auction-settings';
 @Component({
   selector: 'app-user-control',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './user-control.component.html',
   styleUrl: './user-control.component.scss'
 })
@@ -27,6 +27,8 @@ export class UserControlComponent implements OnInit {
   activeTab: 'users' | 'auction-access' = 'users';
   auctions: AuctionSettings[] = [];
   editingAuction: AuctionSettings | null = null;
+  userFilter = '';
+  auctionFilter = '';
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -136,6 +138,20 @@ export class UserControlComponent implements OnInit {
 
   async loadAuctions(): Promise<void> {
     this.auctions = await this.auctionService.getAuctions();
+  }
+
+  get filteredUsers(): AppUser[] {
+    const filter = this.userFilter.trim().toLowerCase();
+    if (!filter) return this.users;
+    return this.users.filter((user) => [user.displayName, user.email, user.role, user.active ? 'active' : 'inactive']
+      .some((value) => String(value ?? '').toLowerCase().includes(filter)));
+  }
+
+  get filteredAuctions(): AuctionSettings[] {
+    const filter = this.auctionFilter.trim().toLowerCase();
+    if (!filter) return this.auctions;
+    return this.auctions.filter((auction) => [auction.auctionName, auction.createdByEmail, auction.createdBy]
+      .some((value) => String(value ?? '').toLowerCase().includes(filter)));
   }
 
   editAuctionAccess(auction: AuctionSettings): void {

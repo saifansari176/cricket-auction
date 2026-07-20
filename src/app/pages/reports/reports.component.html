@@ -43,11 +43,12 @@
           placeholder="Search purchased players">
       </div>
 
-      <div *ngIf="selectedTeamPlayers.length > 0" class="table-responsive">
+      <div *ngIf="selectedTeamPlayers.length > 0" class="table-responsive desktop-table">
       <table class="table table-bordered table-hover">
         <thead class="table-dark">
           <tr>
             <th>#</th>
+            <th>Photo</th>
             <th>Player Name</th>
             <th>
               <div class="type-header">
@@ -59,6 +60,7 @@
               </div>
             </th>
             <th>Mobile Number</th>
+            <th>Jersey No.</th>
             <th>T-Shirt Size</th>
             <th>Sold Amount</th>
             <!-- <th>Sold Date</th> -->
@@ -68,15 +70,33 @@
           <tr *ngFor="let player of filteredSelectedTeamPlayers; let i = index">
             <!-- {{player | json}} -->
             <td>{{i + 1}}</td>
+            <td><img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" class="player-photo" alt="Player photo"><span *ngIf="!getBidPlayerPhoto(player)">-</span></td>
             <td>{{player.playerName}}</td>
             <td>{{getBidPlayerType(player)}}</td>
             <td>{{getBidPlayerMobile(player)}}</td>
+            <td>{{getBidPlayerJerseyNumber(player)}}</td>
             <td>{{getBidPlayerTshirtSize(player)}}</td>
             <td>{{player.bidAmount}}</td>
             <!-- <td>{{player.soldDate | date:'medium'}}</td> -->
           </tr>
         </tbody>
       </table>
+      </div>
+
+      <div *ngIf="selectedTeamPlayers.length > 0" class="mobile-player-list">
+        <details *ngFor="let player of filteredSelectedTeamPlayers" class="player-accordion">
+          <summary>
+            <img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" alt="Player photo">
+            <span *ngIf="!getBidPlayerPhoto(player)" class="photo-placeholder">No Image</span>
+            <span><strong>{{player.playerName}}</strong><small>{{getBidPlayerType(player)}}</small></span>
+          </summary>
+          <div class="accordion-details">
+            <span>Mobile <strong>{{getBidPlayerMobile(player)}}</strong></span>
+            <span>Jersey No. <strong>{{getBidPlayerJerseyNumber(player)}}</strong></span>
+            <span>T-Shirt Size <strong>{{getBidPlayerTshirtSize(player)}}</strong></span>
+            <span>Sold Amount <strong>{{player.bidAmount}}</strong></span>
+          </div>
+        </details>
       </div>
 
       <div *ngIf="selectedTeam && selectedTeamPlayers.length === 0" class="empty-state">

@@ -4,19 +4,23 @@ import { RouterLink, RouterModule } from '@angular/router';
 import { Player } from '../../../core/models/player';
 import * as XLSX from 'xlsx';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MessageService } from '../../../core/services/message.service';
 import { AuctionService } from '../../../core/services/auction.service';
 
 @Component({
   selector: 'app-player-list',
   standalone: true,
-  imports: [RouterLink, CommonModule, RouterModule],
+  imports: [RouterLink, CommonModule, RouterModule, FormsModule],
   templateUrl: './player-list.component.html',
   styleUrl: './player-list.component.scss'
 })
 export class PlayerListComponent {
   players: Player[] = [];
   brokenPhotoUrls = new Set<string>();
+  playerFilter = '';
+  playerTypeFilter = '';
+  playerStatusFilter = '';
 
   constructor(
     private playerService: PlayerService,
@@ -47,11 +51,36 @@ export class PlayerListComponent {
     await this.loadPlayers();
   }
 
+  get playerTypes(): string[] {
+    return Array.from(new Set(this.players.map((player) => player.playerType).filter(Boolean))).sort();
+  }
+
+  get playerStatuses(): string[] {
+    return Array.from(new Set(this.players.map((player) => player.status).filter(Boolean))).sort();
+  }
+
+  get filteredPlayers(): Player[] {
+    const search = this.playerFilter.trim().toLowerCase();
+    const type = this.playerTypeFilter.trim().toLowerCase();
+    const status = this.playerStatusFilter.trim().toLowerCase();
+
+    return this.players.filter((player) => {
+      const matchesType = !type || player.playerType.toLowerCase() === type;
+      const matchesStatus = !status || player.status.toLowerCase() === status;
+      const matchesSearch = !search || [
+        player.firstName, player.lastName, player.mobile, player.jerseyNumber,
+        player.playerType, player.status, player.baseBid
+      ].some((value) => String(value ?? '').toLowerCase().includes(search));
+      return matchesType && matchesStatus && matchesSearch;
+    });
+  }
+
   exportExcel() {
     const data = this.players.map(player => ({
       'First Name': player.firstName,
       'Last Name': player.lastName,
       'Mobile': player.mobile,
+      'Jersey Number': player.jerseyNumber,
       'Player Type': player.playerType,
       'T-Shirt Size': player.tshirtSize,
       'Trouser Size': player.trouserSize,
@@ -129,6 +158,7 @@ export class PlayerListComponent {
           firstName: this.getCellValue(row, 'First Name'),
           lastName: this.getCellValue(row, 'Last Name'),
           mobile,
+          jerseyNumber: this.getCellValue(row, 'Jersey Number'),
           playerType: this.getCellValue(row, 'Player Type'),
           tshirtSize: this.getCellValue(row, 'T-Shirt Size'),
           trouserSize: this.getCellValue(row, 'Trouser Size'),

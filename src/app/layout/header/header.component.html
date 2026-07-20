@@ -38,8 +38,9 @@
         <div class="nav-group">
             <button type="button">Auction <span>▾</span></button>
             <div class="nav-dropdown">
-                <a routerLink="/auction" routerLinkActive="active">Live Auction</a>
-                <a routerLink="/auction-settings" routerLinkActive="active">Auction Settings</a>
+                <a routerLink="/auction" routerLinkActive="active" (click)="startNormalAuction()">Live Auction</a>
+                <a routerLink="/auction/categories" routerLinkActive="active">Categories</a>
+                <a routerLink="/auction-settings" routerLinkActive="active">Auction Management</a>
                 <a routerLink="/reports" routerLinkActive="active">Reports</a>
             </div>
         </div>
@@ -120,7 +121,9 @@
         <span>{{openSection === 'auction' ? '−' : '+'}}</span>
     </button>
     <div class="accordion-body" *ngIf="openSection === 'auction'">
-        <a routerLink="/auction" routerLinkActive="active" (click)="closeMenu()">Live Auction</a>
+        <a routerLink="/auction" routerLinkActive="active" (click)="startNormalAuction(); closeMenu()">Live Auction</a>
+        <a routerLink="/auction/categories" routerLinkActive="active" (click)="closeMenu()">Categories</a>
+        <a routerLink="/auction-settings" routerLinkActive="active" (click)="closeMenu()">Auction Management</a>
         <a routerLink="/reports" routerLinkActive="active" (click)="closeMenu()">Reports</a>
         <a routerLink="/settings" routerLinkActive="active" (click)="closeMenu()">Settings</a>
     </div>

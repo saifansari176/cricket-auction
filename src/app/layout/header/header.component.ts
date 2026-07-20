@@ -50,6 +50,11 @@ export class HeaderComponent implements OnInit {
     await this.router.navigateByUrl('/login');
   }
 
+  startNormalAuction(): void {
+    this.auctionService.clearSelectedPlayer();
+    this.auctionService.setSelectedCategory('');
+  }
+
   toggleMenu(): void {
     this.menuOpen = !this.menuOpen;
   }

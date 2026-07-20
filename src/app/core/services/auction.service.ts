@@ -21,6 +21,7 @@ export class AuctionService {
 
   activeAuction$ = new BehaviorSubject<AuctionSettings | null>(null);
   selectedPlayer$ = new BehaviorSubject<{id: string, name: string} | null>(null);
+  selectedCategoryId$ = new BehaviorSubject<string>('');
 
   async save(settings: AuctionSettings, auctionId?: string): Promise<string> {
 
@@ -274,6 +275,7 @@ export class AuctionService {
           ...bid,
           playerName,
           mobile: player.mobile,
+          jerseyNumber: player.jerseyNumber,
           tshirtSize: player.tshirtSize
         }))
     );
@@ -316,6 +318,10 @@ export class AuctionService {
 
   setSelectedPlayer(playerId: string, playerName: string): void {
     this.selectedPlayer$.next({ id: playerId, name: playerName });
+  }
+
+  setSelectedCategory(categoryId: string): void {
+    this.selectedCategoryId$.next(categoryId);
   }
 
   clearSelectedPlayer(): void {

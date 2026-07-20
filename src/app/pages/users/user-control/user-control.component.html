@@ -55,6 +55,8 @@
     <section class="list-panel">
       <h3>Registered Users</h3>
 
+      <div class="mb-3"><input type="search" class="form-control" [(ngModel)]="userFilter" placeholder="Search users"></div>
+
       <div class="table-responsive">
       <table class="table table-bordered table-hover align-middle">
         <thead class="table-dark">
@@ -67,7 +69,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let user of users">
+          <tr *ngFor="let user of filteredUsers">
             <td>{{user.displayName}}</td>
             <td>{{user.email}}</td>
             <td>{{user.role}}</td>
@@ -87,13 +89,15 @@
     <h3>User Auction Access</h3>
     <p class="hint">Select an auction to set the number of teams and players allowed for that auction.</p>
 
+    <div class="mb-3"><input type="search" class="form-control" [(ngModel)]="auctionFilter" placeholder="Search auctions"></div>
+
     <div class="table-responsive">
       <table class="table table-bordered table-hover align-middle">
         <thead class="table-dark">
           <tr><th>Auction</th><th>Owner</th><th>Team Limit</th><th>Player Limit</th><th>Action</th></tr>
         </thead>
         <tbody>
-          <tr *ngFor="let auction of auctions">
+          <tr *ngFor="let auction of filteredAuctions">
             <td>{{auction.auctionName}}</td>
             <td>{{auction.createdByEmail || auction.createdBy}}</td>
             <td>{{auction.teamLimit ?? 2}}</td>

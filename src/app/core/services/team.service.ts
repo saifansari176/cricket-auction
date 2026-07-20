@@ -76,7 +76,7 @@ await this.firebase.add(
     const auction = selectedAuction?.activeAuctionId || selectedAuction?.id
       ? await this.auctionService.getAuctionById(selectedAuction.activeAuctionId || selectedAuction.id!)
       : selectedAuction;
-    const teamLimit = Number(auction?.teamLimit ?? 2);
+    const teamLimit = Number(auction?.teamLimit ?? 8);
     return (await this.getTeams()).length < teamLimit;
   }
 

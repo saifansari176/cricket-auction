@@ -218,7 +218,7 @@ if (!settings) {
     else {
 
       if (!await this.teamService.canAddTeam()) {
-        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789.');
+        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
         return;
       }
 

@@ -37,8 +37,12 @@
 
 </div>
 
-<div class="table-responsive">
-<table class="table table-striped table-bordered">
+<div class="player-filters">
+    <input type="search" class="form-control" [(ngModel)]="playerFilter" placeholder="Search players">
+</div>
+
+<div class="table-responsive desktop-table">
+<table class="table table-striped table-bordered align-middle">
 
     <thead class="table-dark">
 
@@ -52,13 +56,33 @@
     
     <th>Last Name</th>
     
-    <th>Player Type</th>
+    <th>
+      <div class="type-header">
+        <span>Player Type</span>
+        <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+          <option value="">All</option>
+          <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+        </select>
+      </div>
+    </th>
     
+    <th>Category</th>
+
     <th>Base Bid</th>
 
     <th>Mobile</th>
 
-    <th>Status</th>
+    <th>Jersey No.</th>
+
+    <th>
+      <div class="type-header">
+        <span>Status</span>
+        <select [(ngModel)]="playerStatusFilter" aria-label="Filter player status">
+          <option value="">All</option>
+          <option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option>
+        </select>
+      </div>
+    </th>
 
     <th>Action</th>
 
@@ -67,7 +91,7 @@
     </thead>
 
     <tbody>
-    <tr *ngFor="let player of players; let i=index">
+    <tr *ngFor="let player of filteredPlayers; let i=index">
 
     <td>{{i+1}}</td>
     <td>
@@ -94,9 +118,13 @@
     
     <td>{{player.playerType}}</td>
 
+    <td>{{player.categoryName || 'Regular'}}</td>
+
     <td>{{player.baseBid}}</td>
 
     <td>{{player.mobile}}</td>
+
+    <td>{{player.jerseyNumber || '-'}}</td>
 
     <td>{{player.status}}</td>
 
@@ -125,4 +153,26 @@
     </tbody>
 
 </table>
+</div>
+
+<div class="mobile-player-list">
+    <details *ngFor="let player of filteredPlayers; let i = index" class="player-accordion">
+        <summary>
+            <img *ngIf="player.photo && !isPhotoBroken(player.photo)" [src]="player.photo" (error)="markPhotoBroken(player.photo)" alt="Player photo">
+            <span *ngIf="!player.photo || isPhotoBroken(player.photo)" class="photo-placeholder">No Image</span>
+            <span><strong>{{player.firstName}} {{player.lastName}}</strong><small>{{player.playerType}}</small></span>
+        </summary>
+        <div class="accordion-details">
+            <span>Mobile <strong>{{player.mobile}}</strong></span>
+            <span>Jersey No. <strong>{{player.jerseyNumber || '-'}}</strong></span>
+            <span>Category <strong>{{player.categoryName || 'Regular'}}</strong></span>
+            <span>Base Bid <strong>{{player.baseBid}}</strong></span>
+            <span>Status <strong>{{player.status}}</strong></span>
+            <div class="accordion-actions">
+                <a [routerLink]="['/players/edit', player.id]" class="btn btn-warning btn-sm">Edit</a>
+                <button class="btn btn-danger btn-sm" (click)="deletePlayer(player.id!)">Delete</button>
+            </div>
+        </div>
+    </details>
+    <div *ngIf="filteredPlayers.length === 0" class="text-muted text-center p-3">No players found.</div>
 </div>

@@ -32,7 +32,7 @@ export class PlayerService {
 
     await Promise.all(
       players
-        .filter((player) => player.auctionId === auctionId && player.id)
+        .filter((player) => player.auctionId === auctionId && !player.categoryId && player.id)
         .map((player) => this.firebase.update(this.collection, player.id!, {
           ...player,
           baseBid: price

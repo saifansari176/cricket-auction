@@ -58,6 +58,27 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
+                        <label>Category</label>
+                        <select class="form-select" formControlName="categoryId" (change)="onCategoryChange()">
+                            <option value="">Regular Players (default base price)</option>
+                            <option *ngFor="let category of categories" [value]="category.id">{{category.name}} — {{category.basePrice}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label>Jersey Number</label>
+
+                        <input type="tel" maxlength="3" class="form-control" formControlName="jerseyNumber"
+                            placeholder="Enter jersey number" (keypress)="allowOnlyNumbers($event)">
+
+                        <div class="text-danger mt-1" *ngIf="form.controls.jerseyNumber.touched && form.controls.jerseyNumber.invalid">
+                            <small>Jersey number must contain up to 3 digits.</small>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
                     
                         <label>Last Name<span class="text-danger">*</span></label>
                     

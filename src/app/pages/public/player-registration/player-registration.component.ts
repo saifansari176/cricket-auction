@@ -10,6 +10,8 @@ import { PlayerRegistrationLinkService } from '../../../core/services/player-reg
 import { PlayerService } from '../../../core/services/player.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { MessageService } from '../../../core/services/message.service';
+import { PlayerCategory } from '../../../core/models/player-category';
+import { PlayerCategoryService } from '../../../core/services/player-category.service';
 
 @Component({
   selector: 'app-player-registration',
@@ -26,6 +28,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
   private storageService = inject(StorageService);
   private message = inject(MessageService);
   private route = inject(ActivatedRoute);
+  private categoryService = inject(PlayerCategoryService);
 
   auction: AuctionSettings | null = null;
   registrationEnabled = false;
@@ -34,13 +37,16 @@ export class PlayerRegistrationComponent implements OnDestroy {
   submitted = false;
   photoPreview = '';
   uploadingPhoto = false;
+  categories: PlayerCategory[] = [];
   private localPreviewUrl = '';
 
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', Validators.required],
     mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+    jerseyNumber: ['', [Validators.pattern(/^[0-9]{1,3}$/)]],
     playerType: ['', Validators.required],
+    categoryId: [''],
     tshirtSize: ['', Validators.required],
     trouserSize: [''],
     note: [''],
@@ -60,6 +66,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
       ]);
 
       this.auction = auction;
+      this.categories = await this.categoryService.getCategories(auction?.activeAuctionId || auction?.id);
       this.registrationEnabled = registrationSettings.enabled;
     } finally {
       this.loading = false;
@@ -76,10 +83,13 @@ export class PlayerRegistrationComponent implements OnDestroy {
       firstName: this.form.value.firstName || '',
       lastName: this.form.value.lastName || '',
       mobile: this.form.value.mobile || '',
+      jerseyNumber: this.form.value.jerseyNumber || '',
       playerType: this.form.value.playerType || '',
+      categoryId: this.form.value.categoryId || '',
+      categoryName: this.getSelectedCategory()?.name || '',
       tshirtSize: this.form.value.tshirtSize || '',
       trouserSize: this.form.value.trouserSize || '',
-      baseBid: Number(this.auction?.basePlayerPrice ?? this.auction?.minimumBid ?? 0),
+      baseBid: Number(this.getSelectedCategory()?.basePrice ?? this.auction?.basePlayerPrice ?? this.auction?.minimumBid ?? 0),
       note: this.form.value.note || '',
       photo: this.form.value.photo || '',
       status: 'Available',
@@ -90,7 +100,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
 
     try {
       if (!await this.playerService.canAddPlayer(this.auction?.id || this.auction?.activeAuctionId)) {
-        this.message.warning('Player limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789.');
+        this.message.warning('Player limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
         return;
       }
 
@@ -157,5 +167,9 @@ export class PlayerRegistrationComponent implements OnDestroy {
     if (code < 48 || code > 57) {
       event.preventDefault();
     }
+  }
+
+  private getSelectedCategory(): PlayerCategory | undefined {
+    return this.categories.find((category) => category.id === this.form.value.categoryId);
   }
 }
