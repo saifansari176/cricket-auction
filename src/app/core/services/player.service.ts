@@ -14,11 +14,9 @@ export class PlayerService {
 
     const activeAuctionId = await this.auctionService.getActiveAuctionId();
 
-    const players = await this.firebase.getAll<Player>(this.collection);
-
     return activeAuctionId
-      ? players.filter((player) => player.auctionId === activeAuctionId)
-      : players;
+      ? this.firebase.getAll<Player>(this.auctionCollection(activeAuctionId))
+      : [];
 
   }
 
@@ -27,13 +25,13 @@ export class PlayerService {
       return;
     }
 
-    const players = await this.firebase.getAll<Player>(this.collection);
+    const players = await this.firebase.getAll<Player>(this.auctionCollection(auctionId));
     const price = Number(baseBid || 0);
 
     await Promise.all(
       players
-        .filter((player) => player.auctionId === auctionId && !player.categoryId && player.id)
-        .map((player) => this.firebase.update(this.collection, player.id!, {
+        .filter((player) => !player.categoryId && player.id)
+        .map((player) => this.firebase.update(this.auctionCollection(auctionId), player.id!, {
           ...player,
           baseBid: price
         }))
@@ -42,10 +40,8 @@ export class PlayerService {
 
  async getPlayerById(id: string): Promise<Player | null> {
 
-    return await this.firebase.getById<Player>(
-  this.collection,
-  id
-);
+    const auctionId = await this.auctionService.getActiveAuctionId();
+    return auctionId ? this.firebase.getById<Player>(this.auctionCollection(auctionId), id) : null;
 
   }
 
@@ -54,8 +50,7 @@ async savePlayer(player: Player): Promise<boolean> {
 
     player.auctionId = player.auctionId || activeAuctionId;
 
-    const players = (await this.firebase.getAll<Player>(this.collection))
-      .filter((existingPlayer) => existingPlayer.auctionId === player.auctionId);
+    const players = await this.firebase.getAll<Player>(this.auctionCollection(player.auctionId));
     const exists = players.some(
       x => x.mobile === player.mobile
     );
@@ -71,7 +66,7 @@ async savePlayer(player: Player): Promise<boolean> {
     const { id, ...playerData } = player;
 
 await this.firebase.add(
-  this.collection,
+  this.auctionCollection(player.auctionId),
   playerData
 );
 
@@ -88,18 +83,18 @@ await this.firebase.add(
     const auction = resolvedAuctionId
       ? await this.auctionService.getAuctionById(resolvedAuctionId)
       : selectedAuction;
-    const players = await this.firebase.getAll<Player>(this.collection);
+    const players = resolvedAuctionId
+      ? await this.firebase.getAll<Player>(this.auctionCollection(resolvedAuctionId))
+      : [];
     const playerLimit = Number(auction?.playerLimit ?? 10);
 
-    return players.filter((player) => player.auctionId === resolvedAuctionId).length < playerLimit;
+    return players.length < playerLimit;
   }
 
 async deletePlayer(id: string) {
 
-    await this.firebase.delete(
-      this.collection,
-      id
-    );
+    const auctionId = await this.auctionService.getActiveAuctionId();
+    if (auctionId) await this.firebase.delete(this.auctionCollection(auctionId), id);
 
   }
 
@@ -110,7 +105,7 @@ async deletePlayer(id: string) {
     player.auctionId = player.auctionId || await this.auctionService.getActiveAuctionId();
 
     await this.firebase.update(
-      this.collection,
+      this.auctionCollection(player.auctionId),
       player.id,
       player
     );
@@ -188,6 +183,10 @@ async deletePlayer(id: string) {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
+  }
+
+  private auctionCollection(auctionId: string): string {
+    return this.auctionService.auctionCollection(auctionId, this.collection);
   }
 
 }

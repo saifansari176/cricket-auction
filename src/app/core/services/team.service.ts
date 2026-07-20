@@ -14,25 +14,16 @@ export class TeamService {
 
   private collection = 'teams';
 
-  // ===============================
-  // Get All Teams
-  // ===============================
-
   async getTeams(): Promise<Team[]> {
 
   const activeAuctionId = await this.auctionService.getActiveAuctionId();
 
-  const teams = await this.firebase.getAll<Team>(this.collection);
-
   return activeAuctionId
-    ? teams.filter((team) => team.auctionId === activeAuctionId)
-    : teams;
+    ? this.firebase.getAll<Team>(this.auctionCollection(activeAuctionId))
+    : [];
 
   }
 
-  // ===============================
-  // Save Team
-  // ===============================
 
   async saveTeam(team: Team): Promise<boolean> {
 
@@ -40,8 +31,7 @@ export class TeamService {
 
     if (!team.auctionId) return false;
 
-    const teams = (await this.firebase.getAll<Team>(this.collection))
-      .filter((existingTeam) => existingTeam.auctionId === team.auctionId);
+    const teams = await this.firebase.getAll<Team>(this.auctionCollection(team.auctionId));
 
     const exists = teams.some(
 
@@ -60,7 +50,7 @@ export class TeamService {
     if (!await this.canAddTeam()) return false;
 
 await this.firebase.add(
-  this.collection,
+  this.auctionCollection(team.auctionId),
   team
 );
 
@@ -96,18 +86,13 @@ await this.firebase.add(
 
   }
 
-  // ===============================
-  // Update Team
-  // ===============================
-
   async updateTeam(team: Team): Promise<boolean> {
 
     team.auctionId = team.auctionId || await this.auctionService.getActiveAuctionId();
 
     if (!team.auctionId) return false;
 
-    const teams = (await this.firebase.getAll<Team>(this.collection))
-      .filter((existingTeam) => existingTeam.auctionId === team.auctionId);
+    const teams = await this.firebase.getAll<Team>(this.auctionCollection(team.auctionId));
 
     const duplicate = teams.find(
 
@@ -130,7 +115,7 @@ await this.firebase.add(
     }
 
     await this.firebase.update(
-  this.collection,
+  this.auctionCollection(team.auctionId),
   team.id!,
   team
 );
@@ -139,22 +124,12 @@ await this.firebase.add(
 
   }
 
-  // ===============================
-  // Delete Team
-  // ===============================
-
   async deleteTeam(id: string) {
 
-await this.firebase.delete(
-  this.collection,
-  id
-);
+    const auctionId = await this.auctionService.getActiveAuctionId();
+    if (auctionId) await this.firebase.delete(this.auctionCollection(auctionId), id);
 
   }
-
-  // ===============================
-  // Update Team Points
-  // ===============================
 
   async updateTeamPoints(
 
@@ -209,6 +184,10 @@ await this.firebase.delete(
 
   private normaliseTeamName(teamName: string): string {
     return String(teamName || '').trim().toLocaleLowerCase();
+  }
+
+  private auctionCollection(auctionId: string): string {
+    return this.auctionService.auctionCollection(auctionId, this.collection);
   }
 
 }

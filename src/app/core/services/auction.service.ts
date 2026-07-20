@@ -15,9 +15,10 @@ export class AuctionService {
 
   authService = inject(AuthService);
   
-  private settingsCollection = 'auctionSettings';
-
-  private bidsCollection = 'bids';
+  /** Each auction is now the parent document for its own teams, players and bids. */
+  private auctionsCollection = 'auctions';
+  private legacySettingsCollection = 'auctionSettings';
+  private readonly selectionCollection = 'preferences';
 
   activeAuction$ = new BehaviorSubject<AuctionSettings | null>(null);
   selectedPlayer$ = new BehaviorSubject<{id: string, name: string} | null>(null);
@@ -36,7 +37,7 @@ export class AuctionService {
     if (activeAuctionId) {
 
       await this.firebase.update(
-        this.settingsCollection,
+        this.auctionsCollection,
         activeAuctionId,
         {
           ...settings,
@@ -48,7 +49,7 @@ export class AuctionService {
     } else {
 
       const auctionRef = await this.firebase.add(
-        this.settingsCollection,
+        this.auctionsCollection,
         {
           ...settings,
           ...ownerDetails,
@@ -69,14 +70,18 @@ export class AuctionService {
 
    async get(): Promise<AuctionSettings | null> {
 
-  const auction = await this.firebase.getById<AuctionSettings>(
-    this.settingsCollection,
-    await this.getCurrentSelectionKey()
-  );
+    await this.migrateLegacyData();
+    const selection = await this.getSelection();
+    const auction = selection?.activeAuctionId
+      ? await this.getAuctionById(selection.activeAuctionId)
+      : null;
 
-  this.activeAuction$.next(auction);
+    const activeAuction = auction && selection?.activeAuctionId
+      ? { ...auction, activeAuctionId: selection.activeAuctionId }
+      : auction;
+  this.activeAuction$.next(activeAuction);
 
-  return auction;
+  return activeAuction;
 
 }
 
@@ -101,7 +106,7 @@ export class AuctionService {
 
   async getAuctionById(auctionId: string): Promise<AuctionSettings | null> {
     return await this.firebase.getById<AuctionSettings>(
-      this.settingsCollection,
+      this.auctionsCollection,
       auctionId
     );
   }
@@ -110,9 +115,8 @@ export class AuctionService {
     const user = await this.authService.waitForUser();
     const isAdmin = this.authService.isAdmin(user);
 
-    const auctions = await this.firebase.getAll<AuctionSettings>(
-      this.settingsCollection
-    );
+    await this.migrateLegacyData();
+    const auctions = await this.firebase.getAll<AuctionSettings>(this.auctionsCollection);
 
     return auctions
       .filter((auction) => auction.id !== 'current')
@@ -124,7 +128,7 @@ export class AuctionService {
 
   async setActiveAuction(auctionId: string): Promise<void> {
     const auction = await this.firebase.getById<AuctionSettings>(
-      this.settingsCollection,
+      this.auctionsCollection,
       auctionId
     );
 
@@ -134,15 +138,10 @@ export class AuctionService {
 
     const now = new Date().toISOString();
 
-    await this.firebase.set(
-      this.settingsCollection,
-      await this.getCurrentSelectionKey(),
-      {
-        ...auction,
-        activeAuctionId: auctionId,
-        updatedAt: now
-      }
-    );
+    await this.firebase.set(this.selectionPath(), 'current', {
+      activeAuctionId: auctionId,
+      updatedAt: now
+    });
 
     this.activeAuction$.next({
       ...auction,
@@ -152,27 +151,19 @@ export class AuctionService {
   }
 
   async deleteAuction(auctionId: string): Promise<void> {
+    const current = await this.get();
 
     await this.firebase.delete(
-      this.settingsCollection,
+      this.auctionsCollection,
       auctionId
     );
 
-    const current = await this.get();
-
-    if (current?.activeAuctionId === auctionId) {
-
-      await this.firebase.delete(
-        this.settingsCollection,
-        await this.getCurrentSelectionKey()
-      );
-
-    }
+    if (current?.id === auctionId) await this.firebase.delete(this.selectionPath(), 'current');
 
   }
 
   async updateAuctionAccess(auctionId: string, teamLimit: number, playerLimit: number): Promise<void> {
-    await this.firebase.update(this.settingsCollection, auctionId, {
+    await this.firebase.update(this.auctionsCollection, auctionId, {
       teamLimit,
       playerLimit,
       updatedAt: new Date().toISOString()
@@ -183,13 +174,15 @@ export class AuctionService {
 
     const { id: _id, ...data } = bid;
 
+    const auctionId = data.auctionId || await this.getActiveAuctionId();
+    if (!auctionId) return;
     const payload: Omit<AuctionBid, 'id'> = {
       ...data,
-      auctionId: data.auctionId || await this.getActiveAuctionId()
+      auctionId
     };
 
     await this.firebase.add(
-      this.bidsCollection,
+      this.auctionCollection(auctionId, 'bids'),
       payload
     );
 
@@ -198,14 +191,9 @@ export class AuctionService {
   async getBids(): Promise<AuctionBid[]> {
 
     const activeAuctionId = await this.getActiveAuctionId();
-
-    const bids = await this.firebase.getAll<AuctionBid>(
-      this.bidsCollection
-    );
-
     return activeAuctionId
-      ? bids.filter((bid) => bid.auctionId === activeAuctionId)
-      : bids;
+      ? this.firebase.getAll<AuctionBid>(this.auctionCollection(activeAuctionId, 'bids'))
+      : [];
   }
 
   async getSoldPlayers(): Promise<AuctionBid[]> {
@@ -250,28 +238,33 @@ export class AuctionService {
 
   async deletePlayerBids(playerId: string): Promise<void> {
     const bids = await this.getPlayerHistory(playerId);
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) return;
 
     await Promise.all(
       bids
         .filter((bid) => !!bid.id)
-        .map((bid) => this.firebase.delete(this.bidsCollection, bid.id!))
+        .map((bid) => this.firebase.delete(this.auctionCollection(auctionId, 'bids'), bid.id!))
     );
   }
 
   async deleteBid(bidId: string): Promise<void> {
-    await this.firebase.delete(this.bidsCollection, bidId);
+    const auctionId = await this.getActiveAuctionId();
+    if (auctionId) await this.firebase.delete(this.auctionCollection(auctionId, 'bids'), bidId);
   }
 
   async syncPlayerBidDetails(player: Player): Promise<void> {
     if (!player.id) return;
 
     const bids = await this.getPlayerHistory(player.id);
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) return;
     const playerName = `${player.firstName} ${player.lastName}`.trim();
 
     await Promise.all(
       bids
         .filter((bid) => !!bid.id)
-        .map((bid) => this.firebase.update(this.bidsCollection, bid.id!, {
+        .map((bid) => this.firebase.update(this.auctionCollection(auctionId, 'bids'), bid.id!, {
           ...bid,
           playerName,
           mobile: player.mobile,
@@ -283,11 +276,13 @@ export class AuctionService {
 
   async syncTeamBidDetails(teamId: string, teamName: string): Promise<void> {
     const bids = await this.getBids();
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) return;
 
     await Promise.all(
       bids
         .filter((bid) => bid.teamId === teamId && !!bid.id)
-        .map((bid) => this.firebase.update(this.bidsCollection, bid.id!, {
+        .map((bid) => this.firebase.update(this.auctionCollection(auctionId, 'bids'), bid.id!, {
           ...bid,
           teamName
         }))
@@ -297,6 +292,8 @@ export class AuctionService {
   async clearAuctionHistory(): Promise<void> {
 
     const bids = await this.getBids();
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) return;
 
     for (const bid of bids) {
 
@@ -306,7 +303,7 @@ export class AuctionService {
 
       await this.firebase.delete(
 
-        this.bidsCollection,
+        this.auctionCollection(auctionId, 'bids'),
 
         bid.id
 
@@ -332,10 +329,56 @@ export class AuctionService {
     return this.selectedPlayer$.asObservable();
   }
 
-  private async getCurrentSelectionKey(): Promise<string> {
-    const user = await this.authService.waitForUser();
+  auctionCollection(auctionId: string, name: string): string {
+    return `${this.auctionsCollection}/${auctionId}/${name}`;
+  }
 
-    return user?.uid ? `current_${user.uid}` : 'current';
+  private selectionPath(): string {
+    const uid = this.authService.currentUser$.value?.uid || 'anonymous';
+    return `users/${uid}/${this.selectionCollection}`;
+  }
+
+  private async getSelection(): Promise<{ activeAuctionId?: string } | null> {
+    const selection = await this.firebase.getById<{ activeAuctionId?: string }>(this.selectionPath(), 'current');
+    if (selection?.activeAuctionId) return selection;
+
+    // Preserve the active auction chosen before the new layout was introduced.
+    const user = await this.authService.waitForUser();
+    const legacyKey = user?.uid ? `current_${user.uid}` : 'current';
+    const legacy = await this.firebase.getById<AuctionSettings>(this.legacySettingsCollection, legacyKey);
+    if (legacy?.activeAuctionId) {
+      await this.firebase.set(this.selectionPath(), 'current', { activeAuctionId: legacy.activeAuctionId });
+      return { activeAuctionId: legacy.activeAuctionId };
+    }
+    return null;
+  }
+
+  /** Copies the old flat collections once, without deleting any existing data. */
+  private async migrateLegacyData(): Promise<void> {
+    const migration = await this.firebase.getById<{ completed?: boolean }>('appSettings', 'auctionDataStructureV2');
+    if (migration?.completed) return;
+
+    const legacyAuctions = await this.firebase.getAll<AuctionSettings>(this.legacySettingsCollection);
+    const auctions = legacyAuctions.filter((auction) => auction.id && auction.id !== 'current' && !auction.id.startsWith('current_'));
+    for (const auction of auctions) {
+      const auctionId = auction.id!;
+      await this.firebase.set(this.auctionsCollection, auctionId, auction);
+      await this.copyLegacyCollection('teams', auctionId, 'teams');
+      await this.copyLegacyCollection('players', auctionId, 'players');
+      await this.copyLegacyCollection('bids', auctionId, 'bids');
+      await this.copyLegacyCollection('playerCategories', auctionId, 'categories');
+    }
+    await this.firebase.set('appSettings', 'auctionDataStructureV2', {
+      completed: true,
+      completedAt: new Date().toISOString()
+    });
+  }
+
+  private async copyLegacyCollection(source: string, auctionId: string, destination: 'teams' | 'players' | 'bids' | 'categories'): Promise<void> {
+    const records = await this.firebase.getAll<{ id?: string; auctionId?: string }>(source);
+    await Promise.all(records
+      .filter((record) => record.id && record.auctionId === auctionId)
+      .map((record) => this.firebase.set(this.auctionCollection(auctionId, destination), record.id!, record)));
   }
 
 }
