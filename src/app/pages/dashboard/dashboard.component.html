@@ -10,7 +10,8 @@
       <strong>{{teams.length}}</strong>
     </button>
 
-    <button type="button" class="summary-card" [class.active]="activeList === 'available'" (click)="showList('available')">
+    <button type="button" class="summary-card" [class.active]="activeList === 'available'"
+      (click)="showList('available')">
       <span>Available Players</span>
       <strong>{{availablePlayers.length}}</strong>
     </button>
@@ -30,12 +31,8 @@
     <div class="panel-header">
       <h3>{{activeTitle}}</h3>
       <div class="panel-actions">
-        <button
-          *ngIf="activeList === 'available'"
-          type="button"
-          class="btn btn-primary btn-sm"
-          [disabled]="filteredAvailablePlayers.length === 0"
-          (click)="downloadAvailablePlayersExcel()">
+        <button *ngIf="activeList === 'available'" type="button" class="btn btn-primary btn-sm"
+          [disabled]="filteredAvailablePlayers.length === 0" (click)="downloadAvailablePlayersExcel()">
           &#128229; Download
         </button>
         <span *ngIf="loading">Loading...</span>
@@ -43,192 +40,193 @@
       </div>
     </div>
 
-    <div class="table-filter">
-      <input
-        type="search"
-        [(ngModel)]="tableFilter"
-        [placeholder]="'Search ' + activeTitle.toLowerCase()">
-      <select *ngIf="activeList === 'available'" [(ngModel)]="categoryFilter" aria-label="Filter player category">
-        <option value="">All categories</option>
-        <option value="__regular__">Regular Players</option>
-        <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
-      </select>
-    </div>
-
     <div class="table-responsive desktop-table">
 
-    <table *ngIf="activeList === 'players'" class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Photo</th>
-          <th>Player</th>
-          <th>
-            <div class="type-header">
-              <span>Type</span>
-              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
-                <option value="">All</option>
-                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
-              </select>
-            </div>
-          </th>
-          <th>Mobile</th>
-          <th>
-            <div class="type-header">
-              <span>Status</span>
-              <select [(ngModel)]="playerStatusFilter" aria-label="Filter player status">
-                <option value="">All</option>
-                <option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option>
-              </select>
-            </div>
-          </th>
-          <th>Base Bid</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let player of filteredPlayers; let i = index">
-          <td>{{i + 1}}</td>
-          <td><img [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="img-dashboard-fluid"></td>
-          <td>{{player.firstName}} {{player.lastName}}</td>
-          <td>{{player.playerType}}</td>
-          <td>{{player.mobile}}</td>
-          <td>{{player.status}}</td>
-          <td>{{player.baseBid}}</td>
-        </tr>
-      </tbody>
-    </table>
+      <table *ngIf="activeList === 'players'" class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Player</th>
+            <th>
+              <div class="type-header">
+                <span>Type</span>
+                <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                  <option value="">All</option>
+                  <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Mobile</th>
+            <th>
+              <div class="type-header">
+                <span>Status</span>
+                <select [(ngModel)]="playerStatusFilter" aria-label="Filter player status">
+                  <option value="">All</option>
+                  <option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Base Bid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of filteredPlayers; let i = index">
+            <td>{{i + 1}}</td>
+            <td><img [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="img-dashboard-fluid">
+            </td>
+            <td>{{player.firstName}} {{player.lastName}}</td>
+            <td>{{player.playerType}}</td>
+            <td>{{player.mobile}}</td>
+            <td>{{player.status}}</td>
+            <td>{{player.baseBid}}</td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table *ngIf="activeList === 'teams'" class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Team</th>
-          <th>Owner</th>
-          <th>Remaining</th>
-          <th>Players Bought</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let team of filteredTeams; let i = index">
-          <td>{{i + 1}}</td>
-          <td>{{team.teamName}}</td>
-          <td>{{team.ownerName}}</td>
-          <td>{{team.remainingPoints}}</td>
-          <td>{{team.playersBought}}</td>
-        </tr>
-      </tbody>
-    </table>
+      <table *ngIf="activeList === 'teams'" class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Team</th>
+            <th>Owner</th>
+            <th>Remaining</th>
+            <th>Players Bought</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let team of filteredTeams; let i = index">
+            <td>{{i + 1}}</td>
+            <td>{{team.teamName}}</td>
+            <td>{{team.ownerName}}</td>
+            <td>{{team.remainingPoints}}</td>
+            <td>{{team.playersBought}}</td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table *ngIf="activeList === 'sold'" class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Photo</th>
-          <th>Player</th>
-          <th>
-            <div class="type-header">
-              <span>Type</span>
-              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
-                <option value="">All</option>
-                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
-              </select>
-            </div>
-          </th>
-          <th>Team</th>
-          <th>Sold Amount</th>
-          <th>Date</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let player of filteredSoldPlayers; let i = index">
-          <td>{{i + 1}}</td>
-          <td><img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" [alt]="player.playerName" class="img-dashboard-fluid"><span *ngIf="!getBidPlayerPhoto(player)">-</span></td>
-          <td>{{player.playerName}}</td>
-          <td>{{getBidPlayerType(player)}}</td>
-          <td>{{player.teamName}}</td>
-          <td>{{player.bidAmount}}</td>
-          <td>{{player.soldDate | date:'medium'}}</td>
-        </tr>
-      </tbody>
-    </table>
+      <table *ngIf="activeList === 'sold'" class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Player</th>
+            <th>
+              <div class="type-header">
+                <span>Type</span>
+                <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                  <option value="">All</option>
+                  <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Team</th>
+            <th>Sold Amount</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of filteredSoldPlayers; let i = index">
+            <td>{{i + 1}}</td>
+            <td><img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" [alt]="player.playerName"
+                class="img-dashboard-fluid"><span *ngIf="!getBidPlayerPhoto(player)">-</span></td>
+            <td>{{player.playerName}}</td>
+            <td>{{getBidPlayerType(player)}}</td>
+            <td>{{player.teamName}}</td>
+            <td>{{player.bidAmount}}</td>
+            <td>{{player.soldDate | date:'medium'}}</td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table *ngIf="activeList === 'available'" class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Photo</th>
-          <th>Player</th>
-          <th>
-            <div class="type-header">
-              <span>Type</span>
-              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
-                <option value="">All</option>
-                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
-              </select>
-            </div>
-          </th>
-          <th>
-            <div class="type-header">
-              <span>Status</span>
-              <select [(ngModel)]="playerStatusFilter" aria-label="Filter player status">
-                <option value="">All</option>
-                <option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option>
-              </select>
-            </div>
-          </th>
-          <th>Base Bid</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let player of filteredAvailablePlayers; let i = index">
-          <td>{{i + 1}}</td>
-          <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="img-dashboard-fluid"><span *ngIf="!player.photo">-</span></td>
-          <td>{{player.firstName}} {{player.lastName}}</td>
-          <td>{{player.playerType}}</td>
-          <td>{{player.status}}</td>
-          <td>{{player.baseBid}}</td>
-          <td>
-            <button 
-              type="button" 
-              class="btn btn-sm btn-auction"
-              (click)="startAuction(player)"
-              title="Start auction for this player">
-              🔨 Auction
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <table *ngIf="activeList === 'available'" class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Player</th>
+            <th>
+              <div class="type-header">
+                <span>Type</span>
+                <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                  <option value="">All</option>
+                  <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </th>
+            <th>
+              <div class="type-header">
+                <span>Status</span>
+                <select [(ngModel)]="playerStatusFilter" aria-label="Filter player status">
+                  <option value="">All</option>
+                  <option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Base Bid</th>
+            <th>
+              <div class="type-header">
+                <span>Category</span>
+                <select *ngIf="activeList === 'available'" [(ngModel)]="categoryFilter"
+                  aria-label="Filter player category">
+                  <option value="">All categories</option>
+                  <option value="__regular__">Regular Players</option>
+                  <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of filteredAvailablePlayers; let i = index">
+            <td>{{i + 1}}</td>
+            <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName"
+                class="img-dashboard-fluid"><span *ngIf="!player.photo">-</span></td>
+            <td>{{player.firstName}} {{player.lastName}}</td>
+            <td>{{player.playerType}}</td>
+            <td>{{player.status}}</td>
+            <td>{{player.baseBid}}</td>
+            <td>{{player.categoryName || 'Regular'}}</td>
+            <td>
+              <button type="button" class="btn btn-sm btn-auction" (click)="startAuction(player)"
+                title="Start auction for this player">
+                🔨 Auction
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <table *ngIf="activeList === 'unsold'" class="table table-bordered table-hover">
-      <thead class="table-dark">
-        <tr>
-          <th>#</th>
-          <th>Photo</th>
-          <th>Player</th>
-          <th>
-            <div class="type-header">
-              <span>Type</span>
-              <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
-                <option value="">All</option>
-                <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
-              </select>
-            </div>
-          </th>
-          <th>Base Bid</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let player of filteredUnsoldPlayers; let i = index">
-          <td>{{i + 1}}</td>
-          <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="img-dashboard-fluid"><span *ngIf="!player.photo">-</span></td>
-          <td>{{player.firstName}} {{player.lastName}}</td>
-          <td>{{player.playerType}}</td>
-          <td>{{player.baseBid}}</td>
-        </tr>
-      </tbody>
-    </table>
+      <table *ngIf="activeList === 'unsold'" class="table table-bordered table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Player</th>
+            <th>
+              <div class="type-header">
+                <span>Type</span>
+                <select [(ngModel)]="playerTypeFilter" aria-label="Filter player type">
+                  <option value="">All</option>
+                  <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+                </select>
+              </div>
+            </th>
+            <th>Base Bid</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of filteredUnsoldPlayers; let i = index">
+            <td>{{i + 1}}</td>
+            <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName"
+                class="img-dashboard-fluid"><span *ngIf="!player.photo">-</span></td>
+            <td>{{player.firstName}} {{player.lastName}}</td>
+            <td>{{player.playerType}}</td>
+            <td>{{player.baseBid}}</td>
+          </tr>
+        </tbody>
+      </table>
 
     </div>
 
@@ -243,12 +241,21 @@
             <img *ngIf="$any(player).photo" [src]="$any(player).photo" alt="Player photo">
             <span *ngIf="!$any(player).photo" class="photo-placeholder">No Image</span>
           </ng-template>
-          <span><strong>{{activeList === 'sold' ? $any(player).playerName : $any(player).firstName + ' ' + $any(player).lastName}}</strong><small>{{activeList === 'sold' ? getBidPlayerType($any(player)) : $any(player).playerType}}</small></span>
+          <span><strong>{{activeList === 'sold' ? $any(player).playerName : $any(player).firstName + ' ' +
+              $any(player).lastName}}</strong><small>{{activeList === 'sold' ? getBidPlayerType($any(player)) :
+              $any(player).playerType}}</small></span>
         </summary>
         <div class="accordion-details" *ngIf="activeList === 'sold'; else playerDetails">
-          <span>Team <strong>{{$any(player).teamName}}</strong></span><span>Sold Amount <strong>{{$any(player).bidAmount}}</strong></span><span>Date <strong>{{$any(player).soldDate | date:'medium'}}</strong></span>
+          <span>Team <strong>{{$any(player).teamName}}</strong></span><span>Sold Amount
+            <strong>{{$any(player).bidAmount}}</strong></span><span>Date <strong>{{$any(player).soldDate |
+              date:'medium'}}</strong></span>
         </div>
-        <ng-template #playerDetails><div class="accordion-details"><span>Mobile <strong>{{$any(player).mobile}}</strong></span><span>Status <strong>{{$any(player).status}}</strong></span><span>Base Bid <strong>{{$any(player).baseBid}}</strong></span><button *ngIf="activeList === 'available'" type="button" class="btn btn-sm btn-auction" (click)="startAuction($any(player))">Auction</button></div></ng-template>
+        <ng-template #playerDetails>
+          <div class="accordion-details"><span>Mobile <strong>{{$any(player).mobile}}</strong></span><span>Status
+              <strong>{{$any(player).status}}</strong></span><span>Base Bid
+              <strong>{{$any(player).baseBid}}</strong></span><button *ngIf="activeList === 'available'" type="button"
+              class="btn btn-sm btn-auction" (click)="startAuction($any(player))">Auction</button></div>
+        </ng-template>
       </details>
     </div>
 

@@ -9,6 +9,8 @@ import { MessageService } from '../../../core/services/message.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { PlayerService } from '../../../core/services/player.service';
 import { TeamService } from '../../../core/services/team.service';
+import { PlayerCategoryService } from '../../../core/services/player-category.service';
+import { PlayerCategory } from '../../../core/models/player-category';
 
 type AuctionAction = {
   type: 'sold' | 'unsold';
@@ -22,6 +24,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   auction: AuctionSettings | null = null;
   currentPlayer: Player | null = null;
   teams: Team[] = [];
+  categories: PlayerCategory[] = [];
   currentBid = 0;
   highestTeam: Team | null = null;
   loading = false;
@@ -37,7 +40,8 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     private teamService: TeamService,
     private auctionService: AuctionService,
     private message: MessageService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private categoryService: PlayerCategoryService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -46,6 +50,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.loading = true;
     try {
       this.auction = await this.auctionService.get();
+      this.categories = await this.categoryService.getCategories(this.auction?.activeAuctionId || this.auction?.id);
       await this.loadTeams();
       const selectedPlayer = this.auctionService.selectedPlayer$.value;
       if (selectedPlayer?.id) {
@@ -108,8 +113,16 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
 
     // The opening bidder buys at the player's base price. Every later bid increases it.
     return this.highestTeam
-      ? this.currentBid + Number(this.auction.bidIncreaseBy || 0)
+      ? this.currentBid + this.currentPlayerBidIncrease
       : this.currentBid;
+  }
+
+  get currentPlayerBidIncrease(): number {
+    const playerIncrement = Number(this.currentPlayer?.bidIncreaseBy ?? 0);
+    if (playerIncrement > 0) return playerIncrement;
+
+    const categoryIncrement = Number(this.categories.find((category) => category.id === this.currentPlayer?.categoryId)?.bidIncreaseBy ?? 0);
+    return categoryIncrement > 0 ? categoryIncrement : Number(this.auction?.bidIncreaseBy ?? 0);
   }
 
   canBid(team: Team): boolean {

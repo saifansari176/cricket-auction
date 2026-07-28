@@ -3,4 +3,5 @@ export interface PlayerCategory {
   auctionId: string;
   name: string;
   basePrice: number;
+  bidIncreaseBy?: number;
 }

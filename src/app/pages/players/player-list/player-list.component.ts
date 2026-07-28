@@ -21,7 +21,8 @@ export class PlayerListComponent {
   playerFilter = '';
   playerTypeFilter = '';
   playerStatusFilter = '';
-
+  categoryFilter = '';
+  
   constructor(
     private playerService: PlayerService,
     private auctionService: AuctionService,
@@ -34,10 +35,6 @@ export class PlayerListComponent {
 
   async loadPlayers() {
     this.players = await this.playerService.getPlayers();
-    const auction = await this.auctionService.get();
-    const baseBid = Number(auction?.basePlayerPrice ?? auction?.minimumBid ?? 0);
-
-    this.players = this.players.map((player) => ({ ...player, baseBid }));
   }
 
   async deletePlayer(id: string) {
@@ -59,19 +56,27 @@ export class PlayerListComponent {
     return Array.from(new Set(this.players.map((player) => player.status).filter(Boolean))).sort();
   }
 
+get categories(): string[] {
+  return Array.from(new Set(this.players.map(player => player.categoryName).filter((name): name is string => !!name))).sort();
+}
+
   get filteredPlayers(): Player[] {
     const search = this.playerFilter.trim().toLowerCase();
     const type = this.playerTypeFilter.trim().toLowerCase();
     const status = this.playerStatusFilter.trim().toLowerCase();
+    const category = this.categoryFilter.trim().toLowerCase();
 
     return this.players.filter((player) => {
+      console.log("category", player);
+      
       const matchesType = !type || player.playerType.toLowerCase() === type;
       const matchesStatus = !status || player.status.toLowerCase() === status;
+      const matchesCategory = !category || player.categoryName?.toLowerCase() === category;
       const matchesSearch = !search || [
         player.firstName, player.lastName, player.mobile, player.jerseyNumber,
         player.playerType, player.status, player.baseBid
       ].some((value) => String(value ?? '').toLowerCase().includes(search));
-      return matchesType && matchesStatus && matchesSearch;
+      return matchesType && matchesStatus && matchesSearch && matchesCategory;
     });
   }
 

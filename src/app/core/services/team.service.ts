@@ -127,7 +127,24 @@ await this.firebase.add(
   async deleteTeam(id: string) {
 
     const auctionId = await this.auctionService.getActiveAuctionId();
-    if (auctionId) await this.firebase.delete(this.auctionCollection(auctionId), id);
+    if (!auctionId) return;
+
+    const playerCollection = this.auctionService.auctionCollection(auctionId, 'players');
+    const players = await this.firebase.getAll<{ id?: string; soldToTeamId?: string; status?: string; soldPrice?: number }>(playerCollection);
+
+    await Promise.all(
+      players
+        .filter((player) => player.id && player.soldToTeamId === id)
+        .map((player) => this.firebase.update(playerCollection, player.id!, {
+          ...player,
+          status: 'Available',
+          soldToTeamId: '',
+          soldPrice: 0
+        }))
+    );
+
+    await this.auctionService.deleteTeamBids(id);
+    await this.firebase.delete(this.auctionCollection(auctionId), id);
 
   }
 

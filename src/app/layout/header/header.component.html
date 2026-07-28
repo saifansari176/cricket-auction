@@ -7,12 +7,7 @@
         </button>
 
         <a class="brand-home" routerLink="/dashboard" aria-label="Go to dashboard">
-            <img src="/cricbids-logo.png" class="brand-mark" alt="CRICBIDS logo">
-
-            <div>
-                <h4>Cricbids</h4>
-                <p>Management Console</p>
-            </div>
+            <img src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
         </a>
     </div>
 
@@ -48,31 +43,26 @@
         <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active">Users</a>
     </nav>
 
-    <div class="user" *ngIf="currentUser$ | async as user">
-        <label class="registration-toggle">
-            <input type="checkbox" [checked]="registrationLinkEnabled" (change)="toggleRegistrationLink()">
-            Registration Link
-        </label>
-
-        <button type="button" class="share-btn" (click)="shareRegistrationLink()">
-            Share Link
-        </button>
-
-        <div class="account-chip">
-            <span class="avatar">{{(user.displayName || user.email || 'U').charAt(0)}}</span>
+    <div class="user profile-menu" *ngIf="currentUser$ | async as user" [class.open]="profileOpen" (focusout)="closeProfileOnFocusOut($event)">
+        <button type="button" class="account-chip profile-trigger" (click)="toggleProfile()" [attr.aria-expanded]="profileOpen" aria-haspopup="menu">
+            <span class="avatar" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false"><path d="M12 12a4.25 4.25 0 1 0 0-8.5 4.25 4.25 0 0 0 0 8.5Zm0 2.1c-4.04 0-7.3 2.24-7.3 5v1.4h14.6v-1.4c0-2.76-3.26-5-7.3-5Z"/></svg>
+            </span>
             <span class="account-text">
                 <strong>{{user.displayName || user.email}}</strong>
                 <small>{{user.role}}</small>
             </span>
-        </div>
-
-        <button type="button" class="logout-btn" (click)="logout()">
-            Logout
+            <span class="profile-chevron" aria-hidden="true">⌄</span>
         </button>
+
+        <div class="profile-dropdown" *ngIf="profileOpen" role="menu">
+            <a routerLink="/about-us" role="menuitem" (click)="closeProfile()">About Us</a>
+            <button type="button" class="logout-btn" role="menuitem" (click)="logout()">Logout</button>
+        </div>
     </div>
 </header>
 
-<div class="current-auction-bar fs-3" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction')">
+<div class="current-auction-bar" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction')">
     <strong>{{currentAuction?.auctionName}}</strong>
 </div>
 
@@ -89,6 +79,7 @@
 
     <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
     <a routerLink="/auction-settings" routerLinkActive="active" (click)="closeMenu()">Auction Settings</a>
+    <a routerLink="/about-us" routerLinkActive="active" (click)="closeMenu()">About Us</a>
     <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active" (click)="closeMenu()">User Control</a>
 
     <div class="menu-accordion" (focusout)="closeSectionOnFocusOut($event, 'players')">
@@ -131,15 +122,6 @@
     </div>
 
     <div class="menu-user" *ngIf="currentUser$ | async as user">
-        <label class="registration-toggle">
-            <input type="checkbox" [checked]="registrationLinkEnabled" (change)="toggleRegistrationLink()">
-            Registration Link
-        </label>
-
-        <button type="button" class="share-btn" (click)="shareRegistrationLink()">
-            Share Link
-        </button>
-
         <div class="account-chip">
             <span class="avatar">{{(user.displayName || user.email || 'U').charAt(0)}}</span>
             <span class="account-text">
@@ -147,6 +129,8 @@
                 <small>{{user.role}}</small>
             </span>
         </div>
+
+        <a routerLink="/about-us" routerLinkActive="active" (click)="closeMenu()">About Us</a>
 
         <button type="button" class="logout-btn" (click)="logout(); closeMenu()">
             Logout

@@ -5,7 +5,7 @@
     (click)="toggleFullscreen()"
     [attr.aria-label]="isFullscreen ? 'Exit fullscreen live auction' : 'Open fullscreen live auction'"
     [title]="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'">
-    <span>{{ isFullscreen ? '×' : '⛶' }}</span>
+    <span>{{ isFullscreen ? 'X' : '⛶' }}</span>
   </button>
 
   <div class="auction-header">
@@ -36,7 +36,7 @@
       <div class="half team-half">
         <div class="highest-team">
           <div class="highest-label">HIGHEST BID</div>
-          
+
           <img
             [src]="highestTeam.logo || 'assets/no-team.png'"
             alt="Highest team image"
@@ -52,6 +52,11 @@
       <span>BASE PRICE</span>
       <h2>₹{{currentPlayer.baseBid}}</h2>
     </div>
+<!-- 
+    <div class="info-box">
+      <span>BID INCREASE</span>
+      <h2>₹{{currentPlayerBidIncrease}}</h2>
+    </div> -->
 
     <div class="info-box center">
       <span>PLAYER</span>
@@ -72,28 +77,36 @@
     <button class="next" (click)="nextPlayer()">LOAD PLAYER</button>
   </div>
 
-  <!-- <div *ngIf="highestTeam" class="highest-team">
-    Highest Bid <strong>{{highestTeam.teamName}}</strong>
-  </div> -->
-
   <div class="teams-grid" [style.--team-count]="teams.length || 1">
     <div
       *ngFor="let team of teams; trackBy: trackByTeam"
       class="team-card"
       [class.active]="highestTeam?.id==team.id">
 
-      <div class="team-info">
-        <span>Remaining<br><strong>₹{{team.remainingPoints}}</strong></span>
-        <span>Purchased<br><strong>{{team.playersBought}}</strong></span>
-      </div>
-
       <button
         class="team-bid-btn"
         [disabled]="!canBid(team)"
         [title]="team.teamName + ' - BID ₹' + nextBid"
         (click)="bid(team)">
-        <span class="team-name">{{team.teamName}}</span>
-        <span class="bid-amount">BID ₹{{nextBid}}</span>
+        <span class="team-logo-wrap">
+          <img
+            [src]="team.logo || 'assets/no-team.png'"
+            [alt]="team.teamName + ' logo'"
+            class="team-logo" />
+        </span>
+
+        <span class="team-button-main">
+          <span class="team-name">{{team.teamName}}</span>
+          <span class="team-stats">
+            <span>Left <strong>₹{{team.remainingPoints}}</strong></span>
+            <span>Players <strong>{{team.playersBought || 0}}</strong></span>
+          </span>
+        </span>
+
+        <span class="bid-pill">
+          <span class="bid-label">BID</span>
+          <span class="bid-amount">₹{{nextBid}}</span>
+        </span>
       </button>
     </div>
   </div>

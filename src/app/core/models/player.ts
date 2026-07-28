@@ -28,6 +28,8 @@ export interface Player {
 
   baseBid: number;
 
+  bidIncreaseBy?: number;
+
   status: string;
 
   teamId?: string;

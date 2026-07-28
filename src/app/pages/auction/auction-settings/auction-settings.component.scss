@@ -168,6 +168,42 @@
 
 .mobile-auction-list { display: none; }
 
+.share-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, .5);
+}
+
+.share-modal {
+  width: min(100%, 440px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, .2);
+  padding: 20px;
+}
+
+.share-modal-header,
+.share-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-modal-header h3,
+.share-modal-header p { margin: 0; }
+.share-modal-header p,
+.share-modal-help { color: #64748b; }
+.registration-link-switch { margin: 22px 0 8px; }
+.registration-link-switch .form-check-input { cursor: pointer; }
+.registration-link-switch .form-check-label { font-weight: 600; cursor: pointer; }
+.share-modal-help { font-size: 13px; }
+.share-modal-actions { justify-content: flex-end; margin-top: 20px; }
+
 @media (max-width: 991px) {
   .settings-header,
   .logo-row,

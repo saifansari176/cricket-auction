@@ -112,6 +112,13 @@ export const routes: Routes = [
   },
 
   {
+    path: 'about-us',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/about-us/about-us.component').then((m) => m.AboutUsComponent),
+  },
+
+  {
   path: 'auction-settings',
   canActivate: [authGuard],
   loadComponent: () =>

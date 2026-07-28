@@ -277,74 +277,140 @@
 }
 
 .team-card {
-  background: linear-gradient(180deg, rgba(15, 32, 52, .98), rgba(12, 25, 42, .98));
-  border: 1px solid rgba(148, 163, 184, .32);
-  border-radius: 10px;
-  padding: 6px;
+  border-radius: 9px;
   text-align: center;
+  min-width: 0;
 }
 
 .team-card.active {
-  border-color: #00ff6a;
-}
-
-.team-info {
-  display: flex;
-  justify-content: space-between;
-  gap: 4px;
-  margin-bottom: 5px;
-  color: #cbd5e1;
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.team-info span {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.team-info strong {
-  color: #fff;
+  filter: drop-shadow(0 0 12px rgba(34, 197, 94, .45));
 }
 
 .team-bid-btn {
   width: 100%;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #2563eb, #0f5fd7);
+  min-height: 74px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(20, 184, 166, .95), rgba(37, 99, 235, .95) 52%, rgba(124, 58, 237, .9));
   color: white;
-  padding: 7px 6px;
+  padding: 8px;
   cursor: pointer;
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
+  gap: 7px;
   min-width: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 8px 20px rgba(2, 8, 23, .28);
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, opacity .15s ease;
+}
+
+.team-bid-btn:hover:not(:disabled),
+.team-bid-btn:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, .42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .24), 0 12px 26px rgba(2, 8, 23, .36);
+}
+
+.team-card.active .team-bid-btn {
+  border-color: #22c55e;
+  background: linear-gradient(135deg, #16a34a, #0f766e 54%, #2563eb);
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, .38), 0 0 28px rgba(34, 197, 94, .42);
+}
+
+.team-logo-wrap {
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .95);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.team-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 3px;
+}
+
+.team-button-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 5px;
 }
 
 .team-name {
   display: block;
   color: #fff;
-  font-size: clamp(10px, .85vw, 13px);
+  font-size: clamp(11px, .9vw, 14px);
   font-weight: 900;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+  text-align: left;
+}
+
+.team-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  color: rgba(255, 255, 255, .78);
+  font-size: clamp(8px, .68vw, 10px);
+  font-weight: 800;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.team-stats span {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-stats strong {
+  color: #fff;
+}
+
+.bid-pill {
+  grid-column: 2;
+  justify-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, .34);
+  padding: 5px 8px;
+  min-width: 0;
+}
+
+.bid-label {
+  color: rgba(255, 255, 255, .72);
+  font-size: clamp(8px, .64vw, 10px);
+  font-weight: 900;
 }
 
 .bid-amount {
   display: block;
-  color: #dbeafe;
-  font-size: clamp(9px, .75vw, 11px);
+  color: #fff7ad;
+  font-size: clamp(12px, 1vw, 16px);
+  font-weight: 950;
   white-space: nowrap;
   flex: 0 0 auto;
 }
 
 .team-bid-btn:disabled {
-  opacity: .55;
+  cursor: not-allowed;
+  opacity: .48;
+  filter: grayscale(.25);
+  transform: none;
 }
 
 .completed {

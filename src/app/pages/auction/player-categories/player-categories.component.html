@@ -5,18 +5,61 @@
 
   <section class="category-panel">
     <h3>{{editingCategory ? 'Edit Category' : 'Add Category'}}</h3>
-    <form [formGroup]="form" (ngSubmit)="save()" class="category-form">
-      <input class="form-control" formControlName="name" placeholder="Category name, e.g. Premium Players">
-      <input class="form-control" type="number" min="1" formControlName="basePrice" placeholder="Base price">
-      <button class="btn btn-primary" type="submit">{{editingCategory ? 'Update Category' : 'Add Category'}}</button>
-      <button *ngIf="editingCategory" class="btn btn-outline-secondary" type="button" (click)="cancel()">Cancel</button>
-    </form>
+    <form [formGroup]="form" (ngSubmit)="save()" class="category-form d-block">
+  <div class="category-row">
+
+    <div class="field">
+      <label>Category Name</label>
+      <input
+        class="form-control"
+        formControlName="name"
+        placeholder="Category name, e.g. Premium Players">
+    </div>
+
+    <div class="field">
+      <label>Base Price <span class="text-danger">*</span></label>
+      <input
+        class="form-control"
+        type="number"
+        formControlName="basePrice"
+        required
+        placeholder="Base price"
+        (focus)="clearDefaultZero('basePrice')">
+    </div>
+
+    <div class="field">
+      <label>Bid Increase By <span class="text-danger">*</span></label>
+      <input
+        class="form-control"
+        type="number"
+        formControlName="bidIncreaseBy"
+        required
+        placeholder="Bid increase amount"
+        (focus)="clearDefaultZero('bidIncreaseBy')">
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
+        {{ editingCategory ? 'Update Category' : 'Add Category' }}
+      </button>
+
+      <button
+        *ngIf="editingCategory"
+        class="btn btn-outline-secondary"
+        type="button"
+        (click)="cancel()">
+        Cancel
+      </button>
+    </div>
+
+  </div>
+</form>
   </section>
 
   <section class="category-panel">
     <h3>Saved Categories</h3>
     <div *ngIf="categories.length" class="table-responsive desktop-category-table">
-      <table class="table table-bordered align-middle mb-0"><thead class="table-dark"><tr><th>#</th><th>Category</th><th>Base Price</th><th>Players</th><th>Action</th></tr></thead><tbody><ng-container *ngFor="let category of categories; let i = index"><tr><td>{{i + 1}}</td><td>{{category.name}}</td><td>{{category.basePrice}}</td><td>{{getPlayersForCategory(category.id).length}}</td><td class="category-actions"><button class="btn btn-primary btn-sm" type="button" (click)="toggleCategory(category)">⏷ Players</button><button class="btn btn-success btn-sm" type="button" [disabled]="getPlayersForCategory(category.id).length === 0" (click)="selectCategory(category); startCategoryAuction()">Start Auction</button><button class="btn btn-warning btn-sm" type="button" (click)="edit(category)">Edit</button><button class="btn btn-danger btn-sm" type="button" (click)="delete(category)">Delete</button></td></tr><tr *ngIf="selectedCategory?.id === category.id" class="expanded-category-row"><td colspan="5"><div class="expanded-category-header"><strong>{{category.name}} Players</strong><button class="btn btn-primary btn-sm" type="button" [disabled]="getPlayersForCategory(category.id).length === 0" (click)="downloadCategoryPlayers()">Download List</button></div><table class="table table-bordered align-middle mb-0"><thead class="table-light"><tr><th>Photo</th><th>Player</th><th>Type</th><th>Status</th><th>Base Price</th><th>Action</th></tr></thead><tbody><tr *ngFor="let player of getPlayersForCategory(category.id)"><td><img *ngIf="player.photo" [src]="player.photo" class="player-photo" alt="Player photo"><span *ngIf="!player.photo" class="photo-placeholder">No Image</span></td><td>{{player.firstName}} {{player.lastName}}<small>{{player.mobile}}</small></td><td>{{player.playerType}}</td><td>{{player.status}}</td><td>{{player.baseBid}}</td><td class="category-actions"><button class="btn btn-primary btn-sm" type="button" [disabled]="player.status !== 'Available' && player.status !== 'Unsold'" (click)="startIndividualAuction(player, category)">🔨 Auction</button><button class="btn btn-outline-danger btn-sm" type="button" (click)="removePlayer(player)">Remove</button></td></tr><tr *ngIf="getPlayersForCategory(category.id).length === 0"><td colspan="6" class="text-center text-muted">No players added to this category yet.</td></tr></tbody></table></td></tr></ng-container></tbody></table>
+      <table class="table table-bordered align-middle mb-0"><thead class="table-dark text-center"><tr><th>#</th><th>Category</th><th>Base Price</th><th>Players</th><th>Action</th></tr></thead><tbody><ng-container *ngFor="let category of categories; let i = index"><tr><td>{{i + 1}}</td><td>{{category.name}}</td><td>{{category.basePrice}}</td><td>{{getPlayersForCategory(category.id).length}}</td><td class="category-actions"><button class="btn btn-primary btn-sm" type="button" (click)="toggleCategory(category)">⏷ Players</button><button class="btn btn-success btn-sm" type="button" [disabled]="getPlayersForCategory(category.id).length === 0" (click)="selectCategory(category); startCategoryAuction()">Start Auction</button><button class="btn btn-warning btn-sm" type="button" (click)="edit(category)">Edit</button><button class="btn btn-danger btn-sm" type="button" (click)="delete(category)">Delete</button></td></tr><tr *ngIf="selectedCategory?.id === category.id" class="expanded-category-row"><td colspan="5"><div class="expanded-category-header"><strong>{{category.name}} Players</strong><button class="btn btn-primary btn-sm" type="button" [disabled]="getPlayersForCategory(category.id).length === 0" (click)="downloadCategoryPlayers()">Download List</button></div><table class="table table-bordered align-middle mb-0"><thead class="table-light"><tr><th>Photo</th><th>Player</th><th>Type</th><th>Status</th><th>Base Price</th><th>Action</th></tr></thead><tbody><tr *ngFor="let player of getPlayersForCategory(category.id)"><td><img *ngIf="player.photo" [src]="player.photo" class="player-photo" alt="Player photo"><span *ngIf="!player.photo" class="photo-placeholder">No Image</span></td><td>{{player.firstName}} {{player.lastName}}<small>{{player.mobile}}</small></td><td>{{player.playerType}}</td><td>{{player.status}}</td><td>{{player.baseBid}}</td><td class="category-actions"><button class="btn btn-primary btn-sm" type="button" [disabled]="player.status !== 'Available' && player.status !== 'Unsold'" (click)="startIndividualAuction(player, category)">🔨 Auction</button><button class="btn btn-outline-danger btn-sm" type="button" (click)="removePlayer(player)">Remove</button></td></tr><tr *ngIf="getPlayersForCategory(category.id).length === 0"><td colspan="6" class="text-center text-muted">No players added to this category yet.</td></tr></tbody></table></td></tr></ng-container></tbody></table>
     </div>
     <div *ngIf="categories.length; else empty" class="category-list mobile-category-list">
       <details *ngFor="let category of categories" class="category-accordion" (toggle)="selectCategory(category)">
@@ -42,7 +85,7 @@
     <input class="form-control player-search" type="search" [(ngModel)]="playerSearch" placeholder="Find players by name, mobile or player type">
     <div class="table-responsive desktop-player-table">
       <table class="table table-bordered align-middle mb-0">
-        <thead class="table-dark"><tr><th>Photo</th><th>Player</th><th><div class="type-header"><span>Type</span><select [(ngModel)]="playerTypeFilter" aria-label="Filter player type"><option value="">All</option><option *ngFor="let type of playerTypes" [value]="type">{{type}}</option></select></div></th><th><div class="type-header"><span>Status</span><select [(ngModel)]="playerStatusFilter" aria-label="Filter player status"><option value="">All</option><option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option></select></div></th><th>Current Category</th><th>Move to Category</th></tr></thead>
+        <thead class="table-dark text-center"><tr><th>Photo</th><th>Player</th><th><div class="type-header"><span>Type</span><select [(ngModel)]="playerTypeFilter" aria-label="Filter player type"><option value="">All</option><option *ngFor="let type of playerTypes" [value]="type">{{type}}</option></select></div></th><th><div class="type-header"><span>Status</span><select [(ngModel)]="playerStatusFilter" aria-label="Filter player status"><option value="">All</option><option *ngFor="let status of playerStatuses" [value]="status">{{status}}</option></select></div></th><th>Current Category</th><th>Move to Category</th></tr></thead>
         <tbody>
           <tr *ngFor="let player of matchingPlayers">
             <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="player-photo"><span *ngIf="!player.photo" class="photo-placeholder">No Image</span></td>

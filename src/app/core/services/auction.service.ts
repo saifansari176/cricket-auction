@@ -153,12 +153,30 @@ export class AuctionService {
   async deleteAuction(auctionId: string): Promise<void> {
     const current = await this.get();
 
+    await Promise.all([
+      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'teams')),
+      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'players')),
+      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'bids')),
+      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'categories'))
+    ]);
+
+    await this.deleteLegacyAuctionRecords(auctionId);
+
     await this.firebase.delete(
       this.auctionsCollection,
       auctionId
     );
 
-    if (current?.id === auctionId) await this.firebase.delete(this.selectionPath(), 'current');
+    await this.firebase.delete(this.legacySettingsCollection, auctionId);
+
+    if (current?.id === auctionId || current?.activeAuctionId === auctionId) {
+      await Promise.all([
+        this.firebase.delete(this.selectionPath(), 'current'),
+        this.firebase.delete(this.legacySettingsCollection, 'current'),
+        this.deleteCurrentUserLegacySelection()
+      ]);
+      this.activeAuction$.next(null);
+    }
 
   }
 
@@ -244,6 +262,25 @@ export class AuctionService {
     await Promise.all(
       bids
         .filter((bid) => !!bid.id)
+        .map((bid) => this.firebase.delete(this.auctionCollection(auctionId, 'bids'), bid.id!))
+    );
+  }
+
+  async setRegistrationLinkEnabled(auctionId: string, enabled: boolean): Promise<void> {
+    await this.firebase.update(this.auctionsCollection, auctionId, {
+      registrationLinkEnabled: enabled,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
+  async deleteTeamBids(teamId: string): Promise<void> {
+    const bids = await this.getBids();
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) return;
+
+    await Promise.all(
+      bids
+        .filter((bid) => bid.teamId === teamId && !!bid.id)
         .map((bid) => this.firebase.delete(this.auctionCollection(auctionId, 'bids'), bid.id!))
     );
   }
@@ -379,6 +416,31 @@ export class AuctionService {
     await Promise.all(records
       .filter((record) => record.id && record.auctionId === auctionId)
       .map((record) => this.firebase.set(this.auctionCollection(auctionId, destination), record.id!, record)));
+  }
+
+  private async deleteLegacyAuctionRecords(auctionId: string): Promise<void> {
+    await Promise.all([
+      this.deleteLegacyRecordsByAuctionId('teams', auctionId),
+      this.deleteLegacyRecordsByAuctionId('players', auctionId),
+      this.deleteLegacyRecordsByAuctionId('bids', auctionId),
+      this.deleteLegacyRecordsByAuctionId('playerCategories', auctionId)
+    ]);
+  }
+
+  private async deleteLegacyRecordsByAuctionId(collectionName: string, auctionId: string): Promise<void> {
+    const records = await this.firebase.getAll<{ id?: string; auctionId?: string }>(collectionName);
+    await Promise.all(
+      records
+        .filter((record) => record.id && record.auctionId === auctionId)
+        .map((record) => this.firebase.delete(collectionName, record.id!))
+    );
+  }
+
+  private async deleteCurrentUserLegacySelection(): Promise<void> {
+    const user = await this.authService.waitForUser();
+    if (user?.uid) {
+      await this.firebase.delete(this.legacySettingsCollection, `current_${user.uid}`);
+    }
   }
 
 }

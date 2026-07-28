@@ -91,6 +91,10 @@ export class MessageService {
     this.activeMessage$.next(null);
   }
 
+  hasActiveMessage(): boolean {
+    return !!this.activeMessage$.value;
+  }
+
   private open(message: ActiveMessage): void {
     this.activeMessage$.value?.resolve?.(false);
     this.activeMessage$.next(message);

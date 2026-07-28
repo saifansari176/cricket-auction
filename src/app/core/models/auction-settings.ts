@@ -24,6 +24,8 @@ export interface AuctionSettings {
   
   bidIncreaseBy:number;
 
+  registrationLinkEnabled?: boolean;
+
   isActive?: boolean;
 
   createdAt?: string;

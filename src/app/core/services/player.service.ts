@@ -94,7 +94,10 @@ await this.firebase.add(
 async deletePlayer(id: string) {
 
     const auctionId = await this.auctionService.getActiveAuctionId();
-    if (auctionId) await this.firebase.delete(this.auctionCollection(auctionId), id);
+    if (!auctionId) return;
+
+    await this.auctionService.deletePlayerBids(id);
+    await this.firebase.delete(this.auctionCollection(auctionId), id);
 
   }
 

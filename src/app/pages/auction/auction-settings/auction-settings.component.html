@@ -59,7 +59,7 @@
 
     <div *ngIf="!loading && auctions.length > 0" class="table-responsive desktop-auction-table">
       <table class="table table-bordered table-hover align-middle">
-        <thead class="table-dark">
+        <thead class="table-dark text-center">
           <tr>
             <th class="logo-column">Logo</th>
             <th>Auction Name</th>
@@ -108,8 +108,11 @@
                 Edit
               </button>
 
-              <button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">
+              <button type="button" class="btn btn-danger btn-sm me-2" (click)="deleteAuction(auction)">
                 Delete
+              </button>
+              <button type="button" class="btn btn-primary btn-sm" (click)="playerRegistrationFormPopup(auction)">
+            Share Link
               </button>
             </td>
           </tr>
@@ -119,7 +122,7 @@
     <div *ngIf="!loading && auctions.length > 0" class="mobile-auction-list">
       <details *ngFor="let auction of filteredAuctions" [open]="selectedAuctionId === auction.id" class="auction-accordion">
         <summary><img *ngIf="auction.logo" [src]="auction.logo" alt=""><span *ngIf="!auction.logo" class="logo-placeholder">Logo</span><span><strong>{{auction.auctionName}}</strong><small>{{auction.auctionDate | date:'mediumDate'}}</small></span></summary>
-        <div class="auction-details"><span>Points / Team <strong>{{auction.pointsPerTeam}}</strong></span><span>Players / Team <strong>{{auction.playersPerTeam}}</strong></span><span>Base Price <strong>{{auction.basePlayerPrice || auction.minimumBid}}</strong></span><div class="action-cell"><button type="button" class="btn btn-success btn-sm" *ngIf="selectedAuctionId !== auction.id" (click)="activateAuction(auction)">Select</button><button type="button" class="btn btn-warning btn-sm" (click)="editAuction(auction)">Edit</button><button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">Delete</button></div></div>
+        <div class="auction-details"><span>Points / Team <strong>{{auction.pointsPerTeam}}</strong></span><span>Players / Team <strong>{{auction.playersPerTeam}}</strong></span><span>Base Price <strong>{{auction.basePlayerPrice || auction.minimumBid}}</strong></span><div class="action-cell"><button type="button" class="btn btn-success btn-sm" *ngIf="selectedAuctionId !== auction.id" (click)="activateAuction(auction)">Select</button><button type="button" class="btn btn-warning btn-sm" (click)="editAuction(auction)">Edit</button><button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">Delete</button><button type="button" class="btn btn-primary btn-sm" (click)="playerRegistrationFormPopup(auction)">Share Link</button></div></div>
       </details>
     </div>
     <div *ngIf="!loading && auctions.length > 0 && filteredAuctions.length === 0" class="empty-state">
@@ -169,12 +172,12 @@
 
         <div>
           <label class="form-label">Points Per Team</label>
-          <input type="number" class="form-control" formControlName="pointsPerTeam">
+          <input type="number" class="form-control" formControlName="pointsPerTeam" (focus)="clearDefaultZero('pointsPerTeam')">
         </div>
 
         <div>
           <label class="form-label">Players Per Team</label>
-          <input type="number" class="form-control" formControlName="playersPerTeam">
+          <input type="number" class="form-control" formControlName="playersPerTeam" (focus)="clearDefaultZero('playersPerTeam')">
         </div>
 
         <!-- <div class="col-md-6 mb-3">
@@ -189,17 +192,17 @@
 
         <div>
           <label class="form-label">Base Player Price</label>
-          <input type="number" class="form-control" formControlName="basePlayerPrice">
+          <input type="number" class="form-control" formControlName="basePlayerPrice" (focus)="clearDefaultZero('basePlayerPrice')">
         </div>
 
         <div>
           <label class="form-label">Minimum Bid</label>
-          <input type="number" class="form-control" formControlName="minimumBid">
+          <input type="number" class="form-control" formControlName="minimumBid" (focus)="clearDefaultZero('minimumBid')">
         </div>
 
         <div>
           <label class="form-label">Bid Increase By</label>
-          <input type="number" class="form-control" formControlName="bidIncreaseBy">
+          <input type="number" class="form-control" formControlName="bidIncreaseBy" (focus)="clearDefaultZero('bidIncreaseBy')">
         </div>
       </div>
 
@@ -228,5 +231,29 @@
         </button>
       </div>
     </form>
+  </section>
+</div>
+
+<div class="share-modal-backdrop" *ngIf="shareAuction" (click)="closeSharePopup()">
+  <section class="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title" (click)="$event.stopPropagation()">
+    <div class="share-modal-header">
+      <div>
+        <h3 id="share-modal-title">Player Registration Link</h3>
+        <p>{{shareAuction.auctionName}}</p>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeSharePopup()"></button>
+    </div>
+
+    <label class="form-check form-switch registration-link-switch">
+      <input class="form-check-input" type="checkbox" [checked]="shareAuction.registrationLinkEnabled" (change)="toggleRegistrationLink()">
+      <span class="form-check-label">Enable player registration for this auction</span>
+    </label>
+
+    <p class="share-modal-help">Only this auction’s registration form is affected.</p>
+
+    <div class="share-modal-actions">
+      <button type="button" class="btn btn-outline-secondary" (click)="closeSharePopup()">Close</button>
+      <button type="button" class="btn btn-primary" (click)="copyRegistrationLink()">Copy Link</button>
+    </div>
   </section>
 </div>

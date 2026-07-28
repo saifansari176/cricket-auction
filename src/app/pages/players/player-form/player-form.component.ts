@@ -183,6 +183,8 @@ export class PlayerFormComponent {
 
       baseBid: Number(this.getSelectedCategory()?.basePrice ?? this.getAuctionBaseBid()),
 
+      bidIncreaseBy: Number(this.getSelectedCategory()?.bidIncreaseBy ?? this.auction?.bidIncreaseBy ?? 0),
+
       note: this.form.value.note || '',
 
       photo: this.form.value.photo || '',

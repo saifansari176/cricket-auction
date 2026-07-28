@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 
 import { MessageService } from '../../core/services/message.service';
 
@@ -14,6 +14,16 @@ export class MessageModalComponent {
   private messageService = inject(MessageService);
 
   message$ = this.messageService.message$;
+
+  @HostListener('document:keydown.enter', ['$event'])
+  confirmWithEnter(event: Event): void {
+    if (!this.messageService.hasActiveMessage()) {
+      return;
+    }
+
+    event.preventDefault();
+    this.close(true);
+  }
 
   close(confirmed = false): void {
     this.messageService.close(confirmed);

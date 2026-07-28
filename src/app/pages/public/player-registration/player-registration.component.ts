@@ -6,7 +6,6 @@ import { ActivatedRoute } from '@angular/router';
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { Player } from '../../../core/models/player';
 import { AuctionService } from '../../../core/services/auction.service';
-import { PlayerRegistrationLinkService } from '../../../core/services/player-registration-link.service';
 import { PlayerService } from '../../../core/services/player.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { MessageService } from '../../../core/services/message.service';
@@ -24,7 +23,6 @@ export class PlayerRegistrationComponent implements OnDestroy {
   private fb = inject(FormBuilder);
   private auctionService = inject(AuctionService);
   private playerService = inject(PlayerService);
-  private registrationLinkService = inject(PlayerRegistrationLinkService);
   private storageService = inject(StorageService);
   private message = inject(MessageService);
   private route = inject(ActivatedRoute);
@@ -60,14 +58,13 @@ export class PlayerRegistrationComponent implements OnDestroy {
   async ngOnInit(): Promise<void> {
     try {
       const auctionId = this.route.snapshot.queryParamMap.get('auctionId') || '';
-      const [auction, registrationSettings] = await Promise.all([
-        auctionId ? this.auctionService.getAuctionById(auctionId) : this.auctionService.get(),
-        this.registrationLinkService.getSettings()
-      ]);
+      const auction = auctionId
+        ? await this.auctionService.getAuctionById(auctionId)
+        : await this.auctionService.get();
 
       this.auction = auction;
       this.categories = await this.categoryService.getCategories(auction?.activeAuctionId || auction?.id);
-      this.registrationEnabled = registrationSettings.enabled;
+      this.registrationEnabled = auction?.registrationLinkEnabled === true;
     } finally {
       this.loading = false;
     }
@@ -90,6 +87,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
       tshirtSize: this.form.value.tshirtSize || '',
       trouserSize: this.form.value.trouserSize || '',
       baseBid: Number(this.getSelectedCategory()?.basePrice ?? this.auction?.basePlayerPrice ?? this.auction?.minimumBid ?? 0),
+      bidIncreaseBy: Number(this.getSelectedCategory()?.bidIncreaseBy ?? this.auction?.bidIncreaseBy ?? 0),
       note: this.form.value.note || '',
       photo: this.form.value.photo || '',
       status: 'Available',

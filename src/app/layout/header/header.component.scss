@@ -1,25 +1,75 @@
+// .app-header {
+//     min-height:76px;
+//     background:rgb(190 216 255);
+//     border-bottom:1px solid #e2e8f0;
+//     box-shadow:0 8px 24px rgba(15,23,42,.08);
+//     display:flex;
+//     align-items:center;
+//     justify-content:space-between;
+//     gap:18px;
+//     padding:0 28px 0 10px;
+//     position:sticky;
+//     top:0;
+//     z-index:900;
+// }
+
 .app-header {
-    min-height:76px;
-    background:rgb(190 216 255);
-    border-bottom:1px solid #e2e8f0;
-    box-shadow:0 8px 24px rgba(15,23,42,.08);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:18px;
-    padding:0 28px 0 10px;
-    position:sticky;
-    top:0;
-    z-index:900;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    height: 72px;
+    padding: 0 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    box-shadow:
+        0 3px 15px rgba(15,23,42,.06);
+
+    transition: .3s;
 }
 
 .current-auction-bar {
-    background:#0f172a;
-    color:#e2e8f0;
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    padding:6px 20px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 12px;
+
+    background: linear-gradient(135deg,
+            #091b35 0%,
+            #12315f 35%,
+            #1e4d8f 70%,
+            #0c1e39 100%);
+
+    border: 1px solid rgba(255, 255, 255, .18);
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, .35),
+        inset 0 1px 1px rgba(255, 255, 255, .2),
+        inset 0 -1px 1px rgba(255, 255, 255, .08);
+
+    backdrop-filter: blur(15px);
+}
+
+.current-auction-bar strong {
+    color: #fff;
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    text-shadow:
+        0 0 8px rgba(255, 255, 255, .4),
+        0 0 15px #4fc3ff,
+        0 0 30px #2196f3;
 }
 
 .brand,
@@ -48,8 +98,8 @@
 }
 
 .brand-mark {
-    width:100px;
-    height:75px;
+    width:150px;
+    height:80px;
     border-radius:10px;
     color:#fff;
     display:flex;
@@ -115,6 +165,37 @@
     font-size:24px;
     line-height:1;
 }
+@media (max-width: 768px) {
+
+  .brand {
+    position: relative;
+    width: 100%;
+    min-width: unset;
+    height: 70px;
+  }
+
+  .menu-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+
+  .brand-home {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .brand-mark {
+    width: 100px;
+    height: auto;
+  }
+}
 
 .desktop-nav {
     gap:6px;
@@ -125,7 +206,7 @@
 .nav-group button {
     color:#334155;
     text-decoration:none;
-    font-size:14px;
+    font-size:18px;
     font-weight:700;
 }
 
@@ -142,8 +223,8 @@
 .desktop-nav a:hover,
 .nav-group:hover button,
 .nav-group:focus-within button {
-    background:#2563eb;
-    color:#fff;
+    background:#eff6ff;
+    color:#2563eb;
 }
 
 .nav-group {
@@ -165,9 +246,8 @@
     z-index:1000;
 }
 
-.nav-group:hover .nav-dropdown,
-.nav-group:focus-within .nav-dropdown {
-    display:block;
+.nav-group:hover .nav-dropdown {
+    display: block;
 }
 
 .nav-dropdown a {
@@ -176,25 +256,139 @@
 }
 
 .user {
-    gap:12px;
+    // gap:12px;
+     background:#f8fafc;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:40px;
+
+    padding: 0;
+    gap: 0;
+}
+
+.profile-menu {
+    position: relative;
+    padding: 0;
 }
 
 .account-chip {
-    gap:10px;
-    padding:7px 10px;
+    min-height: 52px;
+    gap: 9px;
+    padding: 7px 12px 7px 7px;
 }
 
+.profile-trigger {
+    border: 0;
+    border-radius: 40px;
+    background: #f8fafc;
+    cursor: pointer;
+    text-align: left;
+    border: 1px solid #dbe3ef;
+    transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.profile-trigger:hover,
+.profile-trigger:focus-visible {
+    background: #fff;
+    border-color: #93c5fd;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, .12);
+    outline: none;
+}
+
+.profile-chevron {
+    width: 7px;
+    height: 7px;
+    margin: -4px 2px 0 5px;
+    border-right: 1.8px solid #475569;
+    border-bottom: 1.8px solid #475569;
+    color: transparent;
+    font-size: 0;
+    transform: rotate(45deg);
+    transition: transform .18s ease, margin .18s ease;
+}
+
+.profile-menu.open .profile-chevron {
+    margin-top: 4px;
+    transform: rotate(225deg);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 210px;
+    padding: 7px;
+    border: 1px solid #d7e2f0;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 18px 40px rgba(15,23,42,.16);
+}
+
+.profile-dropdown a,
+.profile-dropdown .logout-btn {
+    display: block;
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 9px;
+    text-align: left;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.profile-dropdown a {
+    color: #334155;
+    font-weight: 700;
+}
+
+.profile-dropdown a:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.profile-dropdown .logout-btn { margin-top: 4px; }
+
 .avatar {
-    width:34px;
-    height:34px;
+    width:36px;
+    height:36px;
     border-radius:50%;
-    background:#0f172a;
+    background: #173b72;
     color:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-weight:800;
-    text-transform:uppercase;
+    box-shadow: none;
+}
+
+.avatar svg {
+    width: 19px;
+    height: 19px;
+    fill: currentColor;
+}
+
+.share-btn{
+
+    background:#2563eb;
+    color:#fff;
+
+    border:none;
+
+    border-radius:10px;
+
+    height:40px;
+
+    padding:0 18px;
+
+    font-weight:700;
+
+    transition:.3s;
+}
+
+.share-btn:hover{
+
+    background:#1d4ed8;
+
+    transform:translateY(-1px);
 }
 
 .account-text {
@@ -206,6 +400,10 @@
 .account-text strong {
     color:#0f172a;
     font-size:13px;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .account-text small {
@@ -314,9 +512,7 @@
         display:flex;
     }
 
-    .app-header > .user {
-        display:none;
-    }
+    .app-header > .user { display:none; }
 
     .menu-user {
         display:block;
@@ -333,7 +529,7 @@
         color:#e2e8f0;
     }
 
-    .menu-user .share-btn,
+    .menu-user,
     .menu-user .logout-btn {
         width:100%;
         margin-bottom:8px;

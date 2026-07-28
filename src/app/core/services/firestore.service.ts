@@ -103,6 +103,13 @@ export class FirebaseService {
 
   }
 
+  async deleteCollection(collectionName: string): Promise<void> {
+    await this.loading.track(async () => {
+      const snapshot = await getDocs(collection(db, collectionName));
+      await Promise.all(snapshot.docs.map((document) => deleteDoc(document.ref)));
+    });
+  }
+
   private withoutId<T extends FirestorePayload>(data: T): DocumentData {
     const { id: _id, ...payload } = data;
     return payload as DocumentData;

@@ -5,8 +5,6 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuctionSettings } from '../../core/models/auction-settings';
 import { AuthService } from '../../core/services/auth.service';
 import { AuctionService } from '../../core/services/auction.service';
-import { PlayerRegistrationLinkService } from '../../core/services/player-registration-link.service';
-import { MessageService } from '../../core/services/message.service';
 
 @Component({
   selector: 'app-header',
@@ -17,28 +15,22 @@ import { MessageService } from '../../core/services/message.service';
 export class HeaderComponent implements OnInit {
   currentUser$;
   menuOpen = false;
+  profileOpen = false;
   openSection = 'main';
   currentAuction: AuctionSettings | null = null;
-  registrationLinkEnabled = false;
 
   constructor(
     private authService: AuthService,
     public router: Router,
-    private auctionService: AuctionService,
-    private registrationLinkService: PlayerRegistrationLinkService,
-    private message: MessageService
+    private auctionService: AuctionService
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
   async ngOnInit(): Promise<void> {
-    const [auction, registrationSettings] = await Promise.all([
-      this.auctionService.get(),
-      this.registrationLinkService.getSettings()
-    ]);
+    const auction = await this.auctionService.get();
 
     this.currentAuction = auction;
-    this.registrationLinkEnabled = registrationSettings.enabled;
 
     this.auctionService.activeAuction$.subscribe((activeAuction) => {
       this.currentAuction = activeAuction;
@@ -76,22 +68,21 @@ export class HeaderComponent implements OnInit {
     this.menuOpen = false;
   }
 
-  async toggleRegistrationLink(): Promise<void> {
-    this.registrationLinkEnabled = !this.registrationLinkEnabled;
-    await this.registrationLinkService.setEnabled(this.registrationLinkEnabled);
+  toggleProfile(): void {
+    this.profileOpen = !this.profileOpen;
   }
 
-  async shareRegistrationLink(): Promise<void> {
-    const activeAuctionId = this.currentAuction?.activeAuctionId || this.currentAuction?.id || '';
-    const query = activeAuctionId ? `?auctionId=${encodeURIComponent(activeAuctionId)}` : '';
-    const link = `${window.location.origin}/player-registration${query}`;
+  closeProfile(): void {
+    this.profileOpen = false;
+  }
 
-    if (navigator.clipboard) {
-      await navigator.clipboard.writeText(link);
-      this.message.success('Registration link copied.');
-      return;
+  closeProfileOnFocusOut(event: FocusEvent): void {
+    const nextFocusedElement = event.relatedTarget as Node | null;
+    const profile = event.currentTarget as HTMLElement;
+
+    if (!profile.contains(nextFocusedElement)) {
+      this.closeProfile();
     }
-
-    this.message.info(`Copy registration link:\n${link}`);
   }
+
 }

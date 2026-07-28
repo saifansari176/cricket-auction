@@ -55,6 +55,8 @@ export class AuctionSettingsComponent {
 
   showForm = false;
 
+  shareAuction: AuctionSettings | null = null;
+
   form = this.fb.group({
 
     logo: [''],
@@ -79,8 +81,6 @@ export class AuctionSettingsComponent {
 
   });
 
-
-  // =====================================
 
   async ngOnInit() {
 
@@ -119,8 +119,6 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
-
   async loadAuctions(): Promise<void> {
 
     this.auctions = await this.auctionService.getAuctions();
@@ -137,8 +135,6 @@ export class AuctionSettingsComponent {
       auction.pointsPerTeam, auction.playersPerTeam, auction.basePlayerPrice, auction.minimumBid
     ].some((value) => String(value ?? '').toLowerCase().includes(filter)));
   }
-
-  // =====================================
 
   selectAuction(auction: AuctionSettings): void {
 
@@ -174,8 +170,6 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
-
   async activateAuction(auction: AuctionSettings): Promise<void> {
 
     if (!auction.id) {
@@ -209,8 +203,6 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
-
   editAuction(auction: AuctionSettings): void {
 
     this.selectAuction(auction);
@@ -219,7 +211,7 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
+
 
   createNewAuction(): void {
 
@@ -257,8 +249,6 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
-
   cancelForm(): void {
 
     this.showForm = false;
@@ -275,7 +265,17 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
+  clearDefaultZero(controlName: string): void {
+
+    const control = this.form.get(controlName);
+
+    if (Number(control?.value ?? 0) === 0) {
+
+      control?.setValue(null);
+
+    }
+
+  }
 
   async deleteAuction(auction: AuctionSettings): Promise<void> {
 
@@ -325,7 +325,37 @@ export class AuctionSettingsComponent {
 
   }
 
-  // =====================================
+  playerRegistrationFormPopup(auction: AuctionSettings): void {
+    this.shareAuction = auction;
+  }
+
+  closeSharePopup(): void {
+    this.shareAuction = null;
+  }
+
+  async toggleRegistrationLink(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+
+    const enabled = !this.shareAuction.registrationLinkEnabled;
+    await this.auctionService.setRegistrationLinkEnabled(this.shareAuction.id, enabled);
+    this.shareAuction.registrationLinkEnabled = enabled;
+
+    const auction = this.auctions.find((item) => item.id === this.shareAuction?.id);
+    if (auction) auction.registrationLinkEnabled = enabled;
+  }
+
+  async copyRegistrationLink(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+
+    const link = `${window.location.origin}/player-registration?auctionId=${encodeURIComponent(this.shareAuction.id)}`;
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(link);
+      this.message.success('Registration link copied.');
+      return;
+    }
+
+    this.message.info(`Copy registration link:\n${link}`);
+  }
 
   async onLogoChange(event: Event) {
 
@@ -371,8 +401,6 @@ export class AuctionSettingsComponent {
     this.uploading = false;
 
   }
-
-  // =====================================
 
   async save() {
 

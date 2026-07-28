@@ -29,6 +29,7 @@ export class PlayerCategoriesComponent {
   categories: PlayerCategory[] = [];
   auctionName = '';
   auctionId = '';
+  auctionBidIncreaseBy = 0;
   editingCategory: PlayerCategory | null = null;
   selectedCategory: PlayerCategory | null = null;
   players: Player[] = [];
@@ -40,7 +41,8 @@ export class PlayerCategoriesComponent {
 
   form = this.fb.group({
     name: ['', Validators.required],
-    basePrice: [0, [Validators.required, Validators.min(1)]]
+    basePrice: [0, [Validators.required, Validators.min(1)]],
+    bidIncreaseBy: [0, [Validators.required, Validators.min(1)]]
   });
 
   async ngOnInit(): Promise<void> {
@@ -48,6 +50,7 @@ export class PlayerCategoriesComponent {
     this.auctionId = auction?.activeAuctionId || auction?.id || '';
     this.auctionName = auction?.auctionName || 'Selected Auction';
     this.regularBasePrice = Number(auction?.basePlayerPrice ?? auction?.minimumBid ?? 0);
+    this.auctionBidIncreaseBy = Number(auction?.bidIncreaseBy || 0);
     await this.loadCategories();
     await this.loadPlayers();
   }
@@ -88,6 +91,10 @@ export class PlayerCategoriesComponent {
     return this.players.filter((player) => player.categoryId === categoryId);
   }
 
+  getCategoryBidIncrease(category: PlayerCategory): number {
+    return Number(category.bidIncreaseBy || this.auctionBidIncreaseBy || 0);
+  }
+
   selectCategory(category: PlayerCategory): void {
     this.selectedCategory = category;
     this.playerSearch = '';
@@ -100,12 +107,24 @@ export class PlayerCategoriesComponent {
 
   edit(category: PlayerCategory): void {
     this.editingCategory = category;
-    this.form.patchValue({ name: category.name, basePrice: category.basePrice });
+    this.form.patchValue({
+      name: category.name,
+      basePrice: category.basePrice,
+      bidIncreaseBy: Number(category.bidIncreaseBy || 0)
+    });
   }
 
   cancel(): void {
     this.editingCategory = null;
-    this.form.reset({ name: '', basePrice: 0 });
+    this.form.reset({ name: '', basePrice: 0, bidIncreaseBy: 0 });
+  }
+
+  clearDefaultZero(controlName: 'basePrice' | 'bidIncreaseBy'): void {
+    const control = this.form.get(controlName);
+
+    if (Number(control?.value || 0) === 0) {
+      control?.setValue(null);
+    }
   }
 
   async save(): Promise<void> {
@@ -118,11 +137,13 @@ export class PlayerCategoriesComponent {
       id: this.editingCategory?.id,
       auctionId: this.auctionId,
       name: this.form.value.name || '',
-      basePrice: Number(this.form.value.basePrice || 0)
+      basePrice: Number(this.form.value.basePrice || 0),
+      bidIncreaseBy: Number(this.form.value.bidIncreaseBy || 0)
     });
     this.message.success(this.editingCategory ? 'Category updated successfully.' : 'Category added successfully.');
     this.cancel();
     await this.loadCategories();
+    await this.loadPlayers();
   }
 
   async delete(category: PlayerCategory): Promise<void> {
@@ -143,7 +164,8 @@ export class PlayerCategoriesComponent {
       ...player,
       categoryId: category.id,
       categoryName: category.name,
-      baseBid: category.basePrice
+      baseBid: category.basePrice,
+      bidIncreaseBy: this.getCategoryBidIncrease(category)
     });
     await this.loadPlayers();
     this.playerCategorySelections[player.id] = '';
@@ -164,7 +186,8 @@ export class PlayerCategoriesComponent {
       ...player,
       categoryId: '',
       categoryName: '',
-      baseBid: this.regularBasePrice
+      baseBid: this.regularBasePrice,
+      bidIncreaseBy: this.auctionBidIncreaseBy
     });
     await this.loadPlayers();
   }
@@ -191,7 +214,8 @@ export class PlayerCategoriesComponent {
       Mobile: player.mobile,
       'Player Type': player.playerType,
       Status: player.status,
-      'Base Price': player.baseBid
+      'Base Price': player.baseBid,
+      'Bid Increase By': this.selectedCategory?.bidIncreaseBy || ''
     }));
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
