@@ -1,4 +1,4 @@
-<header class="app-header">
+<header class="app-header" *ngIf="!router.url.includes('/watch')">
     <div class="brand">
         <button type="button" class="menu-btn" (click)="toggleMenu()" aria-label="Open menu">
             <span></span>

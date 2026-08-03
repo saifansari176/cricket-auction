@@ -11,8 +11,10 @@
         <h1>{{ auction?.auctionName }}</h1>
         <p>{{ auction?.auctionDate }}</p>
       </div>
-      <span class="live-pill" [class.completed]="liveState?.status === 'completed'">{{ liveState?.status === 'completed'
+      <span class="live-pill" [class.completed]="liveState?.status === 'completed'">
+        {{ liveState?.status === 'completed'
         ? 'COMPLETED' : 'LIVE' }}</span>
+        <img src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
     </header>
 
     <section class="live-card">
