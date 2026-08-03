@@ -3,8 +3,17 @@ import { BehaviorSubject } from 'rxjs';
 import { AuctionSettings } from '../models/auction-settings';
 import { AuctionBid } from '../models/bid';
 import { Player } from '../models/player';
+import { Team } from '../models/team';
 import { AuthService } from './auth.service';
 import { FirebaseService } from './firestore.service';
+
+export interface LiveAuctionState {
+  currentPlayerId?: string;
+  currentBid?: number;
+  highestTeamId?: string;
+  status?: 'live' | 'completed';
+  updatedAt?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -178,6 +187,33 @@ export class AuctionService {
       this.activeAuction$.next(null);
     }
 
+  }
+
+  /** Read-only data used by the public tournament watch link. */
+  async getPublicTournament(auctionId: string): Promise<{
+    auction: AuctionSettings | null;
+    teams: Team[];
+    players: Player[];
+    bids: AuctionBid[];
+    liveState: LiveAuctionState | null;
+  }> {
+    const [auction, teams, players, bids, liveState] = await Promise.all([
+      this.getAuctionById(auctionId),
+      this.firebase.getAll<Team>(this.auctionCollection(auctionId, 'teams')),
+      this.firebase.getAll<Player>(this.auctionCollection(auctionId, 'players')),
+      this.firebase.getAll<AuctionBid>(this.auctionCollection(auctionId, 'bids')),
+      this.firebase.getById<LiveAuctionState>(this.auctionCollection(auctionId, 'liveState'), 'current')
+    ]);
+    return { auction, teams, players, bids, liveState };
+  }
+
+  async saveLiveState(state: LiveAuctionState, auctionId?: string): Promise<void> {
+    const id = auctionId || await this.getActiveAuctionId();
+    if (!id) return;
+    await this.firebase.set(this.auctionCollection(id, 'liveState'), 'current', {
+      ...state,
+      updatedAt: new Date().toISOString()
+    });
   }
 
   async updateAuctionAccess(auctionId: string, teamLimit: number, playerLimit: number): Promise<void> {

@@ -18,6 +18,7 @@
             <button type="button">Players <span>▾</span></button>
             <div class="nav-dropdown">
                 <a routerLink="/players" routerLinkActive="active">Player List</a>
+                <a routerLink="/auction/categories" routerLinkActive="active">Player Categories</a>
                 <a routerLink="/players/add" routerLinkActive="active">Add Player</a>
             </div>
         </div>
@@ -34,7 +35,7 @@
             <button type="button">Auction <span>▾</span></button>
             <div class="nav-dropdown">
                 <a routerLink="/auction" routerLinkActive="active" (click)="startNormalAuction()">Live Auction</a>
-                <a routerLink="/auction/categories" routerLinkActive="active">Categories</a>
+                <!-- <a routerLink="/auction/categories" routerLinkActive="active">Categories</a> -->
                 <a routerLink="/auction-settings" routerLinkActive="active">Auction Management</a>
                 <a routerLink="/reports" routerLinkActive="active">Reports</a>
             </div>
@@ -62,7 +63,7 @@
     </div>
 </header>
 
-<div class="current-auction-bar" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction')">
+<div class="current-auction-bar" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction') && !router.url.includes('/watch')">
     <strong>{{currentAuction?.auctionName}}</strong>
 </div>
 

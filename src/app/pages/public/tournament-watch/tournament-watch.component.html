@@ -1,0 +1,89 @@
+<main class="watch-page" *ngIf="!loading; else loadingState">
+  <section *ngIf="notFound" class="empty">
+    <h1>Tournament not found</h1>
+    <p>This public link is invalid or the tournament is no longer available.</p>
+  </section>
+  <ng-container *ngIf="!notFound">
+    <header class="hero">
+      <img *ngIf="auction?.logo" [src]="auction?.logo" [alt]="auction?.auctionName + ' logo'">
+      <div>
+        <p class="eyebrow">CRICBIDS • LIVE TOURNAMENT</p>
+        <h1>{{ auction?.auctionName }}</h1>
+        <p>{{ auction?.auctionDate }}</p>
+      </div>
+      <span class="live-pill" [class.completed]="liveState?.status === 'completed'">{{ liveState?.status === 'completed'
+        ? 'COMPLETED' : 'LIVE' }}</span>
+    </header>
+
+    <section class="live-card">
+      <div *ngIf="currentPlayer; else waiting" class="live-player">
+        <div class="player-profile">
+          <img class="player-image" [src]="currentPlayer.photo || 'assets/no-player.png'"
+            [alt]="currentPlayer.firstName + ' ' + currentPlayer.lastName">
+          <div>
+            <p class="eyebrow">CURRENT PLAYER</p>
+            <h2>{{ currentPlayer.firstName }} {{ currentPlayer.lastName }}</h2>
+          </div>
+        </div>
+        <div class="current-bid"><span>CURRENT BID</span><strong>{{ (liveState?.currentBid || currentPlayer.baseBid) |
+            currency:'INR':'symbol':'1.0-0' }}</strong></div>
+           <div class="player-profile" *ngIf="highestTeam; else noBid">
+          <div>
+            <p class="eyebrow">HIGHEST BID TEAM</p>
+            <h2>{{ highestTeam.teamName }}</h2>
+          </div>
+          <img class="team-image" [src]="highestTeam.logo || 'assets/no-team.png'" [alt]="highestTeam.teamName">
+        </div>
+        <ng-template #noBid>
+          <div class="highest-bid no-bid"><span>HIGHEST BID</span><b>Waiting for a bid</b></div>
+        </ng-template>
+      </div>
+      <ng-template #waiting>
+        <div class="waiting">
+          <h2>{{ liveState?.status === 'completed' ? 'Auction completed' : 'Waiting for the next player' }}</h2>
+          <p>This page refreshes automatically.</p>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- <section class="stats"><article><b>{{ teams.length }}</b><span>Teams</span></article><article><b>{{ bids.length }}</b><span>Players sold</span></article><article><b>{{ totalSpent | currency:'INR':'symbol':'1.0-0' }}</b><span>Total spent</span></article></section> -->
+
+    <section class="reports">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">TOURNAMENT REPORT</p>
+          <h2>Team squads &amp; budget</h2>
+        </div><button type="button" (click)="load(false)">Refresh now</button>
+      </div>
+      <div class="team-grid">
+        <article class="team" *ngFor="let team of teams">
+          <div class="team-header"><img [src]="team.logo || 'assets/no-team.png'" [alt]="team.teamName">
+            <div>
+              <h3>{{ team.teamName }}</h3>
+              <p>{{ soldForTeam(team).length }} players • {{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}
+                spent</p>
+            </div>
+          </div>
+          <ul>
+            <li *ngFor="let bid of soldForTeam(team)"><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount |
+                currency:'INR':'symbol':'1.0-0' }}</b></li>
+            <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="reports latest">
+      <div>
+        <p class="eyebrow">LATEST RESULTS</p>
+        <h2>Recent purchases</h2>
+      </div>
+      <div class="sale" *ngFor="let sale of latestSales"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
+          }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
+      <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
+    </section>
+  </ng-container>
+</main>
+<ng-template #loadingState>
+  <main class="loading">Loading public tournament…</main>
+</ng-template>

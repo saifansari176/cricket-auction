@@ -238,7 +238,7 @@
   <section class="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title" (click)="$event.stopPropagation()">
     <div class="share-modal-header">
       <div>
-        <h3 id="share-modal-title">Player Registration Link</h3>
+        <h3 id="share-modal-title">Share Links</h3>
         <p>{{shareAuction.auctionName}}</p>
       </div>
       <button type="button" class="btn-close" aria-label="Close" (click)="closeSharePopup()"></button>
@@ -252,8 +252,9 @@
     <p class="share-modal-help">Only this auction’s registration form is affected.</p>
 
     <div class="share-modal-actions">
-      <button type="button" class="btn btn-outline-secondary" (click)="closeSharePopup()">Close</button>
-      <button type="button" class="btn btn-primary" (click)="copyRegistrationLink()">Copy Link</button>
+      <!-- <button type="button" class="btn btn-outline-secondary" (click)="closeSharePopup()">Close</button> -->
+      <button type="button" class="share-action registration" (click)="copyRegistrationLink()" title="Copy player registration form link" aria-label="Copy player registration form link"><span class="share-action-icon" aria-hidden="true">↗</span><span><b>Registration form</b><small>Players can register</small></span></button>
+      <button type="button" class="share-action public" (click)="copyPublicTournamentLink()" title="Copy public live auction and reports link" aria-label="Copy public live auction and reports link"><span class="share-action-icon" aria-hidden="true">◉</span><span><b>Public live view</b><small>Live bids &amp; reports</small></span></button>
     </div>
   </section>
 </div>

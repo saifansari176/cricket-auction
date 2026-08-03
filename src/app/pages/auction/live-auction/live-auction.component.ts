@@ -106,6 +106,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.currentBid = 0;
     this.highestTeam = null;
     this.bidHistory = [];
+    this.publishLiveState();
   }
 
   get nextBid(): number {
@@ -137,6 +138,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     if (this.highestTeam) this.bidHistory.push({ team: this.highestTeam, bid: this.currentBid });
     this.currentBid = this.nextBid;
     this.highestTeam = team;
+    this.publishLiveState();
   }
 
   async undoLastBid(): Promise<void> {
@@ -284,6 +286,17 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.currentBid = Number(player.baseBid || 0);
     this.highestTeam = null;
     this.bidHistory = [];
+    this.publishLiveState();
+  }
+
+  private publishLiveState(): void {
+    if (!this.auction?.activeAuctionId && !this.auction?.id) return;
+    void this.auctionService.saveLiveState({
+      currentPlayerId: this.currentPlayer?.id || '',
+      currentBid: this.currentBid,
+      highestTeamId: this.highestTeam?.id || '',
+      status: this.currentPlayer ? 'live' : 'completed'
+    }, this.auction.activeAuctionId || this.auction.id);
   }
 
   private getMaxAllowedBid(team: Team): number {

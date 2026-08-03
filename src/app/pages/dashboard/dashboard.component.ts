@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
-
 import { AuctionBid } from '../../core/models/bid';
 import { Player } from '../../core/models/player';
 import { Team } from '../../core/models/team';
@@ -34,6 +33,8 @@ export class DashboardComponent implements OnInit {
   playerStatusFilter = '';
   categoryFilter = '';
   categories: PlayerCategory[] = [];
+  playerFilter = '';
+  teamFilter = '';
 
   constructor(
     private playerService: PlayerService,
@@ -41,7 +42,7 @@ export class DashboardComponent implements OnInit {
     private auctionService: AuctionService,
     private router: Router,
     private categoryService: PlayerCategoryService
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     this.loading = true;
@@ -86,80 +87,159 @@ export class DashboardComponent implements OnInit {
 
   get filteredPlayers(): Player[] {
     const filter = this.normalizedFilter;
+    const search = this.playerFilter.trim().toLowerCase();
     const players = this.filterPlayers(this.players);
-    if (!filter) return players;
 
-    return players.filter((player) =>
-      this.matchesFilter(filter, [
-        player.firstName,
-        player.lastName,
-        player.playerType,
-        player.status,
-        player.baseBid
-      ])
-    );
+    if (!filter && !search) {
+      return players;
+    }
+
+    return players.filter((player) => {
+      const matchesSearch =
+        !search ||
+        [
+          player.firstName,
+          player.lastName,
+          player.playerType,
+          player.status,
+          player.baseBid,
+        ].some((value) =>
+          String(value ?? '').toLowerCase().includes(search)
+        );
+
+      const matchesFilter =
+        !filter ||
+        this.matchesFilter(filter, [
+          player.firstName,
+          player.lastName,
+          player.playerType,
+          player.status,
+          player.baseBid,
+        ]);
+
+      return matchesSearch && matchesFilter;
+    });
   }
-
   get filteredTeams(): Team[] {
-    const filter = this.normalizedFilter;
+    const filter = this.teamFilter.trim().toLowerCase();
     if (!filter) return this.teams;
 
-    return this.teams.filter((team) =>
-      this.matchesFilter(filter, [
-        team.teamName,
-        team.ownerName,
-        team.remainingPoints,
-        team.playersBought
-      ])
-    );
+    return this.teams.filter((team) => [
+      team.teamName, team.ownerName, team.totalPoints, team.remainingPoints, team.playersBought
+    ].some((value) => String(value ?? '').toLowerCase().includes(filter)));
   }
 
   get filteredSoldPlayers(): AuctionBid[] {
     const filter = this.normalizedFilter;
-    const players = this.soldPlayers.filter((player) => this.matchesPlayerType(player.playerId));
-    if (!filter) return players;
-
-    return players.filter((player) =>
-      this.matchesFilter(filter, [
-        player.playerName,
-        player.teamName,
-        this.getBidPlayerType(player),
-        player.bidAmount,
-        player.soldDate
-      ])
+    const search = this.playerFilter.trim().toLowerCase();
+    const players = this.soldPlayers.filter((player) =>
+      this.matchesPlayerType(player.playerId)
     );
+
+    if (!filter && !search) {
+      return players;
+    }
+
+    return players.filter((player) => {
+      const matchesSearch =
+        !search ||
+        [
+          player.playerName,
+          player.teamName,
+          this.getBidPlayerType(player),
+          player.bidAmount,
+          player.soldDate,
+        ].some((value) =>
+          String(value ?? '').toLowerCase().includes(search)
+        );
+
+      const matchesFilter =
+        !filter ||
+        this.matchesFilter(filter, [
+          player.playerName,
+          player.teamName,
+          this.getBidPlayerType(player),
+          player.bidAmount,
+          player.soldDate,
+        ]);
+
+      return matchesSearch && matchesFilter;
+    });
   }
 
   get filteredAvailablePlayers(): Player[] {
     const filter = this.normalizedFilter;
-    const players = this.filterPlayers(this.availablePlayers).filter((player) =>
-      !this.categoryFilter || (this.categoryFilter === '__regular__' ? !player.categoryId : player.categoryId === this.categoryFilter)
-    );
-    if (!filter) return players;
+    const search = this.playerFilter.trim().toLowerCase();
 
-    return players.filter((player) =>
-      this.matchesFilter(filter, [
-        player.firstName,
-        player.lastName,
-        player.playerType,
-        player.baseBid
-      ])
+    const players = this.filterPlayers(this.availablePlayers).filter(
+      (player) =>
+        !this.categoryFilter ||
+        (this.categoryFilter === '__regular__'
+          ? !player.categoryId
+          : player.categoryId === this.categoryFilter)
     );
+
+    if (!filter && !search) {
+      return players;
+    }
+
+    return players.filter((player) => {
+      const matchesSearch =
+        !search ||
+        [
+          player.firstName,
+          player.lastName,
+          player.playerType,
+          player.baseBid,
+        ].some((value) =>
+          String(value ?? '').toLowerCase().includes(search)
+        );
+
+      const matchesFilter =
+        !filter ||
+        this.matchesFilter(filter, [
+          player.firstName,
+          player.lastName,
+          player.playerType,
+          player.baseBid,
+        ]);
+
+      return matchesSearch && matchesFilter;
+    });
   }
 
   get filteredUnsoldPlayers(): Player[] {
     const filter = this.normalizedFilter;
+    const search = this.playerFilter.trim().toLowerCase();
     const players = this.filterPlayersByType(this.unsoldPlayers);
-    if (!filter) return players;
 
-    return players.filter((player) =>
-      this.matchesFilter(filter, [
-        player.firstName,
-        player.lastName,
-        player.playerType,
-        player.baseBid
-      ])
-    );
+    if (!filter && !search) {
+      return players;
+    }
+
+    return players.filter((player) => {
+      const matchesSearch =
+        !search ||
+        [
+          player.firstName,
+          player.lastName,
+          player.playerType,
+          player.baseBid,
+        ].some((value) =>
+          String(value ?? '').toLowerCase().includes(search)
+        );
+
+      const matchesFilter =
+        !filter ||
+        this.matchesFilter(filter, [
+          player.firstName,
+          player.lastName,
+          player.playerType,
+          player.baseBid,
+        ]);
+
+      return matchesSearch && matchesFilter;
+    });
   }
 
   get activeFilteredCount(): number {
@@ -238,7 +318,7 @@ export class DashboardComponent implements OnInit {
 
   startAuction(player: Player): void {
     if (!player.id) return;
-    
+
     const playerName = `${player.firstName} ${player.lastName}`;
     this.auctionService.setSelectedCategory(player.categoryId || '');
     this.auctionService.setSelectedPlayer(player.id, playerName);

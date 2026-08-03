@@ -357,6 +357,19 @@ export class AuctionSettingsComponent {
     this.message.info(`Copy registration link:\n${link}`);
   }
 
+  async copyPublicTournamentLink(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+
+    const link = `${window.location.origin}/watch/${encodeURIComponent(this.shareAuction.id)}`;
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(link);
+      this.message.success('Public live auction and reports link copied.');
+      return;
+    }
+
+    this.message.info(`Copy public tournament link:\n${link}`);
+  }
+
   async onLogoChange(event: Event) {
 
     const input = event.target as HTMLInputElement;

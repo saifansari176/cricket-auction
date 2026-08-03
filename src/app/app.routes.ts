@@ -110,6 +110,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/settings/settings.component').then((m) => m.SettingsComponent),
   },
+  {
+    path: 'watch/:auctionId',
+    loadComponent: () =>
+      import('./pages/public/tournament-watch/tournament-watch.component').then((m) => m.TournamentWatchComponent),
+  },
 
   {
     path: 'about-us',

@@ -155,6 +155,7 @@
 .settings-summary strong {
   color: #0f172a;
   font-size: 24px;
+  white-space: nowrap;
 }
 
 .empty-state {
@@ -179,7 +180,7 @@
 }
 
 .share-modal {
-  width: min(100%, 440px);
+  width: min(100%, 600px);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, .2);
@@ -202,7 +203,13 @@
 .registration-link-switch .form-check-input { cursor: pointer; }
 .registration-link-switch .form-check-label { font-weight: 600; cursor: pointer; }
 .share-modal-help { font-size: 13px; }
-.share-modal-actions { justify-content: flex-end; margin-top: 20px; }
+.share-modal-actions { justify-content: flex-end; margin-top: 20px; flex-wrap: nowrap; }
+.share-action { display: inline-flex; align-items: center; gap: 9px; min-width: 0; flex: 1 1 0; padding: 9px 12px; border: 1px solid; border-radius: 9px; background: #fff; text-align: left; white-space: nowrap; transition: transform .15s ease, box-shadow .15s ease; }
+.share-action:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(15, 23, 42, .14); }
+.share-action-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; font-size: 18px; font-weight: 800; }
+.share-action b, .share-action small { display: block; line-height: 1.2; }.share-action small { margin-top: 3px; font-size: 11px; }
+.share-action.registration { color: #1453a5; border-color: #9dbde7; }.share-action.registration .share-action-icon { color: #1453a5; background: #e7f0ff; }.share-action.public { color: #fff; border-color: #1d7aab; background: linear-gradient(135deg, #0d6efd, #075684); }.share-action.public .share-action-icon { background: rgba(255,255,255,.18); }.share-action.public small { color: #d9f3ff; }
+@media (max-width: 575px) { .share-modal { width: min(100%, 520px); padding: 16px; } .share-modal-actions { gap: 6px; } .share-action { padding: 8px; } .share-action-icon { width: 27px; height: 27px; } .share-action b { font-size: 12px; } .share-action small { display: none; } }
 
 @media (max-width: 991px) {
   .settings-header,
