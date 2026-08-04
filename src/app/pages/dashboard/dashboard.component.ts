@@ -327,11 +327,13 @@ export class DashboardComponent implements OnInit {
 
   downloadAvailablePlayersExcel(): void {
     const data = this.filteredAvailablePlayers.map((player) => ({
+      'Sr No': this.filteredAvailablePlayers.indexOf(player) + 1,
       'First Name': player.firstName,
       'Last Name': player.lastName,
-      'Mobile Number': player.mobile,
-      'T-Shirt Size': player.tshirtSize,
-      Photo: player.photo
+      'Player Type': player.playerType,
+      // 'Mobile Number': player.mobile,
+      // 'T-Shirt Size': player.tshirtSize,
+      // Photo: player.photo
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);
