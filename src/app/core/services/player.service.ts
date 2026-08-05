@@ -20,20 +20,26 @@ export class PlayerService {
 
   }
 
-  async updateBaseBidForAuction(auctionId: string, baseBid: number): Promise<void> {
+  async updateAuctionDefaultsForPlayers(
+    auctionId: string,
+    baseBid: number,
+    bidIncreaseBy: number
+  ): Promise<void> {
     if (!auctionId) {
       return;
     }
 
     const players = await this.firebase.getAll<Player>(this.auctionCollection(auctionId));
     const price = Number(baseBid || 0);
+    const increment = Number(bidIncreaseBy || 0);
 
     await Promise.all(
       players
         .filter((player) => !player.categoryId && player.id)
         .map((player) => this.firebase.update(this.auctionCollection(auctionId), player.id!, {
           ...player,
-          baseBid: price
+          baseBid: price,
+          bidIncreaseBy: increment
         }))
     );
   }

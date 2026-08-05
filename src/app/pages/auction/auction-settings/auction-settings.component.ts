@@ -456,9 +456,10 @@ export class AuctionSettingsComponent {
 
       const savedAuctionId = await this.auctionService.save(settings, this.selectedAuctionId || undefined);
 
-      await this.playerService.updateBaseBidForAuction(
+      await this.playerService.updateAuctionDefaultsForPlayers(
         savedAuctionId,
-        settings.basePlayerPrice
+        settings.basePlayerPrice,
+        settings.bidIncreaseBy
       );
 
       await this.teamService.reconcileTeams(
