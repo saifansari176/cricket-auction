@@ -98,7 +98,7 @@
           <span class="team-name">{{team.teamName}}</span>
           <span class="team-stats">
             <span>Left <strong>₹{{team.remainingPoints}}</strong></span>
-            <span>Players <strong>{{team.playersBought || 0}}</strong></span>
+            <span>PL<strong>{{(team.playerLimit || auction?.playersPerTeam || 0) - (team.playersBought || 0)}}</strong></span>
           </span>
         </span>
 

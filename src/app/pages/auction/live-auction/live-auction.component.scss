@@ -295,9 +295,9 @@
   color: white;
   padding: 8px;
   cursor: pointer;
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  grid-template-rows: auto auto;
+  // display: grid;
+  // grid-template-columns: 44px minmax(0, 1fr);
+  // grid-template-rows: auto auto;
   align-items: center;
   gap: 7px;
   min-width: 0;
@@ -327,6 +327,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  justify-self: center;
 }
 
 .team-logo {
@@ -353,7 +354,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
-  text-align: left;
+  text-align: center;
 }
 
 .team-stats {
