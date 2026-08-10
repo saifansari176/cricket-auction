@@ -9,6 +9,7 @@ import { Team } from '../../core/models/team';
 import { AuctionService } from '../../core/services/auction.service';
 import { PlayerService } from '../../core/services/player.service';
 import { TeamService } from '../../core/services/team.service';
+import { ImagePreviewService } from '../../shared/image-preview/image-preview.service';
 
 @Component({
   selector: 'app-reports',
@@ -29,7 +30,8 @@ export class ReportsComponent implements OnInit {
   constructor(
     private teamService: TeamService,
     private auctionService: AuctionService,
-    private playerService: PlayerService
+    private playerService: PlayerService,
+    private imagePreview: ImagePreviewService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -101,7 +103,13 @@ export class ReportsComponent implements OnInit {
   }
 
   getBidPlayerPhoto(bid: AuctionBid): string {
-    return this.players.find((player) => player.id === bid.playerId)?.photo || '';
+    return bid.photoUrl || this.players.find((player) => player.id === bid.playerId)?.photo || '';
+  }
+
+  openPreview(url: string, name = ''): void {
+    if (url) {
+      this.imagePreview.open(url, name);
+    }
   }
 
   getBidPlayerTshirtSize(bid: AuctionBid): string {

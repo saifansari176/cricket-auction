@@ -19,7 +19,7 @@
   <div *ngIf="currentPlayer" class="player-section">
     <div *ngIf="!highestTeam" class="player-center">
       <img
-        [src]="currentPlayer.photo || 'assets/no-player.png'"
+        [src]="currentPlayer.photo || '/cricbids-logo.png'"
         alt="Player image"
         class="player-image" />
     </div>
@@ -27,7 +27,7 @@
     <div *ngIf="highestTeam" class="player-bid-layout">
       <div class="half player-half">
         <img
-          [src]="currentPlayer.photo || 'assets/no-player.png'"
+          [src]="currentPlayer.photo || '/cricbids-logo.png'"
           alt="Player image"
           class="player-image" />
       </div>
@@ -37,7 +37,7 @@
           <div class="highest-label">HIGHEST BID</div>
 
           <img
-            [src]="highestTeam.logo || 'assets/no-team.png'"
+            [src]="highestTeam.logo || '/cricbids-logo.png'"
             alt="Highest team image"
             class="team-image" />
           <div class="highest-bid-amount">{{highestTeam.teamName }}</div>
@@ -58,9 +58,11 @@
     </div> -->
 
     <div class="info-box center">
-      <span>PLAYER</span>
       <h1>{{currentPlayer.firstName}} {{currentPlayer.lastName}}</h1>
-      <small>{{currentPlayer.playerType}}</small>
+      <small class="player-detailss">
+        {{currentPlayer.playerType}}
+        <ng-container *ngIf="currentPlayer.currentTeam"> / Current Team: {{currentPlayer.currentTeam}}</ng-container>
+      </small>
     </div>
 
     <div class="info-box">
@@ -68,7 +70,11 @@
       <h2 class="bid">₹{{currentBid}}</h2>
     </div>
   </div>
-
+  <div class="player-note-slot">
+    <div *ngIf="currentPlayer?.note" class="text-center player-note">
+      <strong>Notes:</strong> {{currentPlayer?.note}}
+    </div>
+  </div>
   <div class="action-buttons">
     <button class="sold" (click)="sold()">SOLD</button>
     <button class="unsold" (click)="unsold()">UNSOLD</button>
@@ -89,7 +95,7 @@
         (click)="bid(team)">
         <span class="team-logo-wrap">
           <img
-            [src]="team.logo || 'assets/no-team.png'"
+            [src]="team.logo || '/cricbids-logo.png'"
             [alt]="team.teamName + ' logo'"
             class="team-logo" />
         </span>

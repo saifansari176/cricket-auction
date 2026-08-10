@@ -181,6 +181,32 @@
   background-color: #d97706;
 }
 
+.status-select {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.status-select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 28px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.status-select .status-arrow {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1;
+}
+
 @media (max-width: 576px) {
   .summary-grid {
     grid-template-columns: 1fr;

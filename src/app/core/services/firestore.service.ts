@@ -8,6 +8,9 @@ import {
   doc,
   getDoc,
   setDoc,
+  runTransaction,
+  query,
+  where,
   DocumentData
 } from 'firebase/firestore';
 
@@ -64,6 +67,41 @@ export class FirebaseService {
       payload
     ));
 
+  }
+
+  /**
+   * Creates a document only if no document has the supplied field value.
+   * The fixed id protects simultaneous submissions, while the lookup also
+   * protects registrations that were stored with older, random document ids.
+   */
+  async createIfNoMatchingField<T extends FirestorePayload>(
+    collectionName: string,
+    id: string,
+    field: string,
+    value: unknown,
+    data: T
+  ): Promise<boolean> {
+    const payload = this.withoutId(data);
+
+    return this.loading.track(async () => {
+      const matchingDocuments = await getDocs(
+        query(collection(db, collectionName), where(field, '==', value))
+      );
+
+      if (!matchingDocuments.empty) {
+        return false;
+      }
+
+      return runTransaction(db, async (transaction) => {
+      const document = doc(db, collectionName, id);
+      if ((await transaction.get(document)).exists()) {
+        return false;
+      }
+
+      transaction.set(document, payload);
+      return true;
+      });
+    });
   }
 
   // ==========================

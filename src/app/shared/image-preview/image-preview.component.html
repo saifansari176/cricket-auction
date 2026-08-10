@@ -1,0 +1,8 @@
+<div *ngIf="preview" class="image-preview-overlay" (click)="close()">
+  <div class="image-preview-modal" (click)="$event.stopPropagation()">
+    <button type="button" class="preview-close" (click)="close()" title="Close preview">&times;</button>
+    <img [src]="preview.url" [alt]="preview.name">
+    <p *ngIf="preview.name">{{ preview.name }}</p>
+  </div>
+</div>
+

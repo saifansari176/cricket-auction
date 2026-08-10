@@ -37,6 +37,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
   uploadingPhoto = false;
   categories: PlayerCategory[] = [];
   private localPreviewUrl = '';
+  private photoUploadVersion = 0;
 
   form = this.fb.group({
     firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -44,6 +45,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
     mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
     jerseyNumber: ['', [Validators.pattern(/^[0-9]{1,3}$/)]],
     playerType: ['', Validators.required],
+    currentTeam: [''],
     categoryId: [''],
     tshirtSize: ['', Validators.required],
     trouserSize: [''],
@@ -71,6 +73,10 @@ export class PlayerRegistrationComponent implements OnDestroy {
   }
 
   async submit(): Promise<void> {
+    if (this.saving || this.uploadingPhoto) {
+      return;
+    }
+
     if (this.form.invalid || !this.registrationEnabled) {
       this.form.markAllAsTouched();
       return;
@@ -82,6 +88,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
       mobile: this.form.value.mobile || '',
       jerseyNumber: this.form.value.jerseyNumber || '',
       playerType: this.form.value.playerType || '',
+      currentTeam: this.form.value.currentTeam || '',
       categoryId: this.form.value.categoryId || '',
       categoryName: this.getSelectedCategory()?.name || '',
       tshirtSize: this.form.value.tshirtSize || '',
@@ -130,19 +137,27 @@ export class PlayerRegistrationComponent implements OnDestroy {
       return;
     }
 
+    const uploadVersion = ++this.photoUploadVersion;
+    this.form.patchValue({ photo: '' });
     this.setLocalPreview(file);
     this.uploadingPhoto = true;
 
     try {
       const uploadedUrl = await this.storageService.uploadPlayerImage(file);
-      this.form.patchValue({ photo: uploadedUrl });
-      this.photoPreview = uploadedUrl;
-      this.clearLocalPreview();
+      if (uploadVersion === this.photoUploadVersion) {
+        this.form.patchValue({ photo: uploadedUrl });
+        this.photoPreview = uploadedUrl;
+        this.clearLocalPreview();
+      }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Please try again.';
-      this.message.error('Image upload failed: ' + message);
+      if (uploadVersion === this.photoUploadVersion) {
+        const message = error instanceof Error ? error.message : 'Please try again.';
+        this.message.error('Image upload failed: ' + message);
+      }
     } finally {
-      this.uploadingPhoto = false;
+      if (uploadVersion === this.photoUploadVersion) {
+        this.uploadingPhoto = false;
+      }
     }
   }
 

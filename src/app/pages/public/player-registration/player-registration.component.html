@@ -29,7 +29,7 @@
         <input
           type="file"
           accept="image/*"
-          accept="image/*"
+          [disabled]="saving || uploadingPhoto"
           (change)="onPhotoChange($event)"
         />
         <small class="error text-danger" *ngIf="form.get('photo')?.touched && form.get('photo')?.invalid">
@@ -85,6 +85,11 @@
         </label>
 
         <label>
+          Current Team
+          <input formControlName="currentTeam" placeholder="Enter current team name">
+        </label>
+
+        <label>
           Category
           <select formControlName="categoryId">
             <option value="">Regular Players</option>
@@ -134,8 +139,8 @@
         <textarea rows="3" formControlName="note"></textarea>
       </label>
 
-      <button type="submit" [disabled]="saving">
-        {{saving ? 'Submitting...' : 'Submit Registration'}}
+      <button type="submit" [disabled]="saving || uploadingPhoto">
+        {{uploadingPhoto ? 'Uploading photo...' : (saving ? 'Submitting...' : 'Submit Registration')}}
       </button>
     </form>
   </div>

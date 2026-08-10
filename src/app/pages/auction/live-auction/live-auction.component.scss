@@ -1,5 +1,5 @@
 .auction-page {
-  height: calc(100vh - 126px);
+    height: calc(100vh - 126px);
   padding: 10px;
   background:
     radial-gradient(circle at 20% 15%, rgba(0, 255, 255, .18), transparent 28%),
@@ -7,9 +7,10 @@
     linear-gradient(180deg, #07131f, #0d2035);
   color: #fff;
   display: grid;
-  grid-template-rows: auto minmax(230px, 1fr) auto auto auto auto;
-  gap: 10px;
-  overflow: hidden;
+  // grid-template-rows: auto minmax(150px, 1fr) auto auto auto minmax(190px, auto);
+  gap: 5px;
+  overflow-x: hidden;
+  overflow-y: auto;
   box-sizing: border-box;
   position: relative;
   align-items: start;
@@ -165,7 +166,7 @@
 
 .info-bar {
   display: grid;
-  grid-template-columns: 1fr 1.4fr 1fr;
+  grid-template-columns: 1fr 2.4fr 1fr;
   gap: 10px;
   max-width: 950px;
   width: 100%;
@@ -213,6 +214,13 @@
   font-size: 13px;
 }
 
+.center .player-details {
+  display: block;
+  margin-top: 3px;
+  color: #fef08a;
+  font-weight: 700;
+}
+
 .bid {
   color: #ffd000;
   text-shadow: 0 0 12px rgba(255, 208, 0, .55);
@@ -224,6 +232,24 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.player-note-slot {
+  min-height: 0;
+}
+
+.player-note {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .08);
+  color: #dbeafe;
+  font-size: 13px;
+}
+
+.player-note strong {
+  color: #fef08a;
 }
 
 .action-buttons button {
@@ -273,7 +299,7 @@
   gap: 6px;
   min-height: 0;
   overflow: hidden;
-  align-self: end;
+  align-self: start;
 }
 
 .team-card {

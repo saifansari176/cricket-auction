@@ -14,13 +14,16 @@
       <span class="live-pill" [class.completed]="liveState?.status === 'completed'">
         {{ liveState?.status === 'completed'
         ? 'COMPLETED' : 'LIVE' }}</span>
+      <div class="text-center">
         <img src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
+        <p class="mt-1">SAIF ANSARI: 9823300308</p>
+      </div>
     </header>
 
     <section class="live-card">
       <div *ngIf="currentPlayer; else waiting" class="live-player">
         <div class="player-profile">
-          <img class="player-image" [src]="currentPlayer.photo || 'assets/no-player.png'"
+          <img class="player-image" [src]="currentPlayer.photo || '/cricbids-logo.png'"
             [alt]="currentPlayer.firstName + ' ' + currentPlayer.lastName">
           <div>
             <p class="eyebrow">CURRENT PLAYER</p>
@@ -34,7 +37,7 @@
             <p class="eyebrow">HIGHEST BID TEAM</p>
             <h2>{{ highestTeam.teamName }}</h2>
           </div>
-          <img class="team-image" [src]="highestTeam.logo || 'assets/no-team.png'" [alt]="highestTeam.teamName">
+          <img class="team-image" [src]="highestTeam.logo || '/cricbids-logo.png'" [alt]="highestTeam.teamName">
         </div>
         <ng-template #noBid>
           <div class="highest-bid no-bid"><span>HIGHEST BID</span><b>Waiting for a bid</b></div>
@@ -54,12 +57,14 @@
       <div class="section-title">
         <div>
           <p class="eyebrow">TOURNAMENT REPORT</p>
-          <h2>Team squads &amp; budget</h2>
-        </div><button type="button" (click)="load(false)">Refresh now</button>
+            <h2>Team squads &amp; budget</h2>
+        </div><button class="d-grid" type="button" (click)="load(false)">
+          <img style="width: 100px; height: auto;" src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
+          Refresh now</button>
       </div>
       <div class="team-grid">
         <article class="team" *ngFor="let team of teams">
-          <div class="team-header"><img [src]="team.logo || 'assets/no-team.png'" [alt]="team.teamName">
+          <div class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName">
             <div>
               <h3>{{ team.teamName }}</h3>
               <p>{{ soldForTeam(team).length }} players • {{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}
@@ -67,7 +72,7 @@
             </div>
           </div>
           <ul>
-            <li *ngFor="let bid of soldForTeam(team)"><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount |
+            <li *ngFor="let bid of soldForTeam(team)"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount |
                 currency:'INR':'symbol':'1.0-0' }}</b></li>
             <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
           </ul>
@@ -89,3 +94,4 @@
 <ng-template #loadingState>
   <main class="loading">Loading public tournament…</main>
 </ng-template>
+

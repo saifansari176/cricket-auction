@@ -70,7 +70,7 @@
           <tr *ngFor="let player of filteredSelectedTeamPlayers; let i = index">
             <!-- {{player | json}} -->
             <td>{{i + 1}}</td>
-            <td><img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" class="player-photo" alt="Player photo"><span *ngIf="!getBidPlayerPhoto(player)">-</span></td>
+<td><img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" class="player-photo" alt="Player photo" (click)="openPreview(getBidPlayerPhoto(player), player.playerName)" title="Click to preview" style="cursor:pointer"><span *ngIf="!getBidPlayerPhoto(player)">-</span></td>
             <td>{{player.playerName}}</td>
             <td>{{getBidPlayerType(player)}}</td>
             <td>{{getBidPlayerMobile(player)}}</td>
@@ -86,7 +86,7 @@
       <div *ngIf="selectedTeamPlayers.length > 0" class="mobile-player-list">
         <details *ngFor="let player of filteredSelectedTeamPlayers" class="player-accordion">
           <summary>
-            <img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" alt="Player photo">
+<img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" alt="Player photo" (click)="openPreview(getBidPlayerPhoto(player), player.playerName)" title="Click to preview" style="cursor:pointer">
             <span *ngIf="!getBidPlayerPhoto(player)" class="photo-placeholder">No Image</span>
             <span><strong>{{player.playerName}}</strong><small>{{getBidPlayerType(player)}}</small></span>
           </summary>

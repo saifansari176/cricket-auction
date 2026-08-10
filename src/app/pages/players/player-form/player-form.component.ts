@@ -52,6 +52,9 @@ export class PlayerFormComponent {
 
   existingPlayer: Player | null = null;
   categories: PlayerCategory[] = [];
+  saving = false;
+  uploadingPhoto = false;
+  private photoUploadVersion = 0;
 
   form = this.fb.group({
 
@@ -70,6 +73,8 @@ export class PlayerFormComponent {
     jerseyNumber: ['', [Validators.pattern(/^[0-9]{1,3}$/)]],
 
     playerType: ['', Validators.required],
+
+    currentTeam: [''],
 
     categoryId: [''],
 
@@ -129,6 +134,8 @@ export class PlayerFormComponent {
 
       playerType: player.playerType,
 
+      currentTeam: player.currentTeam || '',
+
       categoryId: player.categoryId || '',
 
       tshirtSize: player.tshirtSize,
@@ -149,7 +156,11 @@ export class PlayerFormComponent {
 
   // =========================================
 
-  async save() {
+  async save(): Promise<void> {
+
+    if (this.saving || this.uploadingPhoto) {
+      return;
+    }
 
     if (this.form.invalid) {
 
@@ -159,6 +170,9 @@ export class PlayerFormComponent {
 
     }
 
+    this.saving = true;
+
+    try {
     const player: Player = {
 
       id: this.isEdit ? this.playerId : undefined,
@@ -172,6 +186,8 @@ export class PlayerFormComponent {
       jerseyNumber: this.form.value.jerseyNumber || '',
 
       playerType: this.form.value.playerType!,
+
+      currentTeam: this.form.value.currentTeam || '',
 
       categoryId: this.form.value.categoryId || '',
 
@@ -233,13 +249,16 @@ export class PlayerFormComponent {
 
     }
 
-    this.router.navigate(['/players']);
+    await this.router.navigate(['/players']);
+    } finally {
+      this.saving = false;
+    }
 
   }
 
   // =========================================
 
-  async onPhotoChange(event: Event) {
+  async onPhotoChange(event: Event): Promise<void> {
 
     const input = event.target as HTMLInputElement;
 
@@ -257,15 +276,25 @@ export class PlayerFormComponent {
       return;
     }
 
+    const uploadVersion = ++this.photoUploadVersion;
+    this.form.patchValue({ photo: '' });
+    this.uploadingPhoto = true;
+
     try {
       const uploadedUrl = await this.storageService.uploadPlayerImage(file);
-      this.form.patchValue({
-        photo: uploadedUrl
-      });
+      if (uploadVersion === this.photoUploadVersion) {
+        this.form.patchValue({ photo: uploadedUrl });
+      }
     } catch (error: unknown) {
-      console.error('Player image upload failed', error);
-      const message = error instanceof Error ? error.message : 'Please try again.';
-      this.message.error('Image upload failed: ' + message);
+      if (uploadVersion === this.photoUploadVersion) {
+        console.error('Player image upload failed', error);
+        const message = error instanceof Error ? error.message : 'Please try again.';
+        this.message.error('Image upload failed: ' + message);
+      }
+    } finally {
+      if (uploadVersion === this.photoUploadVersion) {
+        this.uploadingPhoto = false;
+      }
     }
 
   }

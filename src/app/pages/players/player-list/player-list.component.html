@@ -112,7 +112,9 @@
         width="70"
         height="70"
         (error)="markPhotoBroken(player.photo)"
-        style="object-fit:cover;border-radius:8px">
+        (click)="openPreview(player.photo, player.firstName + ' ' + player.lastName)"
+        title="Click to preview"
+        style="object-fit:cover;border-radius:8px;cursor:pointer">
 
       <div
         *ngIf="!player.photo || isPhotoBroken(player.photo)"
@@ -168,7 +170,7 @@
 <div class="mobile-player-list">
     <details *ngFor="let player of filteredPlayers; let i = index" class="player-accordion">
         <summary>
-            <img *ngIf="player.photo && !isPhotoBroken(player.photo)" [src]="player.photo" (error)="markPhotoBroken(player.photo)" alt="Player photo">
+            <img *ngIf="player.photo && !isPhotoBroken(player.photo)" [src]="player.photo" (error)="markPhotoBroken(player.photo)" (click)="openPreview(player.photo, player.firstName + ' ' + player.lastName)" title="Click to preview" alt="Player photo" style="cursor:pointer">
             <span *ngIf="!player.photo || isPhotoBroken(player.photo)" class="photo-placeholder">No Image</span>
             <span><strong>{{player.firstName}} {{player.lastName}}</strong><small>{{player.playerType}}</small></span>
         </summary>

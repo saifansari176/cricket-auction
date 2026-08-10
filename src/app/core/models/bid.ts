@@ -24,4 +24,6 @@ export interface AuctionBid {
 
   soldDate: string;
 
+  photoUrl?: string;
+
 }

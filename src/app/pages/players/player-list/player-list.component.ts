@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from '../../../core/services/message.service';
 import { AuctionService } from '../../../core/services/auction.service';
+import { ImagePreviewService } from '../../../shared/image-preview/image-preview.service';
 
 @Component({
   selector: 'app-player-list',
@@ -26,7 +27,8 @@ export class PlayerListComponent {
   constructor(
     private playerService: PlayerService,
     private auctionService: AuctionService,
-    private message: MessageService
+    private message: MessageService,
+    private imagePreview: ImagePreviewService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -217,9 +219,15 @@ get categories(): string[] {
     return this.brokenPhotoUrls.has(url);
   }
 
-  markPhotoBroken(url: string): void {
+markPhotoBroken(url: string): void {
     if (url) {
       this.brokenPhotoUrls.add(url);
+    }
+  }
+
+  openPreview(url: string, name = ''): void {
+    if (url) {
+      this.imagePreview.open(url, name);
     }
   }
 

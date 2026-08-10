@@ -4,6 +4,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './layout/header/header.component';
 import { MessageModalComponent } from './shared/message-modal/message-modal.component';
 import { AppLoaderComponent } from './shared/app-loader/app-loader.component';
+import { ImagePreviewComponent } from './shared/image-preview/image-preview.component';
 
 @Component({
   selector: 'app-root',
@@ -12,7 +13,8 @@ import { AppLoaderComponent } from './shared/app-loader/app-loader.component';
  RouterOutlet,
  HeaderComponent,
  MessageModalComponent,
- AppLoaderComponent
+ AppLoaderComponent,
+ ImagePreviewComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

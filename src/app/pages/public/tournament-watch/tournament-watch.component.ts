@@ -6,6 +6,7 @@ import { AuctionSettings } from '../../../core/models/auction-settings';
 import { Player } from '../../../core/models/player';
 import { Team } from '../../../core/models/team';
 import { AuctionService, LiveAuctionState } from '../../../core/services/auction.service';
+import { ImagePreviewService } from '../../../shared/image-preview/image-preview.service';
 
 @Component({
   selector: 'app-tournament-watch',
@@ -25,7 +26,11 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   private auctionId = '';
   private refreshTimer?: ReturnType<typeof setInterval>;
 
-  constructor(private route: ActivatedRoute, private auctionService: AuctionService) {}
+  constructor(
+    private route: ActivatedRoute,
+    private auctionService: AuctionService,
+    private imagePreview: ImagePreviewService
+  ) {}
 
   ngOnInit(): void {
     this.auctionId = this.route.snapshot.paramMap.get('auctionId') || '';
@@ -57,4 +62,11 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   get latestSales(): AuctionBid[] { return [...this.bids].sort((a, b) => (b.soldDate || '').localeCompare(a.soldDate || '')).slice(0, 8); }
   soldForTeam(team: Team): AuctionBid[] { return this.bids.filter((bid) => bid.teamId === team.id); }
   spentByTeam(team: Team): number { return this.soldForTeam(team).reduce((sum, bid) => sum + Number(bid.bidAmount || 0), 0); }
+  getBidPhoto(bid: AuctionBid): string {
+    return bid.photoUrl || this.players.find((p) => p.id === bid.playerId)?.photo || '/cricbids-logo.png';
+  }
+
+  openPreview(url: string, name = ''): void {
+    this.imagePreview.open(url, name);
+  }
 }

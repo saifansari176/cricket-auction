@@ -14,6 +14,8 @@ export interface Player {
 
   playerType: string;
 
+  currentTeam?: string;
+
   categoryId?: string;
 
   categoryName?: string;

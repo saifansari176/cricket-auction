@@ -30,7 +30,7 @@
                         <label>Photo <span class="text-danger">*</span></label>
                         <img *ngIf="form.value.photo" [src]="form.value.photo" width="120" class="rounded-circle mb-3">
 
-                        <input type="file" accept="image/*" class="form-control" (change)="onPhotoChange($event)">
+                        <input type="file" accept="image/*" class="form-control" [disabled]="uploadingPhoto || saving" (change)="onPhotoChange($event)">
                         <div class="text-danger mt-1"
                             *ngIf="form.controls.photo.touched && form.controls.photo.invalid">
 
@@ -116,6 +116,11 @@
                                 Player Type is required.
                             </small>
                         </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Current Team</label>
+                        <input class="form-control" formControlName="currentTeam" placeholder="Enter current team name">
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -243,13 +248,13 @@
 
                 <div class="text-center button-group">
 
-                    <button class="btn btn-success btn-lg" type="button" (click)="save()">
+                    <button class="btn btn-success btn-lg" type="button" [disabled]="saving || uploadingPhoto" (click)="save()">
 
-                        {{isEdit ? 'Update Player' : 'Submit Registration'}}
+                        {{saving ? 'Saving...' : (uploadingPhoto ? 'Uploading photo...' : (isEdit ? 'Update Player' : 'Submit Registration'))}}
 
                     </button>
 
-                    <button class="btn btn-secondary btn-lg" type="button" (click)="cancel()">
+                    <button class="btn btn-secondary btn-lg" type="button" [disabled]="saving" (click)="cancel()">
 
                         Cancel
 

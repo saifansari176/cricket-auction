@@ -337,12 +337,13 @@ export class AuctionService {
     await Promise.all(
       bids
         .filter((bid) => !!bid.id)
-        .map((bid) => this.firebase.update(this.auctionCollection(auctionId, 'bids'), bid.id!, {
+.map((bid) => this.firebase.update(this.auctionCollection(auctionId, 'bids'), bid.id!, {
           ...bid,
           playerName,
           mobile: player.mobile,
           jerseyNumber: player.jerseyNumber,
-          tshirtSize: player.tshirtSize
+          tshirtSize: player.tshirtSize,
+          photoUrl: player.photo
         }))
     );
   }

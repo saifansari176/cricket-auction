@@ -11,6 +11,8 @@ import { PlayerService } from '../../core/services/player.service';
 import { TeamService } from '../../core/services/team.service';
 import { PlayerCategoryService } from '../../core/services/player-category.service';
 import { PlayerCategory } from '../../core/models/player-category';
+import { ImagePreviewService } from '../../shared/image-preview/image-preview.service';
+import { MessageService } from '../../core/services/message.service';
 
 type DashboardList = 'players' | 'teams' | 'available' | 'sold' | 'unsold';
 
@@ -40,8 +42,10 @@ export class DashboardComponent implements OnInit {
     private playerService: PlayerService,
     private teamService: TeamService,
     private auctionService: AuctionService,
-    private router: Router,
-    private categoryService: PlayerCategoryService
+private router: Router,
+    private categoryService: PlayerCategoryService,
+    private imagePreview: ImagePreviewService,
+    private message: MessageService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -279,6 +283,72 @@ export class DashboardComponent implements OnInit {
 
   getBidPlayerPhoto(bid: AuctionBid): string {
     return this.players.find((player) => player.id === bid.playerId)?.photo || '';
+  }
+
+  openPreview(url: string, name = ''): void {
+    if (url) {
+      this.imagePreview.open(url, name);
+    }
+  }
+
+  async changeSoldPlayerStatus(bid: AuctionBid, event: Event): Promise<void> {
+    const status = (event.target as HTMLSelectElement)?.value;
+    if (!status) return;
+    if (!bid.playerId || !bid.id) {
+      this.message.warning('This player or bid record is missing required data.');
+      return;
+    }
+
+    const confirmed = await this.message.confirm(
+      `Mark "${bid.playerName}" as ${status}? This will remove the player from the sold list and delete the old bid record.`,
+      'Change Player Status',
+      `Mark ${status}`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      if (status === 'Available') {
+        await this.playerService.markAvailable(bid.playerId);
+      } else {
+        await this.playerService.markUnsold(bid.playerId);
+      }
+
+      await this.auctionService.deleteBid(bid.id);
+
+      const team = this.teams.find((t) => t.id === bid.teamId);
+      if (team?.id) {
+        await this.teamService.updateTeam({
+          ...team,
+          remainingPoints: Number(team.remainingPoints || 0) + Number(bid.bidAmount || 0),
+          playersBought: Math.max(0, Number(team.playersBought || 0) - 1)
+        });
+      }
+
+      await this.refreshData(false);
+
+      this.message.success(`${bid.playerName} is now ${status}. Bid record and team allocation updated.`);
+    } catch {
+      this.message.error('Could not update the player status. Please try again.');
+    }
+  }
+
+  private async refreshData(showLoader = true): Promise<void> {
+    if (showLoader) this.loading = true;
+    try {
+      const [players, soldPlayers] = await Promise.all([
+        this.playerService.getPlayers(),
+        this.auctionService.getSoldPlayers()
+      ]);
+      this.players = players;
+      this.soldPlayers = soldPlayers;
+      this.availablePlayers = players.filter((player) => this.isPlayerStatus(player, 'Available'));
+      this.unsoldPlayers = players.filter((player) => player.status === 'Unsold');
+    } finally {
+      this.loading = false;
+    }
   }
 
   private get normalizedFilter(): string {

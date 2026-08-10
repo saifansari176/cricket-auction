@@ -51,32 +51,27 @@ export class PlayerService {
 
   }
 
-async savePlayer(player: Player): Promise<boolean> {
+  async savePlayer(player: Player): Promise<boolean> {
     const activeAuctionId = await this.auctionService.getActiveAuctionId();
 
     player.auctionId = player.auctionId || activeAuctionId;
 
-    const players = await this.firebase.getAll<Player>(this.auctionCollection(player.auctionId));
-    const exists = players.some(
-      x => x.mobile === player.mobile
-    );
-
-    if (exists) {
-
-      return false;
-
-    }
+    if (!player.auctionId) return false;
 
     if (!await this.canAddPlayer(player.auctionId)) return false;
 
     const { id, ...playerData } = player;
+    const mobile = player.mobile.trim();
 
-await this.firebase.add(
-  this.auctionCollection(player.auctionId),
-  playerData
-);
-
-    return true;
+    // Mobile number is unique within an auction. The transaction prevents two
+    // concurrent submissions from both passing a separate read-before-write.
+    return this.firebase.createIfNoMatchingField(
+      this.auctionCollection(player.auctionId),
+      mobile,
+      'mobile',
+      mobile,
+      { ...playerData, mobile }
+    );
 
   }
 
