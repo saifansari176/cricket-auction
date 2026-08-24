@@ -43,7 +43,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
     firstName: ['', [Validators.required, Validators.minLength(2)]],
     lastName: ['', Validators.required],
     mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-    jerseyNumber: ['', [Validators.pattern(/^[0-9]{1,3}$/)]],
+    jerseyNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{1,3}$/)]],
     playerType: ['', Validators.required],
     currentTeam: [''],
     categoryId: [''],

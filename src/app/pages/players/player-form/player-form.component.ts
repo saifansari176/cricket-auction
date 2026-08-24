@@ -70,7 +70,7 @@ export class PlayerFormComponent {
       ]
     ],
 
-    jerseyNumber: ['', [Validators.pattern(/^[0-9]{1,3}$/)]],
+    jerseyNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{1,3}$/)]],
 
     playerType: ['', Validators.required],
 

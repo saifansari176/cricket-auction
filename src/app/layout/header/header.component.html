@@ -78,10 +78,10 @@
         <button type="button" class="close-btn" (click)="closeMenu()" aria-label="Close menu">×</button>
     </div>
 
-    <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">Dashboard</a>
-    <a routerLink="/auction-settings" routerLinkActive="active" (click)="closeMenu()">Auction Settings</a>
-    <a routerLink="/about-us" routerLinkActive="active" (click)="closeMenu()">About Us</a>
-    <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active" (click)="closeMenu()">User Control</a>
+    <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+    <a routerLink="/auction-settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Auction Settings</a>
+    <a routerLink="/about-us" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">About Us</a>
+    <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">User Control</a>
 
     <div class="menu-accordion" (focusout)="closeSectionOnFocusOut($event, 'players')">
     <button type="button" class="accordion-title" (click)="toggleSection('players')">
@@ -89,8 +89,8 @@
         <span>{{openSection === 'players' ? '−' : '+'}}</span>
     </button>
     <div class="accordion-body" *ngIf="openSection === 'players'">
-        <a routerLink="/players" routerLinkActive="active" (click)="closeMenu()">Player List</a>
-        <a routerLink="/players/add" routerLinkActive="active" (click)="closeMenu()">Add Player</a>
+        <a routerLink="/players" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Player List</a>
+        <a routerLink="/players/add" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Add Player</a>
     </div>
 
     </div>
@@ -101,8 +101,8 @@
         <span>{{openSection === 'teams' ? '−' : '+'}}</span>
     </button>
     <div class="accordion-body" *ngIf="openSection === 'teams'">
-        <a routerLink="/teams" routerLinkActive="active" (click)="closeMenu()">Team List</a>
-        <a routerLink="/teams/add" routerLinkActive="active" (click)="closeMenu()">Add Team</a>
+        <a routerLink="/teams" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Team List</a>
+        <a routerLink="/teams/add" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Add Team</a>
     </div>
 
     </div>
@@ -113,11 +113,11 @@
         <span>{{openSection === 'auction' ? '−' : '+'}}</span>
     </button>
     <div class="accordion-body" *ngIf="openSection === 'auction'">
-        <a routerLink="/auction" routerLinkActive="active" (click)="startNormalAuction(); closeMenu()">Live Auction</a>
-        <a routerLink="/auction/categories" routerLinkActive="active" (click)="closeMenu()">Categories</a>
-        <a routerLink="/auction-settings" routerLinkActive="active" (click)="closeMenu()">Auction Management</a>
-        <a routerLink="/reports" routerLinkActive="active" (click)="closeMenu()">Reports</a>
-        <a routerLink="/settings" routerLinkActive="active" (click)="closeMenu()">Settings</a>
+        <a routerLink="/auction" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="startNormalAuction()">Live Auction</a>
+        <a routerLink="/auction/categories" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Categories</a>
+        <a routerLink="/auction-settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Auction Management</a>
+        <a routerLink="/reports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Reports</a>
+        <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Settings</a>
     </div>
 
     </div>
@@ -131,7 +131,7 @@
             </span>
         </div>
 
-        <a routerLink="/about-us" routerLinkActive="active" (click)="closeMenu()">About Us</a>
+        <a routerLink="/about-us" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">About Us</a>
 
         <button type="button" class="logout-btn" (click)="logout(); closeMenu()">
             Logout

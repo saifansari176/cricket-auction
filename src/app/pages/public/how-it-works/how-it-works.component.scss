@@ -1,0 +1,176 @@
+.guide-page {
+    min-height: 100vh;
+    background: #f6f8fc;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column
+}
+
+.guide-header {
+    height: 74px;
+    padding: 10px clamp(20px, 6vw, 88px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid #e5eaf2
+}
+
+.guide-header img {
+    width: 108px;
+    height: 54px;
+    object-fit: contain
+}
+
+.guide-header nav {
+    display: flex;
+    gap: 18px
+}
+
+.guide-header a {
+    color: #334155;
+    text-decoration: none;
+    font-weight: 700
+}
+
+.guide-header a:hover,
+.guide-header a.active {
+    color: #1d4ed8
+}
+
+.guide-page main {
+    flex: 1
+}
+
+.guide-hero {
+    padding: 72px 24px;
+    text-align: center;
+    // background: linear-gradient(120deg, #0f172a, #1d4ed8);
+  background: linear-gradient(135deg, rgba(8, 20, 47, .94), rgba(15, 55, 144, .86)), url('/banner-poster.png') center / cover fixed;
+
+    color: #fff
+}
+
+.guide-hero p {
+    color: #93c5fd;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .12em
+}
+
+.guide-hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 12px 0
+}
+
+.guide-hero span {
+    color: #dbeafe;
+    font-size: 1.05rem
+}
+
+.guide-steps {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 54px 24px 70px;
+    display: grid;
+    gap: 18px
+}
+
+.guide-steps article {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 20px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px
+}
+
+.guide-steps span {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 800
+}
+
+.guide-steps h2 {
+    margin: 3px 0 8px;
+    font-size: 1.25rem
+}
+
+.guide-steps p {
+    margin: 0;
+    color: #475569;
+    line-height: 1.6
+}
+
+.site-footer {
+    background: #0f172a;
+    color: #fff;
+    padding: 48px 24px
+}
+
+.contact-grid {
+    max-width: 1072px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px
+}
+
+.contact-grid article {
+    display: flex;
+    flex-direction: column;
+    gap: 7px
+}
+
+.contact-grid p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .07em
+}
+
+.contact-grid strong {
+    font-size: 1rem
+}
+
+.contact-grid a,
+.contact-grid span {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: .92rem
+}
+
+@media(max-width:600px) {
+    .guide-header {
+        padding: 9px 16px
+    }
+
+    .guide-header img {
+        width: 82px
+    }
+
+    .guide-header nav {
+        gap: 10px;
+        font-size: .85rem
+    }
+
+    .guide-steps {
+        padding: 34px 16px
+    }
+
+    .guide-steps article {
+        padding: 18px;
+        gap: 14px
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr
+    }
+}

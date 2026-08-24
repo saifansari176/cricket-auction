@@ -1,0 +1,309 @@
+.home-page {
+    width: 100%;
+    height: 100vh;
+    min-height: 700px;
+    background: #020d26;
+    color: #fff;
+    overflow: hidden;
+}
+
+
+/* =========================
+   MAIN
+   ========================= */
+
+.home-main {
+    width: 100%;
+    height: calc(100vh - 74px);
+    min-height: 626px;
+}
+
+
+/* =========================
+   HERO
+   ========================= */
+
+.hero {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 80px 40px 190px;
+
+    background-image:
+        linear-gradient(
+            90deg,
+            rgba(1, 10, 30, 0.15),
+            rgba(2, 18, 51, 0.05),
+            rgba(1, 10, 30, 0.15)
+        ),
+        url('/banner-poster.png');
+
+    background-position: center center;
+
+    /*
+     * IMPORTANT
+     * This makes the image cover the ENTIRE hero width.
+     */
+    background-size: cover;
+
+    background-repeat: no-repeat;
+
+    color: #fff;
+    text-align: center;
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   HERO CONTENT
+   ========================= */
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+
+    width: 100%;
+    max-width: 1100px;
+
+    margin-top: -30px;
+}
+
+
+.eyebrow {
+    margin: 0 0 15px;
+
+    color: #7dd3fc;
+
+    letter-spacing: .12em;
+
+    font-size: .9rem;
+
+    font-weight: 800;
+}
+
+
+.hero h1 {
+    max-width: 1100px;
+
+    margin: 0 auto;
+
+    font-weight: 900;
+
+    font-style: italic;
+
+    letter-spacing: -.035em;
+
+    line-height: 1.05;
+
+    font-size: clamp(
+        2.4rem,
+        4.4vw,
+        4.6rem
+    );
+
+    color: #fff;
+
+    text-shadow:
+        0 5px 18px rgba(0, 0, 0, .65);
+}
+
+
+.hero h1 span {
+    color: #22d3ee;
+}
+
+
+.hero-description {
+    max-width: 700px;
+
+    margin: 25px auto 30px;
+
+    color: #f1f5f9;
+
+    font-size: 1.25rem;
+
+    line-height: 1.5;
+
+    text-shadow:
+        0 3px 10px rgba(0, 0, 0, .7);
+}
+
+
+/* =========================
+   GET STARTED
+   ========================= */
+
+.hero-action {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 20px;
+
+    min-width: 215px;
+
+    padding: 14px 30px;
+
+    border: 1px solid #38bdf8;
+
+    border-radius: 9px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #0284c7
+        );
+
+    color: #fff;
+
+    font-size: 1.05rem;
+
+    font-weight: 800;
+
+    text-decoration: none;
+
+    box-shadow:
+        0 0 0 3px rgba(14, 165, 233, .13),
+        0 9px 30px rgba(0, 132, 255, .55);
+
+    transition: .25s ease;
+}
+
+
+.hero-action:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 0 15px rgba(56, 189, 248, .8),
+        0 12px 35px rgba(0, 132, 255, .65);
+}
+
+
+.hero-action span {
+    font-size: 2rem;
+
+    line-height: 0;
+
+    margin-top: -2px;
+}
+
+
+/* =========================
+   BOTTOM INFORMATION PANEL
+   ========================= */
+
+.site-footer {
+    position: absolute;
+
+    left: 3%;
+
+    right: 3%;
+
+    bottom: 18px;
+
+    z-index: 5;
+
+    width: auto;
+
+    padding: 20px 28px;
+
+    background:
+        linear-gradient(
+            120deg,
+            rgba(1, 17, 48, .94),
+            rgba(1, 10, 32, .94)
+        );
+
+    border: 1px solid rgba(14, 165, 233, .45);
+
+    border-radius: 30px;
+
+    box-shadow:
+        0 15px 40px rgba(0, 0, 0, .35);
+
+    backdrop-filter: blur(8px);
+}
+
+
+.contact-grid {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1fr
+        1.25fr
+        1.25fr;
+
+    gap: 0;
+
+    margin: 0 auto;
+}
+
+
+.contact-grid article {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    padding: 5px 28px;
+
+    min-height: 95px;
+
+    border-left:
+        1px solid rgba(56, 189, 248, .18);
+}
+
+
+.contact-grid article:first-child {
+    border-left: 0;
+}
+
+
+.contact-grid p {
+    margin: 0 0 5px;
+
+    color: #22d3ee;
+
+    font-size: .78rem;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+}
+
+
+.contact-grid strong {
+    color: #fff;
+
+    font-size: 1rem;
+
+    font-weight: 800;
+}
+
+
+.contact-grid a,
+.contact-grid span {
+    color: #cbd5e1;
+
+    text-decoration: none;
+
+    font-size: .86rem;
+}
+
+
+.contact-grid a:hover {
+    color: #38bdf8;
+}

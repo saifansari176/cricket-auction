@@ -81,14 +81,15 @@
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Jersey Number</label>
+                        <label>Jersey Number<span class="text-danger">*</span></label>
 
                         <input type="tel" maxlength="3" class="form-control" formControlName="jerseyNumber"
                             placeholder="Enter jersey number" (keypress)="allowOnlyNumbers($event)">
 
                         <div class="text-danger mt-1"
                             *ngIf="form.controls.jerseyNumber.touched && form.controls.jerseyNumber.invalid">
-                            <small>Jersey number must contain up to 3 digits.</small>
+                            <small *ngIf="form.controls.jerseyNumber.errors?.['required']">Jersey number is required.</small>
+                            <small *ngIf="form.controls.jerseyNumber.errors?.['pattern']">Jersey number must contain up to 3 digits.</small>
                         </div>
 
                     </div>

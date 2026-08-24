@@ -148,7 +148,8 @@ get categories(): string[] {
 
       for (const row of excelData) {
         const mobile = this.getCellValue(row, 'Mobile').replace('.0', '').trim();
-        if (!/^[0-9]{10}$/.test(mobile)) {
+        const jerseyNumber = this.getCellValue(row, 'Jersey Number');
+        if (!/^[0-9]{10}$/.test(mobile) || !/^[0-9]{1,3}$/.test(jerseyNumber)) {
           skipped++;
           continue;
         }
@@ -163,7 +164,7 @@ get categories(): string[] {
           firstName: this.getCellValue(row, 'First Name'),
           lastName: this.getCellValue(row, 'Last Name'),
           mobile,
-          jerseyNumber: this.getCellValue(row, 'Jersey Number'),
+          jerseyNumber,
           playerType: this.getCellValue(row, 'Player Type'),
           tshirtSize: this.getCellValue(row, 'T-Shirt Size'),
           trouserSize: this.getCellValue(row, 'Trouser Size'),

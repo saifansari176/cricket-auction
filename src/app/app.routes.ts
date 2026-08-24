@@ -4,8 +4,9 @@ import { adminGuard, auctionSelectionGuard, authGuard, guestGuard } from './core
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
     pathMatch: 'full',
+    loadComponent: () =>
+      import('./pages/public/home/home.component').then((m) => m.HomeComponent),
   },
 
   {
@@ -13,6 +14,18 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadComponent: () =>
       import('./pages/auth/login/login.component').then((m) => m.LoginComponent),
+  },
+
+  {
+    path: 'how-it-works',
+    loadComponent: () =>
+      import('./pages/public/how-it-works/how-it-works.component').then((m) => m.HowItWorksComponent),
+  },
+
+  {
+    path: 'past-auctions',
+    loadComponent: () =>
+      import('./pages/public/past-auctions/past-auctions.component').then((m) => m.PastAuctionsComponent),
   },
 
   {
@@ -139,6 +152,6 @@ export const routes: Routes = [
 
   {
     path: '**',
-    redirectTo: 'dashboard',
+    redirectTo: '',
   },
 ];

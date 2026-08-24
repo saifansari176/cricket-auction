@@ -1,89 +1,99 @@
 <div class="login-page">
+  <app-public-header />
+  <a class="back-home" routerLink="/">← Back to home</a>
   <form class="login-card" [formGroup]="form" (ngSubmit)="login()">
-    <div class="brand">
+    <div class="brand"><img class="brand-logo" src="/cricbids-logo.png" alt="Cricbids logo">
       <h1>Cricbids</h1>
       <p>{{isRegistering ? 'Create your account' : 'Sign in to continue'}}</p>
     </div>
-
-    <div class="alert alert-danger" *ngIf="errorMessage">
-      {{errorMessage}}
+    <div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+    <div class="alert alert-success" *ngIf="successMessage">{{successMessage}}</div>
+    <ng-container *ngIf="phoneMode; else emailLogin">
+      <div class="mb-3"><label class="form-label">Phone Number</label>
+        <div class="phone-input"><span>+91</span><input type="tel" inputmode="numeric" maxlength="10"
+            class="form-control" formControlName="phone" (input)="keepPhoneDigits()"
+            placeholder="10-digit mobile number"></div>
+        <div class="invalid-feedback d-block" *ngIf="phone.touched && phone.invalid">Enter a valid 10-digit Indian
+          mobile number.</div>
+      </div>
+      <div class="mb-3" *ngIf="otpSent"><label class="form-label">OTP</label><input type="text" inputmode="numeric"
+          maxlength="6" class="form-control" formControlName="otp" placeholder="6-digit OTP">
+        <div class="invalid-feedback d-block" *ngIf="otp.touched && otp.invalid">Enter the 6-digit OTP.</div>
+      </div>
+      <div #recaptchaContainer></div>
+      <button *ngIf="!otpSent" class="btn btn-primary w-100" type="button" [disabled]="loading"
+        (click)="sendOtp()">{{loading ? 'Sending OTP...' : 'Send OTP'}}</button><button *ngIf="otpSent"
+        class="btn btn-primary w-100" type="button" [disabled]="loading" (click)="verifyOtp()">{{loading ?
+        'Verifying...' : 'Verify OTP and Login'}}</button>
+    </ng-container>
+    <ng-template #emailLogin>
+      <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control"
+          [class.is-invalid]="email.invalid && (email.touched || email.dirty)" formControlName="email"
+          placeholder="admin@example.com">
+        <div class="invalid-feedback" *ngIf="email.hasError('required') && (email.touched || email.dirty)">Email is
+          required.</div>
+        <div class="invalid-feedback" *ngIf="email.hasError('email') && (email.touched || email.dirty)">Enter a valid
+          email address.</div>
+      </div>
+      <div class="mb-3"><label class="form-label">Password</label><input type="password" class="form-control"
+          [class.is-invalid]="password.invalid && (password.touched || password.dirty)" formControlName="password"
+          placeholder="Minimum 6 characters">
+        <div class="invalid-feedback" *ngIf="password.hasError('required') && (password.touched || password.dirty)">
+          Password is required.</div>
+        <div class="invalid-feedback" *ngIf="password.hasError('minlength') && (password.touched || password.dirty)">
+          Password must be at least 6 characters.</div>
+      </div>
+      <div class="mb-3" *ngIf="isRegistering"><label class="form-label">Display Name</label><input type="text"
+          class="form-control" [class.is-invalid]="displayName.invalid && (displayName.touched || displayName.dirty)"
+          formControlName="displayName" placeholder="Your name">
+        <div class="invalid-feedback" *ngIf="displayName.invalid && (displayName.touched || displayName.dirty)">Display
+          name must be at least 2 characters.</div>
+      </div>
+      <div class="mb-3" *ngIf="isRegistering"><label class="form-label">Confirm Password</label><input type="password"
+          class="form-control"
+          [class.is-invalid]="confirmPassword.invalid && (confirmPassword.touched || confirmPassword.dirty)"
+          formControlName="confirmPassword" placeholder="Re-enter your password">
+        <div class="invalid-feedback"
+          *ngIf="confirmPassword.hasError('required') && (confirmPassword.touched || confirmPassword.dirty)">Confirm
+          your password.</div>
+        <div class="invalid-feedback"
+          *ngIf="confirmPassword.hasError('mismatch') && (confirmPassword.touched || confirmPassword.dirty)">Passwords
+          do not match.</div>
+      </div><button class="btn btn-primary w-100" type="submit" [disabled]="loading">{{loading ? (isRegistering ?
+        'Creating account...' : 'Signing in...') : (isRegistering ? 'Register' : 'Login')}}</button><button
+        class="btn btn-link w-100 mt-2" type="button" (click)="setRegisterMode(!isRegistering)"
+        [disabled]="loading">{{isRegistering ? 'Already have an account? Login' : 'New here? Register'}}</button>
+    </ng-template>
+    <div class="social-login" *ngIf="!isRegistering && !phoneMode">
+      <div class="divider"><span>or continue with</span></div><button class="google-button w-100" type="button"
+        [disabled]="loading" (click)="loginWithGoogle()"><svg viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4"
+            d="M21.8 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.5a4.7 4.7 0 0 1-2 3.1v2.5h3.2c1.9-1.8 3.1-4.4 3.1-7.4Z" />
+          <path fill="#34A853"
+            d="M12 22c2.7 0 5-.9 6.7-2.4l-3.2-2.5c-.9.6-2 .9-3.5.9-2.7 0-5-1.8-5.8-4.3H2.9v2.6A10 10 0 0 0 12 22Z" />
+          <path fill="#FBBC05"
+            d="M6.2 13.7A6 6 0 0 1 5.9 12c0-.6.1-1.2.3-1.7V7.7H2.9A10 10 0 0 0 2 12c0 1.6.4 3.1.9 4.3l3.3-2.6Z" />
+          <path fill="#EA4335"
+            d="M12 6c1.5 0 2.9.5 3.9 1.5l2.9-2.9C17 2.9 14.7 2 12 2a10 10 0 0 0-9.1 5.7l3.3 2.6C7 7.8 9.3 6 12 6Z" />
+        </svg>Continue with Google</button>
     </div>
-
-    <div class="alert alert-success" *ngIf="successMessage">
-      {{successMessage}}
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Email</label>
-      <input
-        type="email"
-        class="form-control"
-        [class.is-invalid]="email.invalid && (email.touched || email.dirty)"
-        formControlName="email"
-        placeholder="admin@example.com">
-
-      <div class="invalid-feedback" *ngIf="email.hasError('required') && (email.touched || email.dirty)">
-        Email is required.
-      </div>
-
-      <div class="invalid-feedback" *ngIf="email.hasError('email') && (email.touched || email.dirty)">
-        Enter a valid email address.
-      </div>
-    </div>
-
-    <div class="mb-3">
-      <label class="form-label">Password</label>
-      <input
-        type="password"
-        class="form-control"
-        [class.is-invalid]="password.invalid && (password.touched || password.dirty)"
-        formControlName="password"
-        placeholder="Minimum 6 characters">
-
-      <div class="invalid-feedback" *ngIf="password.hasError('required') && (password.touched || password.dirty)">
-        Password is required.
-      </div>
-
-      <div class="invalid-feedback" *ngIf="password.hasError('minlength') && (password.touched || password.dirty)">
-        Password must be at least 6 characters.
-      </div>
-    </div>
-
-    <div class="mb-3" *ngIf="isRegistering">
-      <label class="form-label">Display Name</label>
-      <input
-        type="text"
-        class="form-control"
-        [class.is-invalid]="displayName.invalid && (displayName.touched || displayName.dirty)"
-        formControlName="displayName"
-        placeholder="Your name">
-      <div class="invalid-feedback" *ngIf="displayName.invalid && (displayName.touched || displayName.dirty)">
-        Display name must be at least 2 characters.
-      </div>
-    </div>
-
-    <div class="mb-3" *ngIf="isRegistering">
-      <label class="form-label">Confirm Password</label>
-      <input
-        type="password"
-        class="form-control"
-        [class.is-invalid]="confirmPassword.invalid && (confirmPassword.touched || confirmPassword.dirty)"
-        formControlName="confirmPassword"
-        placeholder="Re-enter your password">
-      <div class="invalid-feedback" *ngIf="confirmPassword.hasError('required') && (confirmPassword.touched || confirmPassword.dirty)">
-        Confirm your password.
-      </div>
-      <div class="invalid-feedback" *ngIf="confirmPassword.hasError('mismatch') && (confirmPassword.touched || confirmPassword.dirty)">
-        Passwords do not match.
-      </div>
-    </div>
-
-    <button class="btn btn-primary w-100" type="submit" [disabled]="loading">
-      {{loading ? (isRegistering ? 'Creating account...' : 'Signing in...') : (isRegistering ? 'Register' : 'Login')}}
-    </button>
-
-    <button class="btn btn-link w-100 mt-2" type="button" (click)="setRegisterMode(!isRegistering)" [disabled]="loading">
-      {{isRegistering ? 'Already have an account? Login' : 'New here? Register'}}
-    </button>
   </form>
+  <footer class="site-footer">
+    <div class="contact-grid">
+      <article>
+        <p>Founder</p><strong>Mohammad Saif Ansari</strong><a href="tel:9823300308">9823300308</a><a
+          href="tel:9320006789">9320006789</a>
+      </article>
+      <article>
+        <p>Co-Founder</p><strong>Saad Ansari</strong><a href="tel:9699760242">9699760242</a>
+      </article>
+      <article>
+        <p>Partners</p><strong>Our Partner Network</strong><a href="tel:9689950988">Noor Ansari · 9689950988</a><a
+          href="tel:8793669939">Arif Ansari · 8793669939</a><a href="tel:9175982907">Raj Ansari · 9175982907</a>
+      </article>
+      <article>
+        <p>Technology Partner / Powered by</p><strong>Techcharm Pvt Ltd</strong><span>Khalid Ansari Sir</span>
+      </article>
+    </div>
+  </footer>
 </div>

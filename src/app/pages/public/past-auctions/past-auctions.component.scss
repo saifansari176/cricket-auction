@@ -1,0 +1,174 @@
+.past-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgba(8, 20, 47, .94), rgba(15, 55, 144, .86)), url('/banner-poster.png') center / cover fixed;
+    color: #0f172a
+}
+
+.past-page header {
+    height: 74px;
+    padding: 10px clamp(20px, 6vw, 88px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-bottom: 1px solid #e5eaf2
+}
+
+.past-page header img {
+    width: 108px;
+    height: 54px;
+    object-fit: contain
+}
+
+.past-page nav {
+    display: flex;
+    gap: 18px
+}
+
+.past-page nav a {
+    color: #334155;
+    text-decoration: none;
+    font-weight: 700
+}
+
+.past-page nav a:hover,
+.past-page nav a.active {
+    color: #1d4ed8
+}
+
+.past-page main {
+    max-width: 1080px;
+    margin: auto;
+    padding: 72px 24px
+}
+
+.eyebrow {
+    margin: 0 0 12px;
+    color: #93c5fd;
+    font-size: .78rem;
+    letter-spacing: .12em;
+    font-weight: 800
+}
+
+.past-page h1 {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(2rem, 4vw, 3rem)
+}
+
+.intro {
+    color: #dbeafe;
+    font-size: 1.08rem
+}
+
+.auction-grid {
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px
+}
+
+.auction-grid article {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid #dbe3ef;
+    border-radius: 14px
+}
+
+.auction-grid img,
+.fallback {
+    width: 62px;
+    height: 62px;
+    object-fit: contain;
+    background: #f8fafc;
+    border-radius: 10px;
+    flex: none
+}
+
+.fallback {
+    display: grid;
+    place-items: center;
+    color: #2563eb;
+    font-weight: 800
+}
+
+.auction-grid h2 {
+    font-size: 1.05rem;
+    margin: 0 0 6px
+}
+
+.auction-grid p,
+.empty {
+    margin: 0;
+    color: #64748b
+}
+
+.past-page footer {
+    background: #0f172a;
+    color: #fff;
+    padding: 48px 24px
+}
+
+.contact-grid {
+    max-width: 1072px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px
+}
+
+.contact-grid article {
+    display: flex;
+    flex-direction: column;
+    gap: 7px
+}
+
+.contact-grid p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .07em
+}
+
+.contact-grid strong {
+    font-size: 1rem
+}
+
+.contact-grid a,
+.contact-grid span {
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: .92rem
+}
+
+@media(max-width:720px) {
+    .past-page {
+        background-attachment: scroll
+    }
+
+    .past-page header {
+        padding: 9px 16px
+    }
+
+    .past-page header img {
+        width: 82px
+    }
+
+    .past-page nav {
+        gap: 10px;
+        font-size: .83rem
+    }
+
+    .auction-grid,
+    .contact-grid {
+        grid-template-columns: 1fr
+    }
+
+    .past-page main {
+        padding: 50px 20px
+    }
+}

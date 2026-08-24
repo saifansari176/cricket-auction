@@ -2,10 +2,15 @@ import { Injectable } from '@angular/core';
 import { FirebaseApp, deleteApp, initializeApp } from 'firebase/app';
 import {
   User,
+  ConfirmationResult,
+  GoogleAuthProvider,
+  RecaptchaVerifier,
   createUserWithEmailAndPassword,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPhoneNumber,
+  signInWithPopup,
   signOut,
   updateProfile
 } from 'firebase/auth';
@@ -45,15 +50,34 @@ export class AuthService {
   async login(email: string, password: string): Promise<AppUser | null> {
     return this.loading.track(async () => {
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const appUser = await this.loadOrCreateProfile(credential.user);
+      return this.completeSignIn(credential.user);
+    });
+  }
 
-      if (!appUser.active) {
-        await signOut(auth);
-        throw new Error('This user account is inactive.');
-      }
+  async loginWithGoogle(): Promise<AppUser> {
+    return this.loading.track(async () => {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      const credential = await signInWithPopup(auth, provider);
+      return this.completeSignIn(credential.user);
+    });
+  }
 
-      this.currentUser$.next(appUser);
-      return appUser;
+  async sendPhoneOtp(phoneNumber: string, container: HTMLElement): Promise<ConfirmationResult> {
+    const verifier = new RecaptchaVerifier(auth, container, { size: 'invisible' });
+
+    try {
+      return await signInWithPhoneNumber(auth, phoneNumber, verifier);
+    } catch (error) {
+      verifier.clear();
+      throw error;
+    }
+  }
+
+  async loginWithPhoneOtp(confirmation: ConfirmationResult, otp: string): Promise<AppUser> {
+    return this.loading.track(async () => {
+      const credential = await confirmation.confirm(otp);
+      return this.completeSignIn(credential.user);
     });
   }
 
@@ -181,5 +205,17 @@ export class AuthService {
       ...profile,
       id: firebaseUser.uid
     };
+  }
+
+  private async completeSignIn(firebaseUser: User): Promise<AppUser> {
+    const appUser = await this.loadOrCreateProfile(firebaseUser);
+
+    if (!appUser.active) {
+      await signOut(auth);
+      throw new Error('This user account is inactive.');
+    }
+
+    this.currentUser$.next(appUser);
+    return appUser;
   }
 }

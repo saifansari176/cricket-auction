@@ -63,10 +63,10 @@
         </label>
 
         <label>
-          Jersey Number
+          Jersey Number *
           <input type="tel" maxlength="3" formControlName="jerseyNumber" (keypress)="allowOnlyNumbers($event)">
           <small class="error" *ngIf="form.get('jerseyNumber')?.touched && form.get('jerseyNumber')?.invalid">
-            Enter up to 3 digits.
+            Enter a jersey number with up to 3 digits.
           </small>
         </label>
 
