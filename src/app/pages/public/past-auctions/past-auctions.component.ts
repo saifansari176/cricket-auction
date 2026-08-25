@@ -8,5 +8,25 @@ import { PublicHeaderComponent } from '../../../shared/public-header/public-head
 export class PastAuctionsComponent {
   private auctionService = inject(AuctionService);
   auctions: AuctionSettings[] = [];
-  async ngOnInit(): Promise<void> { try { this.auctions = (await this.auctionService.getAuctions()).filter(a => !a.isActive); } catch { this.auctions = []; } }
+
+  async ngOnInit(): Promise<void> {
+    try {
+      this.auctions = (await this.auctionService.getAuctions())
+        .filter((auction) => !auction.isActive && this.isPastAuction(auction.auctionDate));
+    } catch {
+      this.auctions = [];
+    }
+  }
+
+  private isPastAuction(auctionDate: string): boolean {
+    if (!auctionDate) return false;
+
+    const date = new Date(`${auctionDate}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return false;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return date < today;
+  }
 }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AuctionSettings } from '../../core/models/auction-settings';
 import { AuthService } from '../../core/services/auth.service';
@@ -25,6 +25,13 @@ export class HeaderComponent implements OnInit {
     private auctionService: AuctionService
   ) {
     this.currentUser$ = this.authService.currentUser$;
+
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.closeMenu();
+        this.openSection = 'main';
+      }
+    });
   }
 
   async ngOnInit(): Promise<void> {

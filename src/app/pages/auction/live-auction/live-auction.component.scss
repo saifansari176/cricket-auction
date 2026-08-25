@@ -1,5 +1,6 @@
 .auction-page {
-    height: calc(100vh - 126px);
+  min-height: calc(100vh - 72px);
+  height: auto;
   padding: 10px;
   background:
     radial-gradient(circle at 20% 15%, rgba(0, 255, 255, .18), transparent 28%),
@@ -7,7 +8,7 @@
     linear-gradient(180deg, #07131f, #0d2035);
   color: #fff;
   display: grid;
-  // grid-template-rows: auto minmax(150px, 1fr) auto auto auto minmax(190px, auto);
+  grid-template-rows: auto minmax(220px, 42vh) auto auto auto;
   gap: 5px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -28,6 +29,20 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+  overflow: hidden;
+}
+
+.auction-page.fullscreen-mode .player-section {
+  min-height: 0;
+}
+
+.auction-page.fullscreen-mode .player-image {
+  max-height: calc(100% - 8px);
+}
+
+.auction-page.fullscreen-mode .team-image {
+  max-height: calc(100% - 42px);
 }
 
 .fullscreen-toggle {
@@ -86,6 +101,7 @@
   min-height: 0;
   position: relative;
   padding: 4px 8px 0;
+  min-height: 220px;
   align-self: stretch;
   overflow: hidden;
   background: linear-gradient(90deg, #004e92, #000428);
@@ -93,7 +109,7 @@
 
 .player-center {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,7 +118,7 @@
 
 .player-bid-layout {
   width: 100%;
-  height: 100%;
+  height: auto;
   display: flex;
   align-items: stretch;
   justify-content: center;
@@ -124,6 +140,24 @@
   max-height: calc(100% - 8px);
   border-radius: 8px;
   box-shadow: 0 0 35px rgba(0, 255, 255, 0.28);
+}
+
+.player-placeholder {
+  width: min(100%, 420px);
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border: 1px solid rgba(125, 211, 252, .45);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, .75), rgba(30, 64, 175, .85));
+  color: #fff;
+  font-size: clamp(24px, 4vw, 48px);
+  font-weight: 900;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+  box-shadow: 0 0 35px rgba(0, 255, 255, .2);
 }
 
 .team-half {
@@ -295,7 +329,7 @@
 
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(var(--team-count), minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   gap: 6px;
   min-height: 0;
   overflow: hidden;
@@ -321,9 +355,9 @@
   color: white;
   padding: 8px;
   cursor: pointer;
-  // display: grid;
-  // grid-template-columns: 44px minmax(0, 1fr);
-  // grid-template-rows: auto auto;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
   align-items: center;
   gap: 7px;
   min-width: 0;
@@ -455,6 +489,12 @@
     flex-direction: column;
   }
 
+  .auction-page.fullscreen-mode {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+    overflow: hidden;
+  }
+
   .info-bar {
     grid-template-columns: 1fr;
   }
@@ -462,6 +502,10 @@
   .player-section {
     min-height: 220px;
     overflow: hidden;
+  }
+
+  .auction-page.fullscreen-mode .player-section {
+    min-height: 0;
   }
 
   .player-bid-layout {
@@ -489,6 +533,77 @@
     width: 100%;
   }
 
+  .teams-grid {
+    width: 100%;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  }
+
+  .team-bid-btn {
+    min-height: 86px;
+  }
+
+}
+
+@media (max-width: 760px) {
+  .auction-page {
+    min-height: calc(100vh - 99px);
+  }
+}
+
+@media (max-width: 600px) {
+  .auction-page {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .auction-header {
+    padding: 8px 44px 8px 8px;
+    justify-content: flex-start;
+  }
+
+  .auction-header h1 {
+    font-size: clamp(17px, 5vw, 22px);
+    overflow-wrap: anywhere;
+  }
+
+  .auction-header p {
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .player-section {
+    min-height: 190px;
+  }
+
+  .player-section .half {
+    min-height: 170px;
+  }
+
+  .info-box {
+    padding: 9px 6px;
+  }
+
+  .center h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .highest-label {
+    font-size: 14px;
+    letter-spacing: 5px;
+  }
+
+  .action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .action-buttons button {
+    min-width: 0;
+  }
+
+  .teams-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* SOLD AND UNSOLD RESULT ANIMATIONS */

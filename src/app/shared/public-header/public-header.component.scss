@@ -1,13 +1,32 @@
 .public-site-header {
-    height: 104px;
-    padding: 14px clamp(32px, 5vw, 88px);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    height: 112px;
+    padding: 10px clamp(32px, 5.5vw, 88px);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 32px;
+    position: relative;
+    overflow: hidden;
     background: linear-gradient(110deg, rgba(1, 12, 35, .98), rgba(2, 22, 59, .96));
-    border-bottom: 1px solid rgba(14, 165, 233, .55);
-    box-shadow: 0 7px 22px rgba(0, 0, 0, .28)
+    border-bottom: 1px solid rgba(14, 165, 233, .75);
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 7px 22px rgba(0, 0, 0, .28), 0 1px 18px rgba(14, 165, 233, .3)
+}
+
+.public-site-header::after {
+    content: '';
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    bottom: -1px;
+    height: 2px;
+    border-radius: 50%;
+    background: #38bdf8;
+    box-shadow: 0 0 14px 3px rgba(56, 189, 248, .8);
 }
 
 .public-brand {
@@ -17,8 +36,8 @@
 }
 
 .public-brand img {
-    width: 140px;
-    height: 90px;
+    width: 150px;
+    height: 96px;
     object-fit: contain
 }
 
@@ -69,21 +88,33 @@
 
 @media(max-width:600px) {
     .public-site-header {
-        padding: 9px 16px;
-        align-items: flex-start
+        padding: 10px 12px 12px;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
     }
 
     .public-brand img {
-        width: 76px;
-        height: 52px
+        width: 104px;
+        height: 64px
     }
 
     .public-site-header nav {
-        gap: 10px 14px;
-        padding-top: 8px
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        gap: 10px;
+        padding: 0 2px 3px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .public-site-header nav::-webkit-scrollbar {
+        display: none;
     }
 
     .public-site-header nav a {
-        font-size: 13px
+        flex: 0 0 auto;
+        font-size: 12px
     }
 }

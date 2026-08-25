@@ -19,17 +19,29 @@
   <div *ngIf="currentPlayer" class="player-section">
     <div *ngIf="!highestTeam" class="player-center">
       <img
-        [src]="currentPlayer.photo || '/cricbids-logo.png'"
+        *ngIf="currentPlayer.photo; else playerNamePlaceholder"
+        [src]="currentPlayer.photo"
         alt="Player image"
         class="player-image" />
+      <ng-template #playerNamePlaceholder>
+        <div class="player-placeholder" aria-label="Player name">
+          {{currentPlayer.firstName}} {{currentPlayer.lastName}}
+        </div>
+      </ng-template>
     </div>
 
     <div *ngIf="highestTeam" class="player-bid-layout">
       <div class="half player-half">
         <img
-          [src]="currentPlayer.photo || '/cricbids-logo.png'"
+          *ngIf="currentPlayer.photo; else playerNamePlaceholderWithBid"
+          [src]="currentPlayer.photo"
           alt="Player image"
           class="player-image" />
+        <ng-template #playerNamePlaceholderWithBid>
+          <div class="player-placeholder" aria-label="Player name">
+            {{currentPlayer.firstName}} {{currentPlayer.lastName}}
+          </div>
+        </ng-template>
       </div>
 
       <div class="half team-half">

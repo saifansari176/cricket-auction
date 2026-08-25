@@ -51,7 +51,7 @@
             </span>
             <span class="account-text">
                 <strong>{{user.displayName || user.email}}</strong>
-                <small>{{user.role}}</small>
+                <small *ngIf="user.role === 'admin'">{{user.role}}</small>
             </span>
             <span class="profile-chevron" aria-hidden="true">⌄</span>
         </button>
@@ -70,13 +70,13 @@
 <div class="menu-backdrop" *ngIf="menuOpen" (click)="closeMenu()"></div>
 
 <aside class="menu-panel" [class.open]="menuOpen">
-    <div class="menu-panel-header">
+    <!-- <div class="menu-panel-header">
         <div>
             <h3>Cricbids</h3>
             <p>Navigation</p>
         </div>
         <button type="button" class="close-btn" (click)="closeMenu()" aria-label="Close menu">×</button>
-    </div>
+    </div> -->
 
     <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
     <a routerLink="/auction-settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Auction Settings</a>
@@ -127,7 +127,7 @@
             <span class="avatar">{{(user.displayName || user.email || 'U').charAt(0)}}</span>
             <span class="account-text">
                 <strong>{{user.displayName || user.email}}</strong>
-                <small>{{user.role}}</small>
+                <small *ngIf="user.role === 'admin'">{{user.role}}</small>
             </span>
         </div>
 

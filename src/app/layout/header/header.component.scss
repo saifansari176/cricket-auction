@@ -1,42 +1,31 @@
-// .app-header {
-//     min-height:76px;
-//     background:rgb(190 216 255);
-//     border-bottom:1px solid #e2e8f0;
-//     box-shadow:0 8px 24px rgba(15,23,42,.08);
-//     display:flex;
-//     align-items:center;
-//     justify-content:space-between;
-//     gap:18px;
-//     padding:0 28px 0 10px;
-//     position:sticky;
-//     top:0;
-//     z-index:900;
-// }
-
 .app-header {
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 1000;
-
+    left: 0;
+    width: 100%;
+    z-index: 1100;
     height: 72px;
     padding: 0 22px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     background: #ffffff;
-
+    overflow: visible;
     border-bottom: 1px solid #e5e7eb;
-
     box-shadow:
         0 3px 15px rgba(15, 23, 42, .06);
-
     transition: .3s;
+}
+
+:host {
+    display: block;
+    min-height: 72px;
 }
 
 .current-auction-bar {
     position: relative;
+    z-index: 1;
+    margin-top: 72px;
     overflow: hidden;
     display: flex;
     justify-content: center;
@@ -230,6 +219,7 @@
 
 .nav-group {
     position: relative;
+    z-index: 2;
 }
 
 .nav-dropdown {
@@ -244,7 +234,7 @@
     display: none;
     margin-top: 0;
     padding: 8px;
-    z-index: 1000;
+    z-index: 1200;
 }
 
 .nav-group:hover .nav-dropdown {
@@ -439,7 +429,7 @@
 
 .menu-panel {
     position: fixed;
-    top: 0;
+    top: 100px;
     left: 0;
     width: 340px;
     max-width: 88vw;
@@ -542,11 +532,20 @@
 }
 
 @media (max-width: 760px) {
+    :host {
+        min-height: 99px;
+    }
+
     .app-header {
+        height: 99px;
         min-height: auto;
         align-items: flex-start;
         flex-direction: column;
         padding: 14px;
+    }
+
+    .current-auction-bar {
+        margin-top: 99px;
     }
 
     .brand {
