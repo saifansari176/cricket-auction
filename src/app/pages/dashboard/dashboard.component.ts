@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { AuctionBid } from '../../core/models/bid';
 import { Player } from '../../core/models/player';
@@ -42,13 +42,19 @@ export class DashboardComponent implements OnInit {
     private playerService: PlayerService,
     private teamService: TeamService,
     private auctionService: AuctionService,
-private router: Router,
+    private router: Router,
+    private route: ActivatedRoute,
     private categoryService: PlayerCategoryService,
     private imagePreview: ImagePreviewService,
     private message: MessageService
   ) { }
 
   async ngOnInit(): Promise<void> {
+    const listFromRoute = this.route.snapshot.queryParamMap.get('list');
+    if (listFromRoute === 'available' || listFromRoute === 'players' || listFromRoute === 'teams' || listFromRoute === 'sold' || listFromRoute === 'unsold') {
+      this.activeList = listFromRoute as DashboardList;
+    }
+
     this.loading = true;
 
     try {
@@ -75,6 +81,12 @@ private router: Router,
     this.playerTypeFilter = '';
     this.playerStatusFilter = '';
     this.categoryFilter = '';
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { list },
+      queryParamsHandling: 'merge'
+    });
   }
 
   get activeTitle(): string {
@@ -392,6 +404,7 @@ private router: Router,
     const playerName = `${player.firstName} ${player.lastName}`;
     this.auctionService.setSelectedCategory(player.categoryId || '');
     this.auctionService.setSelectedPlayer(player.id, playerName);
+    this.auctionService.setReturnToDashboardAfterSale(true);
     this.router.navigate(['/auction']);
   }
 

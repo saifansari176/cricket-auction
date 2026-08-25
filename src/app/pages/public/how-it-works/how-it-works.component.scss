@@ -147,6 +147,14 @@
     font-size: .92rem
 }
 
+.phone-row {
+    display: contents;
+}
+
+.footer-heading {
+    white-space: nowrap;
+}
+
 @media(max-width:600px) {
     .guide-header {
         padding: 9px 16px

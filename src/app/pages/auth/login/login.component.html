@@ -27,7 +27,7 @@
         'Verifying...' : 'Verify OTP and Login'}}</button>
     </ng-container>
     <ng-template #emailLogin>
-        <div class="mb-3" *ngIf="isRegistering"><label class="form-label">Display Name</label><input type="text"
+      <div class="mb-3" *ngIf="isRegistering"><label class="form-label">Display Name</label><input type="text"
           class="form-control" [class.is-invalid]="displayName.invalid && (displayName.touched || displayName.dirty)"
           formControlName="displayName" placeholder="Your name">
         <div class="invalid-feedback" *ngIf="displayName.invalid && (displayName.touched || displayName.dirty)">Display
@@ -78,5 +78,28 @@
         </svg>Continue with Google</button>
     </div>
   </form>
-  <footer class="site-footer"><div class="contact-grid"><article><strong class="footer-heading">Founder</strong><a href="tel:9823300308"><strong>Mohammad Saif Ansari</strong> 9823300308</a><a href="tel:9320006789">9320006789</a></article><article><strong class="footer-heading">Co-Founder</strong><a href="tel:9699760242"><strong>Saad Ansari</strong> 9699760242</a></article><article><strong class="footer-heading">Partners</strong><span class="phone-row"><a href="tel:9689950988">Noor Ansari · 9689950988</a><a href="tel:8793669939">Arif Ansari · 8793669939</a></span><span class="phone-row"><a href="tel:9175982907">Raj Ansari · 9175982907</a><a href="tel:8554849463">Usamah Momin · 8554849463</a></span></article><article><strong class="footer-heading">Technology Partner / Powered by</strong><span class="technology-name">Techcharm Pvt Ltd</span><span class="technology-contact">Khalid Ansari Sir</span></article></div></footer>
+  <footer class="site-footer">
+    <div class="contact-grid">
+      <article>
+        <strong class="footer-heading">Founder</strong>
+        <a href="tel:9823300308">
+          <strong>Mohammad SaifAnsari</strong> 9823300308</a>
+        <a href="tel:9320006789">9320006789</a>
+      </article>
+      <article><strong class="footer-heading">Co-Founder</strong><a href="tel:9699760242"><strong>Saad Ansari</strong>
+          9699760242</a></article>
+      <article>
+        <strong class="footer-heading">Partners</strong>
+        <span class="phone-row">
+          <a href="tel:9689950988">Noor Ansari · 9689950988</a>
+          <a href="tel:8793669939">Arif Ansari · 8793669939</a>
+          <a href="tel:9175982907">Raj Ansari · 9175982907</a>
+          <a href="tel:8554849463">Usamah Momin · 8554849463</a>
+        </span>
+      </article>
+      <article><strong class="footer-heading">Technology Partner / Powered by</strong><span
+          class="technology-name">Techcharm Pvt Ltd</span><span class="technology-contact">Khalid Ansari Sir</span>
+      </article>
+    </div>
+  </footer>
 </div>

@@ -32,6 +32,19 @@ export class AuctionService {
   activeAuction$ = new BehaviorSubject<AuctionSettings | null>(null);
   selectedPlayer$ = new BehaviorSubject<{id: string, name: string} | null>(null);
   selectedCategoryId$ = new BehaviorSubject<string>('');
+  private returnToDashboardAfterSale = false;
+
+  setReturnToDashboardAfterSale(value: boolean): void {
+    this.returnToDashboardAfterSale = value;
+  }
+
+  shouldReturnToDashboardAfterSale(): boolean {
+    return this.returnToDashboardAfterSale;
+  }
+
+  clearReturnToDashboardAfterSale(): void {
+    this.returnToDashboardAfterSale = false;
+  }
 
   async save(settings: AuctionSettings, auctionId?: string): Promise<string> {
 

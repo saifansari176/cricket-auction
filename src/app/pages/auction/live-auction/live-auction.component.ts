@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { Player } from '../../../core/models/player';
@@ -41,7 +42,8 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     private auctionService: AuctionService,
     private message: MessageService,
     private loadingService: LoadingService,
-    private categoryService: PlayerCategoryService
+    private categoryService: PlayerCategoryService,
+    private router: Router
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -232,6 +234,13 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
         this.actionHistory.push({ type: 'sold', playerId: soldPlayerId });
         await this.loadTeams();
         await this.loadNextPlayer();
+
+        const shouldReturnToDashboard = this.auctionService.shouldReturnToDashboardAfterSale();
+        this.auctionService.clearReturnToDashboardAfterSale();
+
+        if (shouldReturnToDashboard) {
+          this.router.navigate(['/dashboard'], { queryParams: { list: 'available' } });
+        }
       });
     } finally {
       this.showSoldAnimation = false;
