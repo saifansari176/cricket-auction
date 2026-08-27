@@ -35,10 +35,9 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.auctionId = this.route.snapshot.paramMap.get('auctionId') || '';
     void this.load();
-    this.refreshTimer = setInterval(() => void this.load(false), 8000);
   }
 
-  ngOnDestroy(): void { if (this.refreshTimer) clearInterval(this.refreshTimer); }
+  ngOnDestroy(): void { this.stopAutoRefresh(); }
 
   async load(showLoader = true): Promise<void> {
     if (!this.auctionId) { this.notFound = true; this.loading = false; return; }
@@ -51,9 +50,29 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       this.bids = data.bids.filter((bid) => bid.sold);
       this.liveState = data.liveState;
       this.notFound = !data.auction;
+      if (this.publicLiveViewEnabled) {
+        this.startAutoRefresh();
+      } else {
+        this.stopAutoRefresh();
+      }
     } catch {
       this.notFound = true;
     } finally { this.loading = false; }
+  }
+
+  get publicLiveViewEnabled(): boolean {
+    return this.auction?.publicLiveViewEnabled !== false;
+  }
+
+  private startAutoRefresh(): void {
+    if (this.refreshTimer) return;
+    this.refreshTimer = setInterval(() => void this.load(false), 8000);
+  }
+
+  private stopAutoRefresh(): void {
+    if (!this.refreshTimer) return;
+    clearInterval(this.refreshTimer);
+    this.refreshTimer = undefined;
   }
 
   get currentPlayer(): Player | undefined { return this.players.find((p) => p.id === this.liveState?.currentPlayerId); }

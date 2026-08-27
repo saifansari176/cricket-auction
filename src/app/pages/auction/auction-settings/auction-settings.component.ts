@@ -344,6 +344,17 @@ export class AuctionSettingsComponent {
     if (auction) auction.registrationLinkEnabled = enabled;
   }
 
+  async togglePublicLiveView(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+
+    const enabled = this.shareAuction.publicLiveViewEnabled !== false;
+    await this.auctionService.setPublicLiveViewEnabled(this.shareAuction.id, !enabled);
+    this.shareAuction.publicLiveViewEnabled = !enabled;
+
+    const auction = this.auctions.find((item) => item.id === this.shareAuction?.id);
+    if (auction) auction.publicLiveViewEnabled = !enabled;
+  }
+
   async copyRegistrationLink(): Promise<void> {
     if (!this.shareAuction?.id) return;
 

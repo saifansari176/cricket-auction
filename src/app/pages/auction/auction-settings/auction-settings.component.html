@@ -1,5 +1,5 @@
 <div class="settings-page">
-  <div class="settings-header">
+  <div class="settings-header mx-4">
     <div>
       <h2>Auction Management</h2>
       <p *ngIf="isAdmin">Manage all registered auctions and their settings.</p>
@@ -250,6 +250,13 @@
     </label>
 
     <p class="share-modal-help">Only this auction’s registration form is affected.</p>
+
+    <label class="form-check form-switch registration-link-switch">
+      <input class="form-check-input" type="checkbox" [checked]="shareAuction.publicLiveViewEnabled !== false" (change)="togglePublicLiveView()">
+      <span class="form-check-label">Show live auction on the public link</span>
+    </label>
+
+    <p class="share-modal-help">Turn this off to show Auction completed and stop auto-refresh.</p>
 
     <div class="share-modal-actions">
       <!-- <button type="button" class="btn btn-outline-secondary" (click)="closeSharePopup()">Close</button> -->

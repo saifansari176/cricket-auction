@@ -26,6 +26,8 @@ export interface AuctionSettings {
 
   registrationLinkEnabled?: boolean;
 
+  publicLiveViewEnabled?: boolean;
+
   isActive?: boolean;
 
   createdAt?: string;

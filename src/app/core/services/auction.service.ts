@@ -322,6 +322,13 @@ export class AuctionService {
     });
   }
 
+  async setPublicLiveViewEnabled(auctionId: string, enabled: boolean): Promise<void> {
+    await this.firebase.update(this.auctionsCollection, auctionId, {
+      publicLiveViewEnabled: enabled,
+      updatedAt: new Date().toISOString()
+    });
+  }
+
   async deleteTeamBids(teamId: string): Promise<void> {
     const bids = await this.getBids();
     const auctionId = await this.getActiveAuctionId();
