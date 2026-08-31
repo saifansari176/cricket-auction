@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuctionBid } from '../../../core/models/bid';
 import { AuctionSettings } from '../../../core/models/auction-settings';
@@ -7,6 +7,7 @@ import { Player } from '../../../core/models/player';
 import { Team } from '../../../core/models/team';
 import { AuctionService, LiveAuctionState } from '../../../core/services/auction.service';
 import { ImagePreviewService } from '../../../shared/image-preview/image-preview.service';
+import { Unsubscribe } from 'firebase/firestore';
 
 @Component({
   selector: 'app-tournament-watch',
@@ -23,13 +24,17 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   liveState: LiveAuctionState | null = null;
   loading = true;
   notFound = false;
+  resultAnimation: 'sold' | 'unsold' | null = null;
   private auctionId = '';
-  private refreshTimer?: ReturnType<typeof setInterval>;
+  private liveStateSubscription?: Unsubscribe;
+  private resultAnimationTimer?: ReturnType<typeof setTimeout>;
+  private lastLiveStateUpdatedAt = '';
 
   constructor(
     private route: ActivatedRoute,
     private auctionService: AuctionService,
-    private imagePreview: ImagePreviewService
+    private imagePreview: ImagePreviewService,
+    private zone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +42,10 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     void this.load();
   }
 
-  ngOnDestroy(): void { this.stopAutoRefresh(); }
+  ngOnDestroy(): void {
+    this.stopLiveUpdates();
+    if (this.resultAnimationTimer) clearTimeout(this.resultAnimationTimer);
+  }
 
   async load(showLoader = true): Promise<void> {
     if (!this.auctionId) { this.notFound = true; this.loading = false; return; }
@@ -49,11 +57,12 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       this.players = data.players;
       this.bids = data.bids.filter((bid) => bid.sold);
       this.liveState = data.liveState;
+      this.lastLiveStateUpdatedAt = data.liveState?.updatedAt || this.lastLiveStateUpdatedAt;
       this.notFound = !data.auction;
       if (this.publicLiveViewEnabled) {
-        this.startAutoRefresh();
+        this.startLiveUpdates();
       } else {
-        this.stopAutoRefresh();
+        this.stopLiveUpdates();
       }
     } catch {
       this.notFound = true;
@@ -64,15 +73,30 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     return this.auction?.publicLiveViewEnabled !== false;
   }
 
-  private startAutoRefresh(): void {
-    if (this.refreshTimer) return;
-    this.refreshTimer = setInterval(() => void this.load(false), 8000);
+  private startLiveUpdates(): void {
+    if (this.liveStateSubscription || !this.auctionId) return;
+    this.liveStateSubscription = this.auctionService.watchLiveState(this.auctionId, (state) => {
+      this.zone.run(() => {
+        if (!state?.updatedAt || state.updatedAt === this.lastLiveStateUpdatedAt) return;
+        this.lastLiveStateUpdatedAt = state.updatedAt;
+        if (state.lastAction === 'sold' || state.lastAction === 'unsold') this.playResultAnimation(state.lastAction);
+        void this.load(false);
+      });
+    });
   }
 
-  private stopAutoRefresh(): void {
-    if (!this.refreshTimer) return;
-    clearInterval(this.refreshTimer);
-    this.refreshTimer = undefined;
+  private stopLiveUpdates(): void {
+    this.liveStateSubscription?.();
+    this.liveStateSubscription = undefined;
+  }
+
+  private playResultAnimation(action: 'sold' | 'unsold'): void {
+    this.resultAnimation = null;
+    requestAnimationFrame(() => {
+      this.resultAnimation = action;
+      if (this.resultAnimationTimer) clearTimeout(this.resultAnimationTimer);
+      this.resultAnimationTimer = setTimeout(() => this.resultAnimation = null, 2200);
+    });
   }
 
   get currentPlayer(): Player | undefined { return this.players.find((p) => p.id === this.liveState?.currentPlayerId); }

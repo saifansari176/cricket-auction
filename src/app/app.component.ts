@@ -25,7 +25,7 @@ export class AppComponent {
   constructor(private router: Router) {}
 
   get showShell(): boolean {
-    const publicPaths = ['/', '/login', '/player-registration', '/watch', '/how-it-works', '/past-auctions'];
+    const publicPaths = ['/', '/login', '/player-registration', '/watch', '/live-screen', '/how-it-works', '/past-auctions'];
     return !publicPaths.some((path) => path === '/' ? this.router.url === '/' : this.router.url.startsWith(path));
   }
 }

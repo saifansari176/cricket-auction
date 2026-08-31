@@ -1,0 +1,452 @@
+<main
+  class="live-screen"
+  [class.updating]="updating"
+  *ngIf="!loading; else loadingState"
+>
+  <section
+    class="screen-shell"
+    *ngIf="auction as loadedAuction; else notFoundState"
+  >
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <header class="screen-header">
+
+      <!-- Cricbids Logo -->
+      <div class="brand-logo">
+        <img
+          src="/cricbids-logo.png"
+          alt="Cricbids Auction"
+        />
+      </div>
+
+      <!-- Auction Title -->
+      <div class="auction-heading">
+
+        <div class="auction-logo" *ngIf="loadedAuction.logo">
+          <img
+            [src]="loadedAuction.logo"
+            [alt]="loadedAuction.auctionName + ' logo'"
+          />
+        </div>
+
+        <div class="auction-title-text">
+          <h1>{{ loadedAuction.auctionName }}</h1>
+
+          <p>LIVE PLAYER AUCTION</p>
+
+          <span
+            class="live-status"
+            [class.completed]="!publicLiveViewEnabled"
+          >
+            <i></i>
+            {{ publicLiveViewEnabled ? 'LIVE' : 'COMPLETED' }}
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Stats -->
+      <div class="screen-stats">
+
+        <div class="stat-item">
+          <span class="stat-icon people-icon">
+            <span></span>
+            <span></span>
+          </span>
+
+          <div>
+            <small>PLAYERS</small>
+            <strong>{{ players.length }}</strong>
+          </div>
+        </div>
+
+        <div class="stat-divider"></div>
+
+        <div class="stat-item">
+          <span class="stat-icon team-icon">
+            <span></span>
+            <span></span>
+          </span>
+
+          <div>
+            <small>TEAMS</small>
+            <strong>
+              {{ teams.length | number:'2.0-0' }}
+            </strong>
+          </div>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         LIVE DISPLAY
+    ====================================================== -->
+    <section
+      class="display-area"
+      *ngIf="publicLiveViewEnabled; else completedState"
+    >
+
+      <div class="broadcast-layout">
+
+
+        <!-- =================================================
+             CURRENT PLAYER
+        ================================================== -->
+        <section class="broadcast-card current-player-card">
+
+          <!-- Animated border -->
+          <div class="running-border"></div>
+
+          <!-- Ribbon -->
+          <div class="card-ribbon">
+            CURRENT PLAYER
+          </div>
+
+
+          <div
+            class="player-content"
+            *ngIf="currentPlayer as player; else waitingForPlayer"
+          >
+
+            <!-- PLAYER IMAGE -->
+            <div class="player-visual">
+
+              <div class="player-portrait">
+
+                <div class="portrait-glow"></div>
+
+                <img
+                  *ngIf="player.photo; else playerPlaceholder"
+                  [src]="player.photo"
+                  [alt]="player.firstName + ' ' + player.lastName"
+                />
+
+                <ng-template #playerPlaceholder>
+                  <span>
+                    {{ player.firstName }}
+                    {{ player.lastName }}
+                  </span>
+                </ng-template>
+
+              </div>
+
+
+              <!-- BASE PRICE -->
+              <div class="base-price">
+
+                <span>BASE PRICE</span>
+
+                <strong>
+                  {{
+                    (currentPlayer?.baseBid || 0)
+                      | currency:'INR':'symbol':'1.0-0'
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- PLAYER INFORMATION -->
+            <div class="player-summary">
+
+              <h2>
+                <span>{{ player.firstName }}</span>
+                <strong>{{ player.lastName }}</strong>
+              </h2>
+
+              <span class="player-role">
+                {{ player.playerType || 'PLAYER' }}
+              </span>
+
+
+              <div class="player-facts">
+
+                <div class="fact">
+
+                  <span class="fact-bullet"></span>
+
+                  <div>
+                    <small>BATTING STYLE</small>
+                    <strong>Right Handed</strong>
+                  </div>
+
+                </div>
+
+
+                <div class="fact">
+
+                  <span class="fact-circle"></span>
+
+                  <div>
+                    <small>BOWLING STYLE</small>
+                    <strong>—</strong>
+                  </div>
+
+                </div>
+
+
+                <div class="fact">
+
+                  <span class="fact-bullet"></span>
+
+                  <div>
+                    <small>AGE</small>
+                    <strong>—</strong>
+                  </div>
+
+                </div>
+
+
+                <div class="fact country-fact">
+
+                  <span class="country-code">IN</span>
+
+                  <div>
+                    <small>COUNTRY</small>
+                    <strong>India</strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Waiting -->
+          <ng-template #waitingForPlayer>
+
+            <div class="waiting-player">
+              Waiting for next player
+            </div>
+
+          </ng-template>
+
+        </section>
+
+
+
+        <!-- =================================================
+             HIGHEST BID
+        ================================================== -->
+        <section class="broadcast-card highest-bid-card">
+
+          <!-- Animated border -->
+          <div class="running-border"></div>
+
+          <!-- Ribbon -->
+          <div class="card-ribbon">
+            HIGHEST BID
+          </div>
+
+
+          <div class="highest-bid-content">
+
+            <!-- TEAM LOGO -->
+            <div
+              class="team-logo-wrap"
+              *ngIf="highestTeam; else waitingForBid"
+            >
+
+              <div class="team-logo-glow"></div>
+
+              <img
+                [src]="highestTeam.logo || '/cricbids-logo.png'"
+                [alt]="highestTeam.teamName + ' logo'"
+              />
+
+            </div>
+
+
+            <!-- TEAM NAME -->
+            <div
+              class="team-name"
+              *ngIf="highestTeam"
+            >
+              {{ highestTeam.teamName }}
+            </div>
+
+
+            <!-- BID -->
+            <div class="highest-amount">
+
+              {{
+                currentBid
+                  | currency:'INR':'symbol':'1.0-0'
+              }}
+
+            </div>
+
+
+            <!-- CURRENT BIDDER -->
+            <div class="bidder-line">
+
+              <span class="bidder-icon">
+                ⚒
+              </span>
+
+              <div>
+
+                <span>CURRENT BIDDER</span>
+
+                <strong>
+                  {{ currentBidderName }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <ng-template #waitingForBid>
+
+            <div class="bid-team waiting">
+              WAITING FOR A BID
+            </div>
+
+          </ng-template>
+
+        </section>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         COMPLETED
+    ====================================================== -->
+    <ng-template #completedState>
+
+      <section class="display-area completed-state">
+
+        <div class="completed-card">
+
+          <span class="eyebrow">
+            AUCTION STATUS
+          </span>
+
+          <h2>Auction Completed</h2>
+
+          <p>
+            The live display has been closed by the auction manager.
+          </p>
+
+        </div>
+
+      </section>
+
+    </ng-template>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+    <footer class="screen-footer">
+
+      <div class="footer-brand">
+
+        <strong>CRICBIDS</strong>
+
+        <span>
+          LIVE AUCTION SOFTWARE
+        </span>
+
+      </div>
+
+
+      <div class="footer-website">
+
+        <span>VISIT US</span>
+
+        <a
+          href="https://www.cricbids.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          www.cricbids.com
+        </a>
+
+      </div>
+
+
+      <div class="footer-contact">
+
+        <span>CONTACT</span>
+
+        <div>
+
+          <strong>
+            Saif Ansari
+            <b>9823300308</b>
+          </strong>
+
+          <i></i>
+
+          <strong>
+            Saad Ansari
+            <b>9699760242</b>
+          </strong>
+
+        </div>
+
+      </div>
+
+    </footer>
+
+  </section>
+
+  <div *ngIf="resultAnimation === 'sold'" class="sold-stamp">
+    <span class="sold-label">SOLD</span>
+    <span class="sold-subtitle">PLAYER SOLD</span>
+  </div>
+
+  <div *ngIf="resultAnimation === 'unsold'" class="unsold-stamp">
+    <span class="unsold-label">UNSOLD</span>
+    <span class="unsold-subtitle">BACK TO THE PLAYER POOL</span>
+  </div>
+</main>
+
+
+<!-- =========================================================
+     LOADING
+========================================================== -->
+<ng-template #loadingState>
+
+  <main class="live-screen centered-message">
+
+    <div class="loading-text">
+      Loading auction...
+    </div>
+
+  </main>
+
+</ng-template>
+
+
+<!-- =========================================================
+     NOT FOUND
+========================================================== -->
+<ng-template #notFoundState>
+
+  <main class="live-screen centered-message">
+
+    <div class="loading-text">
+      Auction not found
+    </div>
+
+  </main>
+
+</ng-template>

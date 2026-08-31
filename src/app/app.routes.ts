@@ -130,6 +130,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'live-screen/:auctionId',
+    loadComponent: () =>
+      import('./pages/public/live-screen/live-screen.component').then((m) => m.LiveScreenComponent),
+  },
+
+  {
     path: 'about-us',
     canActivate: [authGuard],
     loadComponent: () =>

@@ -1,0 +1,2280 @@
+/* =========================================================
+   ROOT SCREEN
+========================================================= */
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.live-screen {
+  position: fixed;
+  inset: 0;
+
+  width: 100vw;
+  height: 100dvh;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(1, 12, 35, 0.20),
+      rgba(1, 8, 25, 0.65)
+    ),
+    url('/banner-poster.png') center center / cover no-repeat;
+
+  color: #fff;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  isolation: isolate;
+}
+
+
+/* =========================================================
+   MOVING BACKGROUND
+========================================================= */
+
+.live-screen::before {
+  content: '';
+
+  position: absolute;
+  inset: -10%;
+
+  z-index: 0;
+
+  background:
+    url('/banner-poster.png') center center / cover no-repeat;
+
+  opacity: 0.5;
+
+  transform: scale(1.08);
+
+  animation:
+    backgroundMove 18s ease-in-out infinite alternate;
+
+  pointer-events: none;}
+
+
+.live-screen::after {
+  content: '';
+
+  position: absolute;
+  inset: 0;
+
+  z-index: 1;
+
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(0, 145, 255, 0.25),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(0, 110, 255, 0.20),
+      transparent 35%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 5, 20, 0.05),
+      rgba(0, 4, 18, 0.45)
+    );
+
+  animation: backgroundGlow 7s ease-in-out infinite alternate;
+}
+
+
+@keyframes backgroundMove {
+
+  0% {
+    transform:
+      scale(1.08)
+      translate3d(-1%, -0.5%, 0);
+  }
+
+  50% {
+    transform:
+      scale(1.12)
+      translate3d(0.5%, 0.5%, 0);
+  }
+
+  100% {
+    transform:
+      scale(1.08)
+      translate3d(1%, -0.5%, 0);
+  }
+}
+
+
+@keyframes backgroundGlow {
+
+  0% {
+    opacity: 0.65;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+
+/* =========================================================
+   SCREEN SHELL
+========================================================= */
+
+.screen-shell {
+
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  // max-width: 1920px;
+
+  margin: 0 auto;
+
+  padding:
+    clamp(12px, 2vh, 28px)
+    clamp(16px, 3vw, 55px)
+    clamp(10px, 1.5vh, 22px);
+
+  display: grid;
+
+  grid-template-rows:
+    minmax(82px, 14vh)
+    minmax(0, 1fr)
+    minmax(50px, 8vh);
+
+  gap: clamp(8px, 1.2vh, 18px);
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.screen-header {
+
+  min-height: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(170px, 0.9fr)
+    minmax(380px, 2fr)
+    minmax(300px, 1.2fr);
+
+  align-items: center;
+
+  gap: clamp(12px, 2vw, 35px);
+}
+
+
+/* =========================================================
+   CRICBIDS LOGO
+========================================================= */
+
+.brand-logo {
+
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.brand-logo img {
+
+  width: auto;
+
+  height:
+    clamp(
+      65px,
+      11vh,
+      125px
+    );
+
+  max-width: 230px;
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(0 0 8px rgba(0, 136, 255, 0.35));
+}
+
+
+/* =========================================================
+   AUCTION TITLE
+========================================================= */
+
+.auction-heading {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: clamp(10px, 1vw, 20px);
+
+  min-width: 0;
+}
+
+
+.auction-logo {
+
+  flex: 0 0 auto;
+
+  width:
+    clamp(
+      65px,
+      8vh,
+      105px
+    );
+
+  height:
+    clamp(
+      65px,
+      8vh,
+      105px
+    );
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.auction-logo img {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  filter:
+    drop-shadow(0 0 10px rgba(0, 136, 255, 0.35));
+}
+
+
+.auction-title-text {
+
+  min-width: 0;
+}
+
+
+.auction-title-text h1 {
+
+  margin: 0;
+
+  color: #f7f9ff;
+
+  font-size:
+    clamp(
+      26px,
+      3.3vw,
+      62px
+    );
+
+  line-height: 0.95;
+
+  font-weight: 900;
+
+  letter-spacing: 1px;
+
+  white-space: nowrap;
+
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+
+.auction-title-text p {
+
+  margin:
+    clamp(4px, 0.6vh, 8px)
+    0
+    0;
+
+  color: #16bfff;
+
+  font-size:
+    clamp(
+      12px,
+      1.25vw,
+      23px
+    );
+
+  letter-spacing:
+    clamp(1px, 0.2vw, 4px);
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   LIVE BADGE
+========================================================= */
+
+.live-status {
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top:
+    clamp(4px, 0.6vh, 8px);
+
+  padding:
+    5px 18px;
+
+  min-width: 75px;
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ff3333,
+      #dc1010
+    );
+
+  color: #fff;
+
+  font-size:
+    clamp(11px, 0.8vw, 15px);
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+
+  box-shadow:
+    0 0 14px rgba(255, 20, 20, 0.35);
+
+  animation: livePulse 1.7s ease-in-out infinite;
+}
+
+
+.live-status i {
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #fff;
+}
+
+
+.live-status.completed {
+
+  background: #444;
+
+  animation: none;
+}
+
+
+@keyframes livePulse {
+
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(255, 30, 30, 0.25);
+  }
+
+  50% {
+    box-shadow:
+      0 0 22px rgba(255, 30, 30, 0.65);
+  }
+}
+
+
+/* =========================================================
+   HEADER STATS
+========================================================= */
+
+.screen-stats {
+
+  justify-self: end;
+
+  width: 100%;
+  max-width: 430px;
+
+  min-height: 70px;
+
+  display: grid;
+
+  grid-template-columns: 1fr auto 1fr;
+
+  align-items: center;
+
+  padding:
+    8px 18px;
+
+  border:
+    1px solid rgba(57, 170, 255, 0.45);
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(3, 25, 58, 0.82),
+      rgba(2, 13, 34, 0.92)
+    );
+
+  box-shadow:
+    inset 0 0 25px rgba(0, 113, 255, 0.08),
+    0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+
+.stat-item {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+}
+
+
+.stat-item div {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.stat-item small {
+
+  color: #dbe9ff;
+
+  font-size:
+    clamp(9px, 0.65vw, 13px);
+
+  letter-spacing: 1px;
+
+  font-weight: 700;
+}
+
+
+.stat-item strong {
+
+  color: #fff;
+
+  font-size:
+    clamp(23px, 2vw, 38px);
+
+  line-height: 1;
+
+  font-weight: 800;
+}
+
+
+.stat-divider {
+
+  height: 45px;
+
+  width: 1px;
+
+  background:
+    rgba(150, 205, 255, 0.35);
+}
+
+
+/* Simple people icon */
+
+.stat-icon {
+
+  position: relative;
+
+  width: 34px;
+  height: 34px;
+
+  display: block;
+}
+
+
+.people-icon::before,
+.team-icon::before {
+
+  content: '';
+
+  position: absolute;
+
+  width: 12px;
+  height: 12px;
+
+  border-radius: 50%;
+
+  background: #148cff;
+
+  top: 2px;
+  left: 11px;
+
+  box-shadow:
+    13px 5px 0 -2px #148cff;
+}
+
+
+.people-icon::after,
+.team-icon::after {
+
+  content: '';
+
+  position: absolute;
+
+  width: 27px;
+  height: 13px;
+
+  left: 3px;
+  bottom: 2px;
+
+  border-radius: 15px 15px 4px 4px;
+
+  background: #148cff;
+
+  box-shadow:
+    9px 2px 0 -4px #148cff;
+}
+
+
+/* =========================================================
+   DISPLAY AREA
+========================================================= */
+
+.display-area {
+
+  min-height: 0;
+
+  width: 100%;
+}
+
+
+/* =========================================================
+   TWO COLUMN LAYOUT
+========================================================= */
+
+.broadcast-layout {
+
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.55fr)
+    minmax(0, 1fr);
+
+  gap:
+    clamp(12px, 1.5vw, 28px);
+}
+
+
+/* =========================================================
+   COMMON CARD
+========================================================= */
+
+.broadcast-card {
+
+  position: relative;
+
+  min-width: 0;
+  min-height: 0;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(2, 24, 54, 0.86),
+      rgba(1, 12, 31, 0.94)
+    );
+
+  box-shadow:
+    inset 0 0 40px rgba(0, 96, 190, 0.09),
+    0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+
+/* =========================================================
+   RUNNING SHINE BORDER
+========================================================= */
+
+.running-border {
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 1;
+
+  border-radius: inherit;
+
+  pointer-events: none;
+
+  padding: 1px;
+
+  overflow: hidden;
+}
+
+
+.running-border::before {
+
+  content: '';
+
+  position: absolute;
+
+  width: 180%;
+  height: 180%;
+
+  left: -40%;
+  top: -40%;
+
+  background:
+    conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 65deg,
+      rgba(0, 177, 255, 0.15) 80deg,
+      #00baff 100deg,
+      #ffffff 110deg,
+      #00baff 120deg,
+      rgba(0, 177, 255, 0.15) 140deg,
+      transparent 160deg,
+      transparent 360deg
+    );
+
+  animation:
+    borderRun 50.2s linear infinite;
+}
+
+
+.running-border::after {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 1px;
+
+  border-radius: 17px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(2, 24, 54, 0.94),
+      rgba(1, 12, 31, 0.97)
+    );
+}
+
+
+@keyframes borderRun {
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   CARD RIBBON
+========================================================= */
+
+.card-ribbon {
+
+  position: absolute;
+
+  z-index: 5;
+
+  top: 0;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  min-width:
+    clamp(180px, 20vw, 300px);
+
+  height:
+    clamp(42px, 5vh, 58px);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 25px;
+
+  border:
+    1px solid #078ddd;
+
+  border-top: 0;
+
+  border-radius:
+    0 0 14px 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 27, 57, 0.98),
+      rgba(2, 16, 37, 0.98)
+    );
+
+  color: #f5f8ff;
+
+  font-size:
+    clamp(13px, 1.1vw, 22px);
+
+  font-weight: 900;
+
+  letter-spacing: 1px;
+
+  white-space: nowrap;
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+
+/* =========================================================
+   PLAYER CARD
+========================================================= */
+
+.current-player-card {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding:
+    clamp(55px, 7vh, 90px)
+    clamp(20px, 3vw, 55px)
+    clamp(20px, 3vh, 45px);
+}
+
+
+.player-content {
+
+  position: relative;
+  z-index: 3;
+
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(260px, 0.95fr)
+    minmax(280px, 1fr);
+
+  align-items: center;
+
+  gap:
+    clamp(25px, 4vw, 70px);
+}
+
+
+/* =========================================================
+   PLAYER VISUAL
+========================================================= */
+
+.player-visual {
+
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap:
+    clamp(12px, 2vh, 25px);
+}
+
+
+/* =========================================================
+   PLAYER IMAGE
+========================================================= */
+
+.player-portrait {
+
+  position: relative;
+
+  width:
+    clamp(
+      210px,
+      28vh,
+      390px
+    );
+
+  height:
+    clamp(
+      210px,
+      28vh,
+      390px
+    );
+
+  flex: 0 0 auto;
+
+  border-radius: 50%;
+
+  padding: 5px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #10c8ff,
+      #0088ff,
+      #13bfff
+    );
+
+  box-shadow:
+    0 0 15px rgba(0, 172, 255, 0.75),
+    0 0 45px rgba(0, 120, 255, 0.25);
+}
+
+
+.player-portrait::before {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 7px;
+
+  border-radius: 50%;
+
+  border:
+    2px solid rgba(255, 255, 255, 0.18);
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+
+.player-portrait img {
+
+  position: relative;
+
+  z-index: 1;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  border-radius: 50%;
+
+  display: block;
+
+  background: #071a35;
+}
+
+
+.portrait-glow {
+
+  position: absolute;
+
+  inset: -10px;
+
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      transparent,
+      rgba(0, 190, 255, 0.5),
+      transparent,
+      rgba(0, 130, 255, 0.4),
+      transparent
+    );
+
+  filter: blur(7px);
+
+  animation:
+    portraitRotate 5s linear infinite;
+}
+
+
+@keyframes portraitRotate {
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   BASE PRICE
+========================================================= */
+
+.base-price {
+
+  position: relative;
+  z-index: 4;
+
+  width:
+    clamp(190px, 17vw, 300px);
+
+  padding:
+    clamp(10px, 1.3vh, 17px)
+    20px;
+
+  border:
+    1px solid #087ec6;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(3, 29, 61, 0.95),
+      rgba(1, 15, 35, 0.98)
+    );
+
+  text-align: center;
+
+  box-shadow:
+    inset 0 0 20px rgba(0, 138, 255, 0.06);
+}
+
+
+.base-price span {
+
+  display: block;
+
+  color: #11c4ff;
+
+  font-size:
+    clamp(10px, 0.8vw, 15px);
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+
+  margin-bottom: 4px;
+}
+
+
+.base-price strong {
+
+  display: block;
+
+  color: #f4f7ff;
+
+  font-size:
+    clamp(24px, 2.3vw, 42px);
+
+  line-height: 1;
+
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   PLAYER SUMMARY
+========================================================= */
+
+.player-summary {
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+
+.player-summary h2 {
+
+  margin: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  color: #fff;
+
+  font-size:
+    clamp(34px, 4vw, 72px);
+
+  line-height: 0.92;
+
+  font-weight: 900;
+
+  letter-spacing: -1px;
+
+  text-transform: uppercase;
+}
+
+
+.player-summary h2 span {
+
+  color: #f7f9ff;
+}
+
+
+.player-summary h2 strong {
+
+  color: #12c5ff;
+}
+
+
+.player-role {
+
+  align-self: flex-start;
+
+  margin-top:
+    clamp(12px, 1.5vh, 20px);
+
+  padding:
+    7px 17px;
+
+  border:
+    1px solid #087ed1;
+
+  border-radius: 5px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #0876cf,
+      #0755a0
+    );
+
+  font-size:
+    clamp(11px, 0.8vw, 16px);
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   PLAYER FACTS
+========================================================= */
+
+.player-facts {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap:
+    clamp(8px, 1.5vh, 18px);
+
+  margin-top:
+    clamp(15px, 2vh, 30px);
+}
+
+
+.fact {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+}
+
+
+.fact > div {
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.fact small {
+
+  color: #a9bad2;
+
+  font-size:
+    clamp(9px, 0.65vw, 13px);
+
+  letter-spacing: 0.8px;
+}
+
+
+.fact strong {
+
+  color: #fff;
+
+  font-size:
+    clamp(13px, 1vw, 19px);
+
+  margin-top: 2px;
+}
+
+
+.fact-bullet {
+
+  width: 11px;
+  height: 11px;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  box-shadow:
+    0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+
+.fact-circle {
+
+  width: 25px;
+  height: 25px;
+
+  border:
+    2px solid #fff;
+
+  border-radius: 50%;
+
+  position: relative;
+}
+
+
+.fact-circle::after {
+
+  content: '';
+
+  position: absolute;
+
+  width: 7px;
+  height: 7px;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  border-radius: 50%;
+
+  background: #fff;
+}
+
+
+.country-code {
+
+  width: 25px;
+
+  color: #fff;
+
+  font-size: 11px;
+
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   HIGHEST BID CARD
+========================================================= */
+
+.highest-bid-card {
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    clamp(55px, 7vh, 90px)
+    clamp(18px, 3vw, 45px)
+    clamp(20px, 3vh, 40px);
+}
+
+
+.highest-bid-content {
+
+  position: relative;
+  z-index: 3;
+
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap:
+    clamp(10px, 1.5vh, 22px);
+}
+
+
+/* =========================================================
+   TEAM LOGO
+========================================================= */
+
+.team-logo-wrap {
+
+  position: relative;
+
+  width:
+    clamp(
+      170px,
+      25vh,
+      330px
+    );
+
+  height:
+    clamp(
+      170px,
+      25vh,
+      330px
+    );
+
+  padding: 10px;
+
+  border:
+    1px solid rgba(0, 166, 255, 0.55);
+
+  border-radius: 16px;
+
+  background:
+    rgba(2, 17, 39, 0.72);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 0 25px rgba(0, 128, 255, 0.12);
+}
+
+
+.team-logo-wrap img {
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  border-radius: 10px;
+
+  position: relative;
+
+  z-index: 2;
+}
+
+
+.team-logo-glow {
+
+  position: absolute;
+
+  inset: -10px;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent,
+      rgba(0, 175, 255, 0.35),
+      transparent
+    );
+
+  filter: blur(10px);
+
+  animation:
+    teamGlow 3s ease-in-out infinite;
+}
+
+
+@keyframes teamGlow {
+
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+
+  50% {
+    opacity: 0.85;
+  }
+}
+
+
+/* =========================================================
+   TEAM NAME
+========================================================= */
+
+.team-name {
+
+  width: 100%;
+
+  text-align: center;
+
+  color: #fff;
+
+  font-size:
+    clamp(22px, 2.2vw, 42px);
+
+  font-weight: 900;
+
+  text-transform: uppercase;
+
+  line-height: 1;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   HIGHEST AMOUNT
+========================================================= */
+
+.highest-amount {
+
+  width: 100%;
+
+  padding:
+    clamp(10px, 1.4vh, 20px)
+    15px;
+
+  border:
+    1px solid #008ee6;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(3, 31, 62, 0.95),
+      rgba(1, 17, 38, 0.98)
+    );
+
+  text-align: center;
+
+  color: #ffd21c;
+
+  font-size:
+    clamp(36px, 4.2vw, 78px);
+
+  line-height: 1;
+
+  font-weight: 900;
+
+  text-shadow:
+    0 0 14px rgba(255, 205, 25, 0.35);
+
+  box-shadow:
+    inset 0 0 25px rgba(0, 145, 255, 0.05);
+}
+
+
+/* =========================================================
+   CURRENT BIDDER
+========================================================= */
+
+.bidder-line {
+
+  width: 100%;
+
+  min-height:
+    clamp(58px, 8vh, 90px);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  padding:
+    8px 15px;
+
+  border:
+    1px solid #087dc4;
+
+  border-radius: 12px;
+
+  background:
+    rgba(2, 19, 42, 0.85);
+
+  text-align: center;
+}
+
+
+.bidder-icon {
+
+  color: #11aaff;
+
+  font-size:
+    clamp(18px, 1.5vw, 28px);
+}
+
+
+.bidder-line div {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+.bidder-line span {
+
+  color: #11c5ff;
+
+  font-size:
+    clamp(9px, 0.7vw, 14px);
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+
+.bidder-line strong {
+
+  margin-top: 3px;
+
+  color: #fff;
+
+  font-size:
+    clamp(14px, 1.2vw, 23px);
+}
+
+
+/* =========================================================
+   WAITING
+========================================================= */
+
+.waiting-player,
+.bid-team.waiting {
+
+  position: relative;
+  z-index: 3;
+
+  width: 100%;
+
+  height: 100%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #8fa6c4;
+
+  font-size: clamp(15px, 1.3vw, 25px);
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.screen-footer {
+
+  min-height: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr 1.5fr;
+
+  align-items: center;
+
+  padding:
+    6px clamp(10px, 2vw, 30px);
+
+  border:
+    1px solid rgba(41, 142, 220, 0.28);
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(2, 19, 43, 0.9),
+      rgba(1, 12, 29, 0.9)
+    );
+
+  box-shadow:
+    inset 0 0 20px rgba(0, 105, 200, 0.05);
+}
+
+
+.footer-brand {
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+
+.footer-brand strong {
+
+  color: #fff;
+
+  font-size:
+    clamp(13px, 1vw, 20px);
+
+  letter-spacing: 1px;
+}
+
+
+.footer-brand span {
+
+  color: #7e98b8;
+
+  font-size:
+    clamp(8px, 0.55vw, 11px);
+
+  letter-spacing: 1px;
+}
+
+
+.footer-website {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+
+.footer-website span,
+.footer-contact > span {
+
+  color: #6e86a5;
+
+  font-size:
+    clamp(7px, 0.55vw, 11px);
+
+  letter-spacing: 1px;
+}
+
+
+.footer-website a {
+
+  margin-top: 3px;
+
+  color: #00bfff;
+
+  font-size:
+    clamp(11px, 0.8vw, 16px);
+
+  font-weight: 800;
+
+  text-decoration: none;
+}
+
+
+.footer-contact {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 15px;
+}
+
+
+.footer-contact > div {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+}
+
+
+.footer-contact strong {
+
+  color: #fff;
+
+  font-size:
+    clamp(9px, 0.7vw, 14px);
+
+  white-space: nowrap;
+}
+
+
+.footer-contact b {
+
+  color: #00bfff;
+
+  margin-left: 5px;
+}
+
+
+.footer-contact i {
+
+  width: 1px;
+
+  height: 20px;
+
+  background:
+    rgba(130, 160, 190, 0.35);
+}
+
+
+/* =========================================================
+   COMPLETED
+========================================================= */
+
+.completed-state {
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+
+.completed-card {
+
+  text-align: center;
+
+  padding: 50px;
+
+  border:
+    1px solid rgba(0, 140, 255, 0.4);
+
+  border-radius: 18px;
+
+  background:
+    rgba(2, 20, 43, 0.85);
+}
+
+
+.completed-card .eyebrow {
+
+  color: #00bfff;
+
+  font-size: 13px;
+
+  letter-spacing: 2px;
+}
+
+
+.completed-card h2 {
+
+  margin: 10px 0;
+
+  font-size: clamp(30px, 4vw, 60px);
+}
+
+
+.completed-card p {
+
+  color: #91a6c1;
+}
+
+
+/* =========================================================
+   CENTERED MESSAGE
+========================================================= */
+
+.centered-message {
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+
+.loading-text {
+
+  padding: 20px 30px;
+
+  border: 1px solid #087fc9;
+
+  border-radius: 12px;
+
+  background: rgba(2, 20, 42, 0.85);
+
+  color: #00bfff;
+
+  font-size: 20px;
+}
+
+
+/* =========================================================
+   UPDATE ANIMATION
+========================================================= */
+
+.live-screen.updating .highest-amount {
+
+  animation:
+    bidUpdate 0.65s ease;
+}
+
+
+@keyframes bidUpdate {
+
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.06);
+
+    text-shadow:
+      0 0 30px rgba(255, 215, 30, 0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+
+/* =========================================================
+   LARGE PROJECTOR / TV
+========================================================= */
+
+@media (min-width: 1600px) {
+
+  .screen-shell {
+    padding-left: 3.5vw;
+    padding-right: 3.5vw;
+  }
+
+  .player-content {
+    gap: 5vw;
+  }
+}
+
+
+/* =========================================================
+   LAPTOP / MEDIUM SCREEN
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .screen-header {
+
+    grid-template-columns:
+      150px
+      minmax(300px, 1fr)
+      280px;
+
+    gap: 12px;
+  }
+
+  .brand-logo img {
+    max-width: 160px;
+  }
+
+  .player-content {
+    gap: 20px;
+  }
+
+  .player-summary h2 {
+    font-size: clamp(30px, 4vw, 52px);
+  }
+
+}
+
+
+/* =========================================================
+   TABLET / SMALL LAPTOP
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .screen-shell {
+
+    grid-template-rows:
+      auto
+      minmax(0, 1fr)
+      auto;
+
+    overflow: hidden;
+  }
+
+
+  .screen-header {
+
+    grid-template-columns:
+      100px
+      1fr
+      200px;
+  }
+
+
+  .brand-logo img {
+    max-width: 100px;
+  }
+
+
+  .auction-logo {
+
+    width: 55px;
+    height: 55px;
+  }
+
+
+  .auction-title-text h1 {
+    font-size: 25px;
+  }
+
+
+  .auction-title-text p {
+    font-size: 10px;
+  }
+
+
+  .screen-stats {
+    min-height: 55px;
+    padding: 5px 8px;
+  }
+
+
+  .stat-icon {
+    transform: scale(0.75);
+  }
+
+
+  .broadcast-layout {
+    gap: 10px;
+  }
+
+
+  .player-content {
+
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 15px;
+  }
+
+
+  .player-portrait {
+
+    width: clamp(160px, 25vh, 250px);
+    height: clamp(160px, 25vh, 250px);
+  }
+
+
+  .player-summary h2 {
+    font-size: clamp(25px, 4vw, 42px);
+  }
+
+
+  .team-logo-wrap {
+
+    width: clamp(130px, 22vh, 220px);
+    height: clamp(130px, 22vh, 220px);
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+
+  .live-screen {
+
+    position: absolute;
+
+    min-height: 100dvh;
+
+    height: auto;
+
+    overflow: auto;
+  }
+
+
+  .screen-shell {
+
+    height: auto;
+
+    min-height: 100dvh;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding: 10px;
+
+  }
+
+
+  .screen-header {
+
+    flex: 0 0 auto;
+
+    display: grid;
+
+    grid-template-columns: 70px 1fr;
+
+    gap: 8px;
+  }
+
+
+  .brand-logo img {
+    width: 65px;
+  }
+
+
+  .screen-stats {
+
+    grid-column: 1 / -1;
+
+    max-width: none;
+
+    min-height: 48px;
+  }
+
+
+  .auction-heading {
+    justify-content: flex-start;
+  }
+
+
+  .auction-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+
+  .auction-title-text h1 {
+    font-size: 20px;
+  }
+
+
+  .auction-title-text p {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+
+  .live-status {
+    margin-top: 3px;
+    padding: 3px 10px;
+    font-size: 9px;
+  }
+
+
+  .display-area {
+    flex: 0 0 auto;
+  }
+
+
+  .broadcast-layout {
+
+    height: auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+
+  .broadcast-card {
+
+    min-height: 500px;
+  }
+
+
+  .current-player-card {
+
+    padding: 60px 18px 20px;
+  }
+
+
+  .player-content {
+
+    height: auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 18px;
+  }
+
+
+  .player-portrait {
+
+    width: min(55vw, 230px);
+    height: min(55vw, 230px);
+  }
+
+
+  .player-summary {
+
+    align-items: center;
+
+    text-align: center;
+  }
+
+
+  .player-role {
+    align-self: center;
+  }
+
+
+  .player-facts {
+    width: 100%;
+    max-width: 260px;
+  }
+
+
+  .base-price {
+    width: min(75vw, 260px);
+  }
+
+
+  .highest-bid-card {
+
+    padding: 60px 18px 25px;
+
+    min-height: 500px;
+  }
+
+
+  .team-logo-wrap {
+
+    width: min(55vw, 230px);
+    height: min(55vw, 230px);
+  }
+
+
+  .highest-amount {
+    font-size: clamp(36px, 12vw, 65px);
+  }
+
+
+  .screen-footer {
+
+    flex: 0 0 auto;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 12px;
+  }
+
+
+  .footer-brand,
+  .footer-website,
+  .footer-contact {
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  .footer-contact {
+    flex-direction: column;
+  }
+
+
+  .footer-contact > div {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SHORT PROJECTOR / LAPTOP
+========================================================= */
+
+@media (max-height: 700px) and (min-width: 651px) {
+
+  .screen-shell {
+
+    padding-top: 8px;
+    padding-bottom: 8px;
+
+    gap: 6px;
+
+    grid-template-rows:
+      minmax(65px, 13vh)
+      minmax(0, 1fr)
+      minmax(42px, 7vh);
+  }
+
+
+  .player-portrait {
+
+    width: clamp(170px, 25vh, 260px);
+    height: clamp(170px, 25vh, 260px);
+  }
+
+
+  .team-logo-wrap {
+
+    width: clamp(130px, 22vh, 220px);
+    height: clamp(130px, 22vh, 220px);
+  }
+
+
+  .player-facts {
+
+    margin-top: 10px;
+
+    gap: 7px;
+  }
+
+
+  .card-ribbon {
+
+    height: 38px;
+  }
+
+
+  .current-player-card,
+  .highest-bid-card {
+
+    padding-top: 48px;
+  }
+
+}
+
+/* SOLD AND UNSOLD RESULT ANIMATIONS */
+.unsold-stamp,
+.sold-stamp {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  min-width: min(82vw, 720px);
+  padding: 28px 42px;
+  transform: translate(-50%, -50%) rotate(-7deg) scale(0.25);
+  color: #fff;
+  text-align: center;
+  letter-spacing: 0.12em;
+  z-index: 1000;
+  border: 7px solid #fff;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--stamp-dark), var(--stamp-main) 50%, var(--stamp-dark));
+  box-shadow: 0 0 0 12px var(--stamp-glow), 0 22px 60px var(--stamp-shadow);
+  animation: resultStampAnimation 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+  isolation: isolate;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    border: 5px solid var(--stamp-ring);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+    animation: resultRipple 1.5s ease-out infinite;
+  }
+
+  &::after { animation-delay: 0.45s; }
+}
+
+.unsold-stamp {
+  --stamp-dark: #991b1b;
+  --stamp-main: #ef4444;
+  --stamp-glow: rgba(239, 68, 68, 0.22);
+  --stamp-shadow: rgba(69, 10, 10, 0.7);
+  --stamp-ring: rgba(254, 202, 202, 0.85);
+}
+
+.sold-stamp {
+  --stamp-dark: #14532d;
+  --stamp-main: #22c55e;
+  --stamp-glow: rgba(34, 197, 94, 0.24);
+  --stamp-shadow: rgba(5, 46, 22, 0.72);
+  --stamp-ring: rgba(187, 247, 208, 0.88);
+}
+
+.unsold-label,
+.sold-label {
+  font-size: clamp(52px, 11vw, 120px);
+  font-weight: 950;
+  line-height: 0.9;
+  text-shadow: 4px 4px 0 var(--stamp-dark), 0 0 24px rgba(255, 255, 255, 0.45);
+}
+
+.unsold-subtitle,
+.sold-subtitle {
+  margin-top: 14px;
+  font-size: clamp(11px, 2vw, 17px);
+  font-weight: 800;
+}
+
+@keyframes resultStampAnimation {
+  0% { transform: translate(-50%, -50%) rotate(-24deg) scale(2.3); opacity: 0; }
+  35% { transform: translate(-50%, -50%) rotate(4deg) scale(0.92); opacity: 1; }
+  52% { transform: translate(-50%, -50%) rotate(-7deg) scale(1.06); }
+  100% { transform: translate(-50%, -50%) rotate(-7deg) scale(1); opacity: 0; }
+}
+
+@keyframes resultRipple {
+  to { width: min(105vw, 1300px); height: min(105vw, 1300px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .unsold-stamp,
+  .sold-stamp,
+  .unsold-stamp::before,
+  .unsold-stamp::after,
+  .sold-stamp::before,
+  .sold-stamp::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

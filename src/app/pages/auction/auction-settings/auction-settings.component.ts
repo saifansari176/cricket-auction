@@ -381,6 +381,19 @@ export class AuctionSettingsComponent {
     this.message.info(`Copy public tournament link:\n${link}`);
   }
 
+  async copyLiveScreenLink(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+
+    const link = `${window.location.origin}/live-screen/${encodeURIComponent(this.shareAuction.id)}`;
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(link);
+      this.message.success('Live screen link copied.');
+      return;
+    }
+
+    this.message.info(`Copy live screen link:\n${link}`);
+  }
+
   async onLogoChange(event: Event) {
 
     const input = event.target as HTMLInputElement;

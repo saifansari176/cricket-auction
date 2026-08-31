@@ -422,3 +422,74 @@
         display: none
     }
 }
+
+/* SOLD AND UNSOLD RESULT ANIMATIONS */
+.unsold-stamp,
+.sold-stamp {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    min-width: min(82vw, 720px);
+    padding: 28px 42px;
+    transform: translate(-50%, -50%) rotate(-7deg) scale(0.25);
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.12em;
+    z-index: 1000;
+    border: 7px solid #fff;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--stamp-dark), var(--stamp-main) 50%, var(--stamp-dark));
+    box-shadow: 0 0 0 12px var(--stamp-glow), 0 22px 60px var(--stamp-shadow);
+    animation: resultStampAnimation 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: none;
+    isolation: isolate;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 30px;
+        border: 5px solid var(--stamp-ring);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+        animation: resultRipple 1.5s ease-out infinite;
+    }
+
+    &::after { animation-delay: 0.45s; }
+}
+
+.unsold-stamp { --stamp-dark: #991b1b; --stamp-main: #ef4444; --stamp-glow: rgba(239, 68, 68, 0.22); --stamp-shadow: rgba(69, 10, 10, 0.7); --stamp-ring: rgba(254, 202, 202, 0.85); }
+.sold-stamp { --stamp-dark: #14532d; --stamp-main: #22c55e; --stamp-glow: rgba(34, 197, 94, 0.24); --stamp-shadow: rgba(5, 46, 22, 0.72); --stamp-ring: rgba(187, 247, 208, 0.88); }
+
+.unsold-label,
+.sold-label {
+    font-size: clamp(52px, 11vw, 120px);
+    font-weight: 950;
+    line-height: 0.9;
+    text-shadow: 4px 4px 0 var(--stamp-dark), 0 0 24px rgba(255, 255, 255, 0.45);
+}
+
+.unsold-subtitle,
+.sold-subtitle { margin-top: 14px; font-size: clamp(11px, 2vw, 17px); font-weight: 800; }
+
+@keyframes resultStampAnimation {
+    0% { transform: translate(-50%, -50%) rotate(-24deg) scale(2.3); opacity: 0; }
+    35% { transform: translate(-50%, -50%) rotate(4deg) scale(0.92); opacity: 1; }
+    52% { transform: translate(-50%, -50%) rotate(-7deg) scale(1.06); }
+    100% { transform: translate(-50%, -50%) rotate(-7deg) scale(1); opacity: 0; }
+}
+
+@keyframes resultRipple { to { width: min(105vw, 1300px); height: min(105vw, 1300px); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .unsold-stamp, .sold-stamp, .unsold-stamp::before, .unsold-stamp::after, .sold-stamp::before, .sold-stamp::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

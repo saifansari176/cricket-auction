@@ -11,6 +11,8 @@ import {
   runTransaction,
   query,
   where,
+  onSnapshot,
+  Unsubscribe,
   DocumentData
 } from 'firebase/firestore';
 
@@ -55,6 +57,13 @@ export class FirebaseService {
     });
 
 }
+
+  /** Subscribe to a document so public displays update as soon as it changes. */
+  watchById<T>(collectionName: string, id: string, onChange: (data: T | null) => void): Unsubscribe {
+    return onSnapshot(doc(db, collectionName, id), (snapshot) => {
+      onChange(snapshot.exists() ? ({ id: snapshot.id, ...snapshot.data() } as T) : null);
+    });
+  }
 
   // ==========================
   // Add New Document

@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Unsubscribe } from 'firebase/firestore';
 import { AuctionSettings } from '../models/auction-settings';
 import { AuctionBid } from '../models/bid';
 import { Player } from '../models/player';
@@ -12,8 +13,11 @@ export interface LiveAuctionState {
   currentBid?: number;
   highestTeamId?: string;
   status?: 'live' | 'completed';
+  lastAction?: LiveScreenAction;
   updatedAt?: string;
 }
+
+export type LiveScreenAction = 'bid' | 'load' | 'sold' | 'unsold' | 'undo';
 
 @Injectable({
   providedIn: 'root'
@@ -227,6 +231,10 @@ export class AuctionService {
       ...state,
       updatedAt: new Date().toISOString()
     });
+  }
+
+  watchLiveState(auctionId: string, onChange: (state: LiveAuctionState | null) => void): Unsubscribe {
+    return this.firebase.watchById<LiveAuctionState>(this.auctionCollection(auctionId, 'liveState'), 'current', onChange);
   }
 
   async updateAuctionAccess(auctionId: string, teamLimit: number, playerLimit: number): Promise<void> {

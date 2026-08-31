@@ -97,6 +97,16 @@
       <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
     </section>
   </ng-container>
+
+  <div *ngIf="resultAnimation === 'sold'" class="sold-stamp">
+    <span class="sold-label">SOLD</span>
+    <span class="sold-subtitle">PLAYER SOLD</span>
+  </div>
+
+  <div *ngIf="resultAnimation === 'unsold'" class="unsold-stamp">
+    <span class="unsold-label">UNSOLD</span>
+    <span class="unsold-subtitle">BACK TO THE PLAYER POOL</span>
+  </div>
 </main>
 <ng-template #loadingState>
   <main class="loading">Loading public tournament…</main>

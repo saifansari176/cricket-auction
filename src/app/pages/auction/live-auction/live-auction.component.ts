@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { Player } from '../../../core/models/player';
 import { Team } from '../../../core/models/team';
-import { AuctionService } from '../../../core/services/auction.service';
+import { AuctionService, LiveScreenAction } from '../../../core/services/auction.service';
 import { MessageService } from '../../../core/services/message.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { PlayerService } from '../../../core/services/player.service';
@@ -79,12 +79,12 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.teams = await this.teamService.getTeams();
   }
 
-  async loadNextPlayer(): Promise<void> {
+  async loadNextPlayer(action: LiveScreenAction = 'load'): Promise<void> {
     const categoryId = this.auctionService.selectedCategoryId$.value;
     const availablePlayers = (await this.playerService.getAvailablePlayers())
       .filter((player) => categoryId ? player.categoryId === categoryId : !player.categoryId);
     if (availablePlayers.length > 0) {
-      this.setCurrentPlayer(availablePlayers[0]);
+      this.setCurrentPlayer(availablePlayers[0], action);
       return;
     }
 
@@ -100,7 +100,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
 
     if (shouldBringBackUnsold) {
       await Promise.all(unsoldPlayers.map((player) => this.playerService.updatePlayer({ ...player, status: 'Available' })));
-      await this.loadNextPlayer();
+      await this.loadNextPlayer(action);
       return;
     }
 
@@ -108,7 +108,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.currentBid = 0;
     this.highestTeam = null;
     this.bidHistory = [];
-    this.publishLiveState();
+    this.publishLiveState(action);
   }
 
   get nextBid(): number {
@@ -140,7 +140,9 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     if (this.highestTeam) this.bidHistory.push({ team: this.highestTeam, bid: this.currentBid });
     this.currentBid = this.nextBid;
     this.highestTeam = team;
-    this.publishLiveState();
+    this.publishLiveState('bid');
+    console.log(1234);
+    
   }
 
   async undoLastBid(): Promise<void> {
@@ -168,7 +170,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
       }
 
       this.actionHistory.pop();
-      this.setCurrentPlayer(restoredPlayer);
+      this.setCurrentPlayer(restoredPlayer, 'undo');
       this.message.success(`${this.playerName} has been returned to the auction.`, 'Unsold Undone');
       return;
     }
@@ -211,9 +213,8 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     if (lastAction?.type === 'sold') {
       this.actionHistory.pop();
     }
-    this.setCurrentPlayer(restoredPlayer);
+    this.setCurrentPlayer(restoredPlayer, 'undo');
     this.message.success(`${this.playerName} has been returned to the auction.`, 'Sale Undone');
-
   }
 
   async sold(): Promise<void> {
@@ -233,7 +234,7 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
         this.updateSoldTeamOnScreen(this.highestTeam!.id!, this.currentBid);
         this.actionHistory.push({ type: 'sold', playerId: soldPlayerId });
         await this.loadTeams();
-        await this.loadNextPlayer();
+        await this.loadNextPlayer('sold');
 
         const shouldReturnToDashboard = this.auctionService.shouldReturnToDashboardAfterSale();
         this.auctionService.clearReturnToDashboardAfterSale();
@@ -256,7 +257,7 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
       await this.loadingService.withoutLoader(async () => {
         await this.playerService.markUnsold(this.currentPlayer!.id!);
         this.actionHistory.push({ type: 'unsold', playerId: unsoldPlayerId });
-        await this.loadNextPlayer();
+        await this.loadNextPlayer('unsold');
       });
     } finally {
       this.showUnsoldAnimation = false;
@@ -290,21 +291,22 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
     this.isFullscreen = !this.isFullscreen;
   }
 
-  private setCurrentPlayer(player: Player): void {
+  private setCurrentPlayer(player: Player, action: LiveScreenAction = 'load'): void {
     this.currentPlayer = player;
     this.currentBid = Number(player.baseBid || 0);
     this.highestTeam = null;
     this.bidHistory = [];
-    this.publishLiveState();
+    this.publishLiveState(action);
   }
 
-  private publishLiveState(): void {
+  private publishLiveState(action: LiveScreenAction = 'load'): void {
     if (!this.auction?.activeAuctionId && !this.auction?.id) return;
     void this.auctionService.saveLiveState({
       currentPlayerId: this.currentPlayer?.id || '',
       currentBid: this.currentBid,
       highestTeamId: this.highestTeam?.id || '',
-      status: this.currentPlayer ? 'live' : 'completed'
+      status: this.currentPlayer ? 'live' : 'completed',
+      lastAction: action
     }, this.auction.activeAuctionId || this.auction.id);
   }
 
