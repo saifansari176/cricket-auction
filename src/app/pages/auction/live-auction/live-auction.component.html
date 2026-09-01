@@ -88,10 +88,10 @@
     </div>
   </div>
   <div class="action-buttons">
-    <button class="sold" (click)="sold()">SOLD</button>
-    <button class="unsold" (click)="unsold()">UNSOLD</button>
-    <button class="undo" (click)="undoLastBid()" title="Undo the last bid or completed sale">UNDO</button>
-    <button class="next" (click)="nextPlayer()">LOAD PLAYER</button>
+    <button class="sold" [disabled]="actionInProgress" (click)="sold()">SOLD</button>
+    <button class="unsold" [disabled]="actionInProgress" (click)="unsold()">UNSOLD</button>
+    <button class="undo" [disabled]="actionInProgress" (click)="undoLastBid()" title="Undo the last bid or completed sale">UNDO</button>
+    <button class="next" [disabled]="actionInProgress" (click)="nextPlayer()">LOAD PLAYER</button>
   </div>
 
   <div class="teams-grid" [style.--team-count]="teams.length || 1">
@@ -102,7 +102,7 @@
 
       <button
         class="team-bid-btn"
-        [disabled]="!canBid(team)"
+        [disabled]="actionInProgress || !canBid(team)"
         [title]="team.teamName + ' - BID ₹' + nextBid"
         (click)="bid(team)">
         <span class="team-logo-wrap">

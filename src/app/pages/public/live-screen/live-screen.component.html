@@ -157,24 +157,19 @@
             <div class="player-summary">
 
               <h2>
-                <span>{{ player.firstName }}</span>
-                <strong>{{ player.lastName }}</strong>
+                <span>{{ player.firstName }} {{ player.lastName }}</span>
+                <!-- <strong>{{ player.lastName }}</strong> -->
               </h2>
-
-              <span class="player-role">
-                {{ player.playerType || 'PLAYER' }}
-              </span>
-
 
               <div class="player-facts">
 
                 <div class="fact">
 
-                  <span class="fact-bullet"></span>
+                  <span class="fact-icon player-type-icon" aria-hidden="true"></span>
 
                   <div>
-                    <small>BATTING STYLE</small>
-                    <strong>Right Handed</strong>
+                    <small>PLAYER TYPE</small>
+                    <strong>{{ player.playerType || '-' }}</strong>
                   </div>
 
                 </div>
@@ -182,38 +177,27 @@
 
                 <div class="fact">
 
-                  <span class="fact-circle"></span>
+                  <span class="fact-icon current-team-icon" aria-hidden="true"></span>
 
                   <div>
-                    <small>BOWLING STYLE</small>
-                    <strong>—</strong>
+                    <small>CURRENT TEAM</small>
+                    <strong>{{ player.currentTeam || '-' }}</strong>
                   </div>
 
                 </div>
 
 
-                <div class="fact">
+                <div class="fact note-fact">
 
-                  <span class="fact-bullet"></span>
+                  <span class="fact-icon note-icon" aria-hidden="true"></span>
 
                   <div>
-                    <small>AGE</small>
-                    <strong>—</strong>
+                    <small>NOTE</small>
+                    <strong>{{ player.note || '-' }}</strong>
                   </div>
 
                 </div>
 
-
-                <div class="fact country-fact">
-
-                  <span class="country-code">IN</span>
-
-                  <div>
-                    <small>COUNTRY</small>
-                    <strong>India</strong>
-                  </div>
-
-                </div>
 
               </div>
 
@@ -266,16 +250,6 @@
 
             </div>
 
-
-            <!-- TEAM NAME -->
-            <div
-              class="team-name"
-              *ngIf="highestTeam"
-            >
-              {{ highestTeam.teamName }}
-            </div>
-
-
             <!-- BID -->
             <div class="highest-amount">
 
@@ -290,9 +264,7 @@
             <!-- CURRENT BIDDER -->
             <div class="bidder-line">
 
-              <span class="bidder-icon">
-                ⚒
-              </span>
+              <span class="bidder-icon" aria-hidden="true"></span>
 
               <div>
 

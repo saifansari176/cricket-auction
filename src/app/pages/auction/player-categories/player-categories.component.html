@@ -39,8 +39,8 @@
     </div>
 
     <div class="actions">
-      <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
-        {{ editingCategory ? 'Update Category' : 'Add Category' }}
+      <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving">
+        {{ saving ? 'Saving...' : (editingCategory ? 'Update Category' : 'Add Category') }}
       </button>
 
       <button

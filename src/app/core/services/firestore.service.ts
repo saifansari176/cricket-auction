@@ -25,6 +25,8 @@ type FirestorePayload = object & { id?: unknown };
   providedIn: 'root'
 })
 export class FirebaseService {
+  private readonly inFlightWrites = new Map<string, Promise<unknown>>();
+
   constructor(private loading: LoadingService) {}
 
   // ==========================
@@ -71,10 +73,10 @@ export class FirebaseService {
 
   async add<T extends FirestorePayload>(collectionName: string, data: T) {
     const payload = this.withoutId(data);
-    return this.loading.track(() => addDoc(
+    return this.runWrite(`add:${collectionName}:${this.writeFingerprint(payload)}`, () => this.loading.track(() => addDoc(
       collection(db, collectionName),
       payload
-    ));
+    )));
 
   }
 
@@ -119,10 +121,10 @@ export class FirebaseService {
 
   async set<T extends FirestorePayload>(collectionName: string, id: string, data: T) {
     const payload = this.withoutId(data);
-    await this.loading.track(() => setDoc(
+    await this.runWrite(`set:${collectionName}:${id}:${this.writeFingerprint(payload)}`, () => this.loading.track(() => setDoc(
       doc(db, collectionName, id),
       payload
-    ));
+    )));
 
   }
 
@@ -132,10 +134,10 @@ export class FirebaseService {
 
   async update<T extends FirestorePayload>(collectionName: string, id: string, data: T) {
     const payload = this.withoutId(data);
-    await this.loading.track(() => updateDoc(
+    await this.runWrite(`update:${collectionName}:${id}:${this.writeFingerprint(payload)}`, () => this.loading.track(() => updateDoc(
       doc(db, collectionName, id),
       payload
-    ));
+    )));
 
   }
 
@@ -144,9 +146,9 @@ export class FirebaseService {
   // ==========================
 
   async delete(collectionName: string, id: string) {
-    await this.loading.track(() => deleteDoc(
+    await this.runWrite(`delete:${collectionName}:${id}`, () => this.loading.track(() => deleteDoc(
       doc(db, collectionName, id)
-    ));
+    )));
 
   }
 
@@ -160,6 +162,20 @@ export class FirebaseService {
   private withoutId<T extends FirestorePayload>(data: T): DocumentData {
     const { id: _id, ...payload } = data;
     return payload as DocumentData;
+  }
+
+  /** Reuses an identical write already in progress instead of sending it again. */
+  private runWrite<T>(key: string, operation: () => Promise<T>): Promise<T> {
+    const existing = this.inFlightWrites.get(key) as Promise<T> | undefined;
+    if (existing) return existing;
+
+    const pending = operation().finally(() => this.inFlightWrites.delete(key));
+    this.inFlightWrites.set(key, pending);
+    return pending;
+  }
+
+  private writeFingerprint(payload: DocumentData): string {
+    return JSON.stringify(payload, Object.keys(payload).sort());
   }
 
 }

@@ -256,10 +256,16 @@ export class AuctionService {
       auctionId
     };
 
-    await this.firebase.add(
-      this.auctionCollection(auctionId, 'bids'),
-      payload
-    );
+    const bidCollection = this.auctionCollection(auctionId, 'bids');
+
+    // A player can only be sold once. Using a deterministic id makes a repeated
+    // Sold click (or a retry after a slow network response) idempotent.
+    if (payload.sold && payload.playerId) {
+      await this.firebase.set(bidCollection, `sold_${payload.playerId}`, payload);
+      return;
+    }
+
+    await this.firebase.add(bidCollection, payload);
 
   }
 

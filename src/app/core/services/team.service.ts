@@ -49,12 +49,14 @@ export class TeamService {
 
     if (!await this.canAddTeam()) return false;
 
-await this.firebase.add(
-  this.auctionCollection(team.auctionId),
-  team
-);
-
-    return true;
+    const teamNameKey = this.normaliseTeamName(team.teamName);
+    return this.firebase.createIfNoMatchingField(
+      this.auctionCollection(team.auctionId),
+      `team_${encodeURIComponent(teamNameKey)}`,
+      'teamNameKey',
+      teamNameKey,
+      { ...team, teamNameKey }
+    );
 
   }
 

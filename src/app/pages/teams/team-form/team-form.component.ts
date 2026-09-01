@@ -50,6 +50,7 @@ export class TeamFormComponent {
   existingTeam: Team | null = null;
 
   uploading = false;
+  saving = false;
 
   form = this.fb.group({
 
@@ -149,6 +150,10 @@ export class TeamFormComponent {
 
   async save() {
 
+    if (this.saving || this.uploading) {
+      return;
+    }
+
     if (this.form.invalid) {
 
       this.form.markAllAsTouched();
@@ -156,6 +161,10 @@ export class TeamFormComponent {
       return;
 
     }
+
+    this.saving = true;
+
+    try {
 
     const settings = await this.auctionService.get();
 
@@ -238,6 +247,10 @@ if (!settings) {
     }
 
     this.router.navigate(['/teams']);
+
+    } finally {
+      this.saving = false;
+    }
 
   }
 

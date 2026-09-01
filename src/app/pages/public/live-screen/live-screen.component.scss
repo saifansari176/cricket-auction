@@ -823,37 +823,15 @@
 ========================================================= */
 
 .player-portrait {
-
   position: relative;
-
-  width:
-    clamp(
-      210px,
-      28vh,
-      390px
-    );
-
-  height:
-    clamp(
-      210px,
-      28vh,
-      390px
-    );
-
   flex: 0 0 auto;
-
   border-radius: 50%;
-
   padding: 5px;
-
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #10c8ff,
       #0088ff,
-      #13bfff
-    );
-
+      #13bfff);
   box-shadow:
     0 0 15px rgba(0, 172, 255, 0.75),
     0 0 45px rgba(0, 120, 255, 0.25);
@@ -2276,5 +2254,267 @@
   .sold-stamp::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* Reference-screen detail refinements. */
+.broadcast-card {
+  border: 1px solid rgba(151, 185, 229, 0.78);
+  background: linear-gradient(135deg, rgba(3, 20, 49, 0.93), rgba(1, 10, 29, 0.97));
+}
+
+.running-border { padding: 0; }
+.running-border::before { display: none; }
+.running-border::after {
+  inset: 0;
+  border: 1px solid rgba(16, 177, 255, 0.4);
+  border-radius: inherit;
+  background: transparent;
+}
+
+.player-summary h2 { font-weight: 900; letter-spacing: -0.02em; }
+.player-summary h2 span { color: #f5f6fb; }
+.player-summary h2 strong {
+  color: #55ccff;
+  background: linear-gradient(180deg, #d9f7ff 0%, #55ceff 48%, #1187ed 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 16px rgba(17, 181, 255, 0.32);
+}
+
+.player-facts { margin-top: clamp(20px, 2.4vh, 34px); }
+.note-fact strong { max-width: 29ch; overflow-wrap: anywhere; }
+
+.highest-amount {
+  color: #ffd42b;
+  background: linear-gradient(180deg, #fff6a0 0%, #ffdd37 48%, #ee9d00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-color: #00aef6;
+  font-weight: 950;
+  text-shadow: 0 3px 0 rgba(125, 74, 0, 0.52), 0 0 20px rgba(255, 203, 23, 0.42);
+}
+
+.fact-icon {
+  position: relative;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  color: #e9f6ff;
+}
+
+.player-type-icon::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 8px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.player-type-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 1px;
+  left: 4px;
+  width: 17px;
+  height: 12px;
+  border-radius: 11px 11px 4px 4px;
+  background: currentColor;
+}
+
+.current-team-icon {
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.current-team-icon::before,
+.current-team-icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+
+.current-team-icon::before {
+  width: 2px;
+  height: 21px;
+  top: 0;
+  left: 10px;
+}
+
+.current-team-icon::after {
+  width: 21px;
+  height: 2px;
+  top: 10px;
+  left: 0;
+}
+
+.note-icon {
+  border: 2px solid currentColor;
+  border-radius: 3px;
+}
+
+.note-icon::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  width: 13px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 0 5px 0 currentColor;
+}
+
+.bidder-icon {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  font-size: 0;
+  transform: rotate(-42deg);
+}
+
+.bidder-icon::before,
+.bidder-icon::after {
+  content: '';
+  position: absolute;
+  display: block;
+  background: linear-gradient(180deg, #72cfff, #177cf4);
+  box-shadow: 0 0 8px rgba(26, 148, 255, 0.36);
+}
+
+.bidder-icon::before {
+  top: 3px;
+  left: 5px;
+  width: 27px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.bidder-icon::after {
+  top: 11px;
+  left: 16px;
+  width: 7px;
+  height: 29px;
+  border-radius: 0 0 5px 5px;
+}
+
+/* Keep every uploaded photo inside a responsive frame and reserve room for price. */
+.player-visual {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  gap: clamp(12px, 2vh, 25px);
+}
+
+.player-portrait {
+  /* Fill every available pixel in the row above the base-price card. */
+  width: auto;
+  height: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+}
+
+.player-portrait::before {
+  inset: 5px;
+}
+
+.player-portrait img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.base-price {
+  margin-top: 0;
+}
+
+/* Replace the removed team-name row with logo space without moving bid details. */
+.team-logo-wrap {
+  width: clamp(200px, 30.5vh, 390px);
+  height: clamp(200px, 30.5vh, 390px);
+}
+
+@media (max-width: 650px) {
+  .player-portrait {
+    width: min(55vw, 230px);
+    height: min(55vw, 230px);
+  }
+
+}
+
+@media (min-width: 651px) and (max-width: 900px) {
+  .team-logo-wrap {
+    width: clamp(140px, 30vh, 260px);
+    height: clamp(140px, 30vh, 260px);
+  }
+}
+
+/* Give the current-player card a transparent, broadcast-style frame of its own. */
+.current-player-card,
+.highest-bid-card {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.current-player-card::before,
+.highest-bid-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 2px;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg,
+      #77e5ff 0 12%,
+      #049ee8 20%,
+      transparent 36% 64%,
+      #006fca 80%,
+      #77e5ff 100%);
+  background-size: 220% 220%;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 7px rgba(34, 194, 255, 0.7));
+  animation: broadcastFrameFlow 18s linear infinite;
+}
+
+.highest-bid-card::before {
+  animation-direction: reverse;
+}
+
+@keyframes broadcastFrameFlow {
+  to {
+    background-position: 220% 220%;
+  }
+}
+
+@media (min-width: 651px) and (max-width: 900px) {
+  .player-portrait {
+    width: min(100%, clamp(170px, 30vh, 300px));
+    height: auto;
+  }
+}
+
+@media (min-width: 651px) and (max-height: 700px) {
+  .player-portrait {
+    width: min(100%, clamp(170px, 33vh, 300px));
+    height: auto;
   }
 }

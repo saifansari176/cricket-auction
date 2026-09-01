@@ -38,6 +38,7 @@ export class PlayerCategoriesComponent {
   playerStatusFilter = '';
   playerCategorySelections: Record<string, string> = {};
   regularBasePrice = 0;
+  saving = false;
 
   form = this.fb.group({
     name: ['', Validators.required],
@@ -128,22 +129,28 @@ export class PlayerCategoriesComponent {
   }
 
   async save(): Promise<void> {
+    if (this.saving) return;
     if (!this.auctionId || this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    await this.categoryService.saveCategory({
-      id: this.editingCategory?.id,
-      auctionId: this.auctionId,
-      name: this.form.value.name || '',
-      basePrice: Number(this.form.value.basePrice || 0),
-      bidIncreaseBy: Number(this.form.value.bidIncreaseBy || 0)
-    });
-    this.message.success(this.editingCategory ? 'Category updated successfully.' : 'Category added successfully.');
-    this.cancel();
-    await this.loadCategories();
-    await this.loadPlayers();
+    this.saving = true;
+    try {
+      await this.categoryService.saveCategory({
+        id: this.editingCategory?.id,
+        auctionId: this.auctionId,
+        name: this.form.value.name || '',
+        basePrice: Number(this.form.value.basePrice || 0),
+        bidIncreaseBy: Number(this.form.value.bidIncreaseBy || 0)
+      });
+      this.message.success(this.editingCategory ? 'Category updated successfully.' : 'Category added successfully.');
+      this.cancel();
+      await this.loadCategories();
+      await this.loadPlayers();
+    } finally {
+      this.saving = false;
+    }
   }
 
   async delete(category: PlayerCategory): Promise<void> {

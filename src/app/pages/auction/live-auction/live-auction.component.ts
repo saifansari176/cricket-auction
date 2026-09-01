@@ -35,6 +35,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   showUnsoldAnimation = false;
   showSoldAnimation = false;
   soldToTeamName = '';
+  actionInProgress = false;
 
   constructor(
     private playerService: PlayerService,
@@ -146,6 +147,9 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   }
 
   async undoLastBid(): Promise<void> {
+    if (this.actionInProgress) return;
+    this.actionInProgress = true;
+    try {
     const lastBid = this.bidHistory.pop();
     if (lastBid) {
       this.currentBid = lastBid.bid;
@@ -215,13 +219,18 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     }
     this.setCurrentPlayer(restoredPlayer, 'undo');
     this.message.success(`${this.playerName} has been returned to the auction.`, 'Sale Undone');
+    } finally {
+      this.actionInProgress = false;
+    }
   }
 
   async sold(): Promise<void> {
+    if (this.actionInProgress) return;
     if (!this.currentPlayer || !this.highestTeam || !this.currentPlayer.id || !this.highestTeam.id) {
       this.message.warning('Select a team and place a bid before marking this player as sold.');
       return;
     }
+    this.actionInProgress = true;
     this.soldToTeamName = this.highestTeam.teamName;
     this.showSoldAnimation = true;
     const soldPlayerId = this.currentPlayer.id;
@@ -245,11 +254,14 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
       });
     } finally {
       this.showSoldAnimation = false;
+      this.actionInProgress = false;
     }
   }
 
   async unsold(): Promise<void> {
+    if (this.actionInProgress) return;
     if (!this.currentPlayer?.id) return;
+    this.actionInProgress = true;
     this.showUnsoldAnimation = true;
     const unsoldPlayerId = this.currentPlayer.id;
 
@@ -261,10 +273,19 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
       });
     } finally {
       this.showUnsoldAnimation = false;
+      this.actionInProgress = false;
     }
   }
 
-  async nextPlayer(): Promise<void> { await this.loadNextPlayer(); }
+  async nextPlayer(): Promise<void> {
+    if (this.actionInProgress) return;
+    this.actionInProgress = true;
+    try {
+      await this.loadNextPlayer();
+    } finally {
+      this.actionInProgress = false;
+    }
+  }
   isHighestBidder(team: Team): boolean { return this.highestTeam?.id === team.id; }
   get playerName(): string { return this.currentPlayer ? `${this.currentPlayer.firstName} ${this.currentPlayer.lastName}` : ''; }
   trackByTeam(_index: number, team: Team): string | undefined { return team.id; }
