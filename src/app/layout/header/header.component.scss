@@ -553,3 +553,9 @@
     }
 
 }
+
+@media (max-width: 768px) {
+    .current-auction-bar {
+        backdrop-filter: none;
+    }
+}

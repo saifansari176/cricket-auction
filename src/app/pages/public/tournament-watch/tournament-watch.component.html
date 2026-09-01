@@ -70,8 +70,8 @@
           Refresh now</button>
       </div>
       <div class="team-grid">
-        <article class="team" *ngFor="let team of teams">
-          <div class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName">
+        <article class="team" *ngFor="let team of teams; trackBy: trackById">
+          <div class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName" loading="lazy" decoding="async">
             <div>
               <h3>{{ team.teamName }}</h3>
               <p>{{ soldForTeam(team).length }} players • {{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}
@@ -79,7 +79,7 @@
             </div>
           </div>
           <ul>
-            <li *ngFor="let bid of soldForTeam(team)"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount |
+            <li *ngFor="let bid of soldForTeam(team); trackBy: trackById"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" loading="lazy" decoding="async" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount |
                 currency:'INR':'symbol':'1.0-0' }}</b></li>
             <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
           </ul>
@@ -92,7 +92,7 @@
         <p class="eyebrow">LATEST RESULTS</p>
         <h2>Recent purchases</h2>
       </div>
-      <div class="sale" *ngFor="let sale of latestSales"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
+      <div class="sale" *ngFor="let sale of latestSales; trackBy: trackById"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
           }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
       <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
     </section>

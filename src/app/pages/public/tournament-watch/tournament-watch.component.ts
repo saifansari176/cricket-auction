@@ -21,6 +21,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   teams: Team[] = [];
   players: Player[] = [];
   bids: AuctionBid[] = [];
+  latestSales: AuctionBid[] = [];
   liveState: LiveAuctionState | null = null;
   loading = true;
   notFound = false;
@@ -29,6 +30,9 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   private liveStateSubscription?: Unsubscribe;
   private resultAnimationTimer?: ReturnType<typeof setTimeout>;
   private lastLiveStateUpdatedAt = '';
+  private readonly soldBidsByTeam = new Map<string, AuctionBid[]>();
+  private readonly spentByTeamId = new Map<string, number>();
+  private readonly playerPhotoById = new Map<string, string>();
 
   constructor(
     private route: ActivatedRoute,
@@ -56,6 +60,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       this.teams = data.teams;
       this.players = data.players;
       this.bids = data.bids.filter((bid) => bid.sold);
+      this.refreshBidSummaries();
       this.liveState = data.liveState;
       this.lastLiveStateUpdatedAt = data.liveState?.updatedAt || this.lastLiveStateUpdatedAt;
       this.notFound = !data.auction;
@@ -80,9 +85,24 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
         if (!state?.updatedAt || state.updatedAt === this.lastLiveStateUpdatedAt) return;
         this.lastLiveStateUpdatedAt = state.updatedAt;
         if (state.lastAction === 'sold' || state.lastAction === 'unsold') this.playResultAnimation(state.lastAction);
-        void this.load(false);
+        void this.applyLiveStateUpdate(state);
       });
     });
+  }
+
+  private async applyLiveStateUpdate(state: LiveAuctionState): Promise<void> {
+    const needsPlayerRefresh = !!state.currentPlayerId
+      && !this.players.some((player) => player.id === state.currentPlayerId);
+    const needsTeamRefresh = !!state.highestTeamId
+      && !this.teams.some((team) => team.id === state.highestTeamId);
+    const needsBidRefresh = state.lastAction === 'sold' || state.lastAction === 'undo';
+
+    if (needsPlayerRefresh || needsTeamRefresh || needsBidRefresh) {
+      await this.load(false);
+      return;
+    }
+
+    this.liveState = state;
   }
 
   private stopLiveUpdates(): void {
@@ -102,11 +122,36 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   get currentPlayer(): Player | undefined { return this.players.find((p) => p.id === this.liveState?.currentPlayerId); }
   get highestTeam(): Team | undefined { return this.teams.find((t) => t.id === this.liveState?.highestTeamId); }
   get totalSpent(): number { return this.bids.reduce((sum, bid) => sum + Number(bid.bidAmount || 0), 0); }
-  get latestSales(): AuctionBid[] { return [...this.bids].sort((a, b) => (b.soldDate || '').localeCompare(a.soldDate || '')).slice(0, 8); }
-  soldForTeam(team: Team): AuctionBid[] { return this.bids.filter((bid) => bid.teamId === team.id); }
-  spentByTeam(team: Team): number { return this.soldForTeam(team).reduce((sum, bid) => sum + Number(bid.bidAmount || 0), 0); }
+  soldForTeam(team: Team): AuctionBid[] { return this.soldBidsByTeam.get(team.id || '') || []; }
+  spentByTeam(team: Team): number { return this.spentByTeamId.get(team.id || '') || 0; }
   getBidPhoto(bid: AuctionBid): string {
-    return bid.photoUrl || this.players.find((p) => p.id === bid.playerId)?.photo || '/cricbids-logo.png';
+    return bid.photoUrl || this.playerPhotoById.get(bid.playerId || '') || '/cricbids-logo.png';
+  }
+
+  trackById(_index: number, item: { id?: string }): string | number {
+    return item.id || _index;
+  }
+
+  private refreshBidSummaries(): void {
+    this.soldBidsByTeam.clear();
+    this.spentByTeamId.clear();
+    this.playerPhotoById.clear();
+
+    for (const player of this.players) {
+      if (player.id && player.photo) this.playerPhotoById.set(player.id, player.photo);
+    }
+
+    for (const bid of this.bids) {
+      const teamId = bid.teamId || '';
+      const teamBids = this.soldBidsByTeam.get(teamId) || [];
+      teamBids.push(bid);
+      this.soldBidsByTeam.set(teamId, teamBids);
+      this.spentByTeamId.set(teamId, (this.spentByTeamId.get(teamId) || 0) + Number(bid.bidAmount || 0));
+    }
+
+    this.latestSales = [...this.bids]
+      .sort((first, second) => (second.soldDate || '').localeCompare(first.soldDate || ''))
+      .slice(0, 8);
   }
 
   openPreview(url: string, name = ''): void {

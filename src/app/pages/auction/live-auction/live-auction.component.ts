@@ -142,8 +142,6 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.currentBid = this.nextBid;
     this.highestTeam = team;
     this.publishLiveState('bid');
-    console.log(1234);
-    
   }
 
   async undoLastBid(): Promise<void> {

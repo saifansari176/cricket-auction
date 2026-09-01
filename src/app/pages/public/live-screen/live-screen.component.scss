@@ -1026,35 +1026,6 @@
 }
 
 
-.player-role {
-
-  align-self: flex-start;
-
-  margin-top:
-    clamp(12px, 1.5vh, 20px);
-
-  padding:
-    7px 17px;
-
-  border:
-    1px solid #087ed1;
-
-  border-radius: 5px;
-
-  background:
-    linear-gradient(
-      180deg,
-      #0876cf,
-      #0755a0
-    );
-
-  font-size:
-    clamp(11px, 0.8vw, 16px);
-
-  font-weight: 800;
-}
-
-
 /* =========================================================
    PLAYER FACTS
 ========================================================= */
@@ -1110,66 +1081,6 @@
     clamp(13px, 1vw, 19px);
 
   margin-top: 2px;
-}
-
-
-.fact-bullet {
-
-  width: 11px;
-  height: 11px;
-
-  border-radius: 50%;
-
-  background: #fff;
-
-  box-shadow:
-    0 0 5px rgba(255, 255, 255, 0.4);
-}
-
-
-.fact-circle {
-
-  width: 25px;
-  height: 25px;
-
-  border:
-    2px solid #fff;
-
-  border-radius: 50%;
-
-  position: relative;
-}
-
-
-.fact-circle::after {
-
-  content: '';
-
-  position: absolute;
-
-  width: 7px;
-  height: 7px;
-
-  top: 50%;
-  left: 50%;
-
-  transform: translate(-50%, -50%);
-
-  border-radius: 50%;
-
-  background: #fff;
-}
-
-
-.country-code {
-
-  width: 25px;
-
-  color: #fff;
-
-  font-size: 11px;
-
-  font-weight: 900;
 }
 
 
@@ -1302,35 +1213,6 @@
   50% {
     opacity: 0.85;
   }
-}
-
-
-/* =========================================================
-   TEAM NAME
-========================================================= */
-
-.team-name {
-
-  width: 100%;
-
-  text-align: center;
-
-  color: #fff;
-
-  font-size:
-    clamp(22px, 2.2vw, 42px);
-
-  font-weight: 900;
-
-  text-transform: uppercase;
-
-  line-height: 1;
-
-  white-space: nowrap;
-
-  overflow: hidden;
-
-  text-overflow: ellipsis;
 }
 
 
@@ -2034,12 +1916,6 @@
     text-align: center;
   }
 
-
-  .player-role {
-    align-self: center;
-  }
-
-
   .player-facts {
     width: 100%;
     max-width: 260px;
@@ -2638,6 +2514,16 @@
   .auction-title-text h1,
   .live-status::before {
     animation: none !important;
+  }
+}
+
+/* Mobile GPUs struggle most with full-screen blur and moving image layers. */
+@media (max-width: 650px) {
+  .live-screen::before,
+  .live-screen::after,
+  .portrait-glow,
+  .team-logo-glow {
+    animation: none;
   }
 }
 
