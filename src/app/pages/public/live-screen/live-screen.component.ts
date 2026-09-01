@@ -26,7 +26,6 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
   notFound = false;
   updating = false;
   resultAnimation: 'sold' | 'unsold' | null = null;
-  screenScale = 1;
   private auctionId = '';
   private liveStateSubscription?: Unsubscribe;
   private updateAnimationTimer?: ReturnType<typeof setTimeout>;
@@ -40,14 +39,11 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.updateScreenScale();
-    window.addEventListener('resize', this.updateScreenScale);
     this.auctionId = this.route.snapshot.paramMap.get('auctionId') || '';
     void this.load();
   }
 
   ngOnDestroy(): void {
-    window.removeEventListener('resize', this.updateScreenScale);
     this.stopLiveUpdates();
     if (this.updateAnimationTimer) clearTimeout(this.updateAnimationTimer);
     if (this.resultAnimationTimer) clearTimeout(this.resultAnimationTimer);
@@ -127,8 +123,31 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
     this.liveStateSubscription = this.auctionService.watchLiveState(this.auctionId, (state) => {
       if (!state?.updatedAt || state.updatedAt === this.lastLiveStateUpdatedAt) return;
       this.lastLiveStateUpdatedAt = state.updatedAt;
-      void this.load(false, state.lastAction);
+      void this.applyLiveStateUpdate(state);
     });
+  }
+
+  /**
+   * A bid only changes the small live-state document. Avoid re-reading every
+   * player, team, and bid on each update; refresh the cached data only when a
+   * newly selected player or team is not already known to this screen.
+   */
+  private async applyLiveStateUpdate(state: LiveAuctionState): Promise<void> {
+    const needsPlayerRefresh = !!state.currentPlayerId
+      && !this.players.some((player) => player.id === state.currentPlayerId);
+    const needsTeamRefresh = !!state.highestTeamId
+      && !this.teams.some((team) => team.id === state.highestTeamId);
+
+    if (needsPlayerRefresh || needsTeamRefresh) {
+      await this.load(false, state.lastAction);
+      return;
+    }
+
+    this.liveState = state;
+    this.playUpdateAnimation();
+    if (state.lastAction === 'sold' || state.lastAction === 'unsold') {
+      this.playResultAnimation(state.lastAction);
+    }
   }
 
   private stopLiveUpdates(): void {
@@ -153,8 +172,4 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
       this.resultAnimationTimer = setTimeout(() => this.resultAnimation = null, 2200);
     });
   }
-
-  private updateScreenScale = (): void => {
-    this.screenScale = Math.min(window.innerWidth / 1536, window.innerHeight / 1024);
-  };
 }

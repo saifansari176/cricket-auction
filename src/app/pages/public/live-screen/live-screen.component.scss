@@ -2492,7 +2492,8 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   filter: drop-shadow(0 0 7px rgba(34, 194, 255, 0.7));
-  animation: broadcastFrameFlow 18s linear infinite;
+  /* Ten updates per second keeps the slow border motion light on projectors. */
+  animation: broadcastFrameFlow 18s steps(180, end) infinite;
 }
 
 .highest-bid-card::before {
@@ -2547,7 +2548,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: none;
-  animation: auctionTitleShine 9s linear infinite;
+  animation: auctionTitleShine 9s steps(90, end) infinite;
 }
 
 .auction-title-text p {
@@ -2621,6 +2622,22 @@
 
   .live-status {
     padding: 3px 10px;
+  }
+}
+
+/* Preserve the broadcast layout while respecting devices or users that limit motion. */
+@media (prefers-reduced-motion: reduce) {
+  .live-screen::before,
+  .live-screen::after,
+  .portrait-glow,
+  .team-logo-glow,
+  .live-status,
+  .current-player-card::before,
+  .highest-bid-card::before,
+  .auction-logo,
+  .auction-title-text h1,
+  .live-status::before {
+    animation: none !important;
   }
 }
 
