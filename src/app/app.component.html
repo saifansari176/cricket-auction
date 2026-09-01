@@ -11,3 +11,15 @@
 <app-message-modal></app-message-modal>
 <app-loader></app-loader>
 <app-image-preview></app-image-preview>
+
+<a
+    *ngIf="showPublicContact"
+    class="whatsapp-contact"
+    href="https://wa.me/919320006789?text=Hello%20Cricbids%2C%20I%20would%20like%20to%20know%20more%20about%20your%20auction%20software."
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Contact Cricbids on WhatsApp"
+    (click)="trackWhatsAppContact()"
+>
+    WhatsApp us
+</a>

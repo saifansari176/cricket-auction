@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /dashboard
+Disallow: /players
+Disallow: /teams
+Disallow: /auction
+Disallow: /reports
+Disallow: /settings
+Disallow: /users
+
+Sitemap: https://www.cricbids.com/sitemap.xml

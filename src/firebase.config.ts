@@ -9,7 +9,8 @@ export const firebaseConfig = {
   projectId: "saifcricketauction",
   storageBucket: "saifcricketauction.appspot.com",
   messagingSenderId: "365618757794",
-  appId: "1:365618757794:web:67e6d9298ee18a91d397fb"
+  appId: "1:365618757794:web:67e6d9298ee18a91d397fb",
+  measurementId: "G-PGWEKXGD8C"
 };
 
 export const app = initializeApp(firebaseConfig);
