@@ -1,8 +1,15 @@
+:host {
+  display: block;
+  padding: 0 24px 24px;
+}
+
 .player-filters {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
 }
+
+.player-list-actions { flex-wrap: nowrap; }
 
 .mobile-player-list { display: none; }
 
@@ -12,7 +19,11 @@
 .type-header::after { content: '⏷'; color: #fff; font-size: 14px; line-height: 1; pointer-events: none; position: absolute; right: 2px; }
 
 @media (max-width: 576px) {
+  :host { padding: 0 16px 20px; }
   .player-filters { flex-direction: column; }
+  .player-list-actions { width: 100%; gap: 6px !important; }
+  .player-list-actions .btn { flex: 1 1 0; padding: 7px 6px; font-size: 12px; white-space: nowrap; }
+  .player-list-actions .me-2 { margin-right: 0 !important; }
   .desktop-table { display: none; }
   .mobile-player-list { display: grid; gap: 10px; }
   .player-accordion { border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; overflow: hidden; }

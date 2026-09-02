@@ -90,6 +90,7 @@
     </button>
     <div class="accordion-body" *ngIf="openSection === 'players'">
         <a routerLink="/players" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Player List</a>
+        <a routerLink="/auction/categories" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Player Categories</a>
         <a routerLink="/players/add" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Add Player</a>
     </div>
 
@@ -114,7 +115,6 @@
     </button>
     <div class="accordion-body" *ngIf="openSection === 'auction'">
         <a routerLink="/auction" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="startNormalAuction()">Live Auction</a>
-        <a routerLink="/auction/categories" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Categories</a>
         <a routerLink="/auction-settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Auction Management</a>
         <a routerLink="/reports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Reports</a>
         <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Settings</a>

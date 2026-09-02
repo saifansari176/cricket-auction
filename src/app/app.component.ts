@@ -24,6 +24,8 @@ import { AnalyticsService } from './core/services/analytics.service';
 export class AppComponent implements OnDestroy {
   title = 'cricket-auction';
   private readonly navigationSubscription: Subscription;
+  private hiddenAt = 0;
+  private readonly resumeReloadDelay = 2 * 60 * 1000;
 
   constructor(
     private router: Router,
@@ -32,11 +34,36 @@ export class AppComponent implements OnDestroy {
     this.navigationSubscription = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => this.analytics.trackPageView(event.urlAfterRedirects));
+
+    window.addEventListener('pageshow', this.onPageShow);
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   ngOnDestroy(): void {
     this.navigationSubscription.unsubscribe();
+    window.removeEventListener('pageshow', this.onPageShow);
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
   }
+
+  private onPageShow = (event: PageTransitionEvent): void => {
+    // Mobile browsers can restore a frozen page from BFCache without restoring
+    // Firebase's live connections. A fresh app boot reconnects those services.
+    if (event.persisted) {
+      window.location.reload();
+    }
+  };
+
+  private onVisibilityChange = (): void => {
+    if (document.visibilityState === 'hidden') {
+      this.hiddenAt = Date.now();
+      return;
+    }
+
+    if (this.hiddenAt && Date.now() - this.hiddenAt >= this.resumeReloadDelay) {
+      window.location.reload();
+    }
+    this.hiddenAt = 0;
+  };
 
   get showShell(): boolean {
     const publicPaths = ['/', '/login', '/player-registration', '/watch', '/live-screen', '/how-it-works', '/past-auctions'];
