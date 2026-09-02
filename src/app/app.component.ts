@@ -71,9 +71,8 @@ export class AppComponent implements OnDestroy {
   }
 
   get showPublicContact(): boolean {
-    return !this.showShell
-      && !this.router.url.startsWith('/live-screen')
-      && !this.router.url.startsWith('/watch');
+    const path = this.router.url.split('?')[0];
+    return ['/', '/home', '/login', '/auction-settings', '/how-it-works'].includes(path);
   }
 
   trackWhatsAppContact(): void {
