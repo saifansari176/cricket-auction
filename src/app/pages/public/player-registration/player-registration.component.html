@@ -92,7 +92,7 @@
         <label>
           Category
           <select formControlName="categoryId">
-            <option value="">Regular Players</option>
+            <option value="" disabled>Select Category</option>
             <option *ngFor="let category of categories" [value]="category.id">{{category.name}} — {{category.basePrice}}</option>
           </select>
         </label>
