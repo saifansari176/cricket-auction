@@ -127,7 +127,7 @@
   gap: 14px;
 }
 
-.form-grid > div {
+.form-grid>div {
   flex: 1 1 calc(50% - 7px);
   min-width: 260px;
 }
@@ -167,12 +167,15 @@
   text-align: center;
 }
 
-.mobile-auction-list { display: none; }
+.mobile-auction-list {
+  display: none;
+}
 
 .share-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1050;
+  // Must sit above the global WhatsApp button (z-index: 1200).
+  z-index: 1300;
   display: grid;
   place-items: center;
   padding: 16px;
@@ -185,6 +188,8 @@
   border-radius: 12px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, .2);
   padding: 20px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
 }
 
 .share-modal-header,
@@ -196,22 +201,138 @@
 }
 
 .share-modal-header h3,
-.share-modal-header p { margin: 0; }
+.share-modal-header p {
+  margin: 0;
+}
+
 .share-modal-header p,
-.share-modal-help { color: #64748b; }
-.registration-link-switch { margin: 22px 0 8px; }
-.registration-link-switch .form-check-input { cursor: pointer; }
-.registration-link-switch .form-check-label { font-weight: 600; cursor: pointer; }
-.share-modal-help { font-size: 13px; }
-.share-modal-actions { justify-content: flex-end; margin-top: 20px; flex-wrap: nowrap; }
-.share-action { display: inline-flex; align-items: center; gap: 9px; min-width: 0; flex: 1 1 0; padding: 9px 12px; border: 1px solid; border-radius: 9px; background: #fff; text-align: left; white-space: nowrap; transition: transform .15s ease, box-shadow .15s ease; }
-.share-action:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(15, 23, 42, .14); }
-.share-action-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; font-size: 18px; font-weight: 800; }
-.share-action b, .share-action small { display: block; line-height: 1.2; }.share-action small { margin-top: 3px; font-size: 11px; }
-.share-action.registration { color: #1453a5; border-color: #9dbde7; }.share-action.registration .share-action-icon { color: #1453a5; background: #e7f0ff; }.share-action.public { color: #fff; border-color: #1d7aab; background: linear-gradient(135deg, #0d6efd, #075684); }.share-action.public .share-action-icon { background: rgba(255,255,255,.18); }.share-action.public small { color: #d9f3ff; }
-@media (max-width: 575px) { .share-modal { width: min(100%, 520px); padding: 16px; } .share-modal-actions { gap: 6px; } .share-action { padding: 8px; } .share-action-icon { width: 27px; height: 27px; } .share-action b { font-size: 12px; } .share-action small { display: none; } }
+.share-modal-help {
+  color: #64748b;
+}
+
+.registration-link-switch {
+  margin: 22px 0 8px;
+}
+
+.registration-link-switch .form-check-input {
+  cursor: pointer;
+}
+
+.registration-link-switch .form-check-label {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.share-modal-help {
+  font-size: 13px;
+}
+
+.share-modal-actions {
+  justify-content: flex-end;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.share-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 1 1 0;
+  padding: 9px 12px;
+  border: 1px solid;
+  border-radius: 9px;
+  background: #fff;
+  text-align: left;
+  white-space: nowrap;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.share-action:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(15, 23, 42, .14);
+}
+
+.share-action-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.share-action b,
+.share-action small {
+  display: block;
+  line-height: 1.2;
+}
+
+.share-action small {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.share-action.registration {
+  color: #1453a5;
+  border-color: #9dbde7;
+}
+
+.share-action.registration .share-action-icon {
+  color: #1453a5;
+  background: #e7f0ff;
+}
+
+.share-action.public {
+  color: #fff;
+  border-color: #1d7aab;
+  background: linear-gradient(135deg, #0d6efd, #075684);
+}
+
+.share-action.public .share-action-icon {
+  background: rgba(255, 255, 255, .18);
+}
+
+.share-action.public small {
+  color: #d9f3ff;
+}
+
+@media (max-width: 575px) {
+  .share-modal {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .share-modal-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .share-action {
+    width: 100%;
+    padding: 10px 12px;
+    white-space: normal;
+  }
+
+  .share-action-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 auto;
+  }
+
+  .share-action b {
+    font-size: 14px;
+  }
+
+  .share-action small {
+    display: block;
+  }
+}
 
 @media (max-width: 991px) {
+
   .settings-header,
   .logo-row,
   .settings-summary {
@@ -223,19 +344,77 @@
     display: block;
   }
 
-  .desktop-auction-table { display: none; }
-  .mobile-auction-list { display: grid; gap: 10px; }
-  .auction-accordion { border: 1px solid #dbe3ef; border-radius: 10px; overflow: hidden; }
-  .auction-accordion summary { display: flex; align-items: center; gap: 10px; padding: 10px; cursor: pointer; list-style: none; }
-  .auction-accordion summary::-webkit-details-marker { display: none; }
-  .auction-accordion summary::after { content: '⏷'; margin-left: auto; font-size: 20px; color: #475569; transition: transform .2s ease; }
-  .auction-accordion[open] summary::after { transform: rotate(180deg); }
-  .auction-accordion summary img, .auction-accordion .logo-placeholder { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; background: #f1f5f9; display: grid; place-items: center; font-size: 10px; }
-  .auction-accordion summary small { display: block; color: #64748b; }
-  .auction-details { border-top: 1px solid #e2e8f0; padding: 12px; display: grid; gap: 8px; }
-  .auction-details > span { display: flex; justify-content: space-between; color: #64748b; }
+  .desktop-auction-table {
+    display: none;
+  }
 
-  .form-grid > div {
+  .mobile-auction-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .auction-accordion {
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .auction-accordion summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .auction-accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .auction-accordion summary::after {
+    content: '⏷';
+    margin-left: auto;
+    font-size: 20px;
+    color: #475569;
+    transition: transform .2s ease;
+  }
+
+  .auction-accordion[open] summary::after {
+    transform: rotate(180deg);
+  }
+
+  .auction-accordion summary img,
+  .auction-accordion .logo-placeholder {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #f1f5f9;
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+  }
+
+  .auction-accordion summary small {
+    display: block;
+    color: #64748b;
+  }
+
+  .auction-details {
+    border-top: 1px solid #e2e8f0;
+    padding: 12px;
+    display: grid;
+    gap: 8px;
+  }
+
+  .auction-details>span {
+    display: flex;
+    justify-content: space-between;
+    color: #64748b;
+  }
+
+  .form-grid>div {
     margin-bottom: 14px;
   }
 }
