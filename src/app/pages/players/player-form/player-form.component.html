@@ -73,9 +73,8 @@
                     <div class="col-md-6 mb-3">
                         <label>Category</label>
                         <select class="form-select" formControlName="categoryId" (change)="onCategoryChange()">
-                            <option value="">Regular Players (default base price)</option>
-                            <option *ngFor="let category of categories" [value]="category.id">{{category.name}} —
-                                {{category.basePrice}}</option>
+                            <option value="" disabled>Select Category</option>
+                            <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
                         </select>
                     </div>
 
