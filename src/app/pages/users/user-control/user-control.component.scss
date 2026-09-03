@@ -24,10 +24,46 @@
 }
 
 .access-form {
-  max-width: 420px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #dbe3ef;
+  width: min(100% - 32px, 420px);
+  margin: 0;
+  padding: 24px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, .28);
+}
+
+.access-modal-backdrop {
+  position: fixed;
+  z-index: 1050;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, .58);
+}
+
+.access-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.access-modal-header h4,
+.access-modal-header p {
+  margin: 0;
+}
+
+.access-modal-header p {
+  margin-top: 4px;
+  color: #64748b;
+}
+
+.access-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .page-header h2,

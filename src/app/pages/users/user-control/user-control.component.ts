@@ -162,8 +162,16 @@ export class UserControlComponent implements OnInit {
     });
   }
 
+  closeAuctionAccess(): void {
+    this.editingAuction = null;
+    this.accessForm.reset({ teamLimit: 2, playerLimit: 10 });
+  }
+
   async saveAuctionAccess(): Promise<void> {
-    if (!this.editingAuction?.id || this.accessForm.invalid) return;
+    if (!this.editingAuction?.id || this.accessForm.invalid) {
+      this.accessForm.markAllAsTouched();
+      return;
+    }
 
     await this.auctionService.updateAuctionAccess(
       this.editingAuction.id,

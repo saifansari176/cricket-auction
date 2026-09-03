@@ -108,11 +108,31 @@
       </table>
     </div>
 
-    <form class="access-form" *ngIf="editingAuction" [formGroup]="accessForm" (ngSubmit)="saveAuctionAccess()">
-      <h4>{{editingAuction.auctionName}}</h4>
-      <div class="mb-3"><label class="form-label">Team Limit</label><input type="number" min="1" class="form-control" formControlName="teamLimit"></div>
-      <div class="mb-3"><label class="form-label">Player Limit</label><input type="number" min="1" class="form-control" formControlName="playerLimit"></div>
-      <button class="btn btn-success" type="submit">Save Auction Access</button>
-    </form>
   </section>
+</div>
+
+<div class="access-modal-backdrop" *ngIf="editingAuction" (click)="closeAuctionAccess()">
+  <form class="access-form" [formGroup]="accessForm" (ngSubmit)="saveAuctionAccess()" (click)="$event.stopPropagation()">
+    <div class="access-modal-header">
+      <div>
+        <h4>Edit Auction Access</h4>
+        <p>{{editingAuction.auctionName}}</p>
+      </div>
+      <button type="button" class="btn-close" aria-label="Close" (click)="closeAuctionAccess()"></button>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Team Limit</label>
+      <input type="number" min="1" class="form-control" formControlName="teamLimit">
+    </div>
+    <div class="mb-4">
+      <label class="form-label">Player Limit</label>
+      <input type="number" min="1" class="form-control" formControlName="playerLimit">
+    </div>
+
+    <div class="access-modal-actions">
+      <button class="btn btn-outline-secondary" type="button" (click)="closeAuctionAccess()">Cancel</button>
+      <button class="btn btn-success" type="submit">Save Access</button>
+    </div>
+  </form>
 </div>
