@@ -116,6 +116,10 @@ export class ReportsComponent implements OnInit {
     return bid.tshirtSize || this.players.find((player) => player.id === bid.playerId)?.tshirtSize || '-';
   }
 
+  getBidPlayerTrouserSize(bid: AuctionBid): string {
+    return bid.trouserSize || this.players.find((player) => player.id === bid.playerId)?.trouserSize || '-';
+  }
+
   private matchesPlayerType(playerId: string): boolean {
     const type = this.playerTypeFilter.trim().toLowerCase();
     if (!type) return true;
@@ -130,11 +134,12 @@ export class ReportsComponent implements OnInit {
 
     const data = this.selectedTeamPlayers.map((player, index) => ({
       '#': index + 1,
-      'Player Name': player.playerName,
+      'Name': player.playerName,
       'Type': this.getBidPlayerType(player),
-      'Mobile Number': this.getBidPlayerMobile(player),
+      'UID': this.getBidPlayerMobile(player),
       'Jersey Number': this.getBidPlayerJerseyNumber(player),
       'T-Shirt Size': this.getBidPlayerTshirtSize(player),
+      'Trouser Size': this.getBidPlayerTrouserSize(player),
       'Sold Amount': player.bidAmount
     }));
 

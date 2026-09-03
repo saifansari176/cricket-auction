@@ -235,7 +235,7 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
 
     try {
       await this.loadingService.withoutLoader(async () => {
-await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerName: this.playerName, teamId: this.highestTeam!.id!, teamName: this.highestTeam!.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer!.mobile, jerseyNumber: this.currentPlayer!.jerseyNumber, tshirtSize: this.currentPlayer!.tshirtSize, photoUrl: this.currentPlayer!.photo, sold: true, soldDate: new Date().toISOString() });
+await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerName: this.playerName, teamId: this.highestTeam!.id!, teamName: this.highestTeam!.teamName, bidAmount: this.currentBid, mobile: this.currentPlayer!.mobile, jerseyNumber: this.currentPlayer!.jerseyNumber, tshirtSize: this.currentPlayer!.tshirtSize, trouserSize: this.currentPlayer!.trouserSize, photoUrl: this.currentPlayer!.photo, sold: true, soldDate: new Date().toISOString() });
         await this.playerService.markSold(this.currentPlayer!.id!, this.highestTeam!.id!, this.currentBid);
         await this.teamService.updateTeamPoints(this.highestTeam!.id!, this.currentBid);
         this.updateSoldTeamOnScreen(this.highestTeam!.id!, this.currentBid);

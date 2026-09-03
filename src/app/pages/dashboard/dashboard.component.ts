@@ -414,9 +414,10 @@ export class DashboardComponent implements OnInit {
       'First Name': player.firstName,
       'Last Name': player.lastName,
       'Player Type': player.playerType,
-      // 'Mobile Number': player.mobile,
-      // 'T-Shirt Size': player.tshirtSize,
-      // Photo: player.photo
+      'UID': player.mobile,
+      'T-Shirt Size': player.tshirtSize,
+      'Trouser Size': player.trouserSize,
+      Photo: player.photo
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(data);

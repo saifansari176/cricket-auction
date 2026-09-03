@@ -20,6 +20,8 @@ export interface AuctionBid {
 
   tshirtSize: string;
 
+  trouserSize: string;
+
   sold: boolean;
 
   soldDate: string;
