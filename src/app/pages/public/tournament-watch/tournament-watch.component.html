@@ -69,7 +69,33 @@
           <img style="width: 100px; height: auto;" src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
           Refresh now</button>
       </div>
-      <div class="team-grid">
+      <div class="accordion d-md-none" id="teamsAccordion">
+        <div class="accordion-item team" *ngFor="let team of teams; let index = index; trackBy: trackById">
+          <h3 class="accordion-header">
+            <button class="accordion-button" [class.collapsed]="expandedMobileTeamId !== (team.id || index.toString())" type="button"
+              (click)="toggleMobileTeam(team.id || index.toString())" [attr.aria-expanded]="expandedMobileTeamId === (team.id || index.toString())">
+              <span class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName" loading="lazy" decoding="async">
+                <span>
+                  <strong>{{ team.teamName }}</strong>
+                  <span class="team-stats">
+                    <span><b>{{ soldForTeam(team).length }}</b> players • <b>{{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}</b> spent</span>
+                    <span class="remaining"><b>{{ remainingPlayers(team) }}</b> players • <b>{{ remainingAmount(team) | currency:'INR':'symbol':'1.0-0' }}</b> remaining</span>
+                  </span>
+                </span>
+              </span>
+            </button>
+          </h3>
+          <div class="accordion-collapse collapse" [class.show]="expandedMobileTeamId === (team.id || index.toString())">
+            <div class="accordion-body">
+              <ul>
+                <li *ngFor="let bid of soldForTeam(team); trackBy: trackById"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" loading="lazy" decoding="async" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></li>
+                <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="team-grid d-none d-md-grid">
         <article class="team" *ngFor="let team of teams; trackBy: trackById">
           <div class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName" loading="lazy" decoding="async">
             <div>

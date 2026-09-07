@@ -26,6 +26,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   loading = true;
   notFound = false;
   resultAnimation: 'sold' | 'unsold' | null = null;
+  expandedMobileTeamId: string | null = null;
   private auctionId = '';
   private liveStateSubscription?: Unsubscribe;
   private resultAnimationTimer?: ReturnType<typeof setTimeout>;
@@ -134,6 +135,9 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     // Every team receives the auction's common budget. Calculate from sold
     // bids so a stale saved team balance cannot show an incorrect amount.
     return Math.max(0, Number(this.auction?.pointsPerTeam || 0) - this.spentByTeam(team));
+  }
+  toggleMobileTeam(teamId: string): void {
+    this.expandedMobileTeamId = this.expandedMobileTeamId === teamId ? null : teamId;
   }
   getBidPhoto(bid: AuctionBid): string {
     return bid.photoUrl || this.playerPhotoById.get(bid.playerId || '') || '/cricbids-logo.png';
