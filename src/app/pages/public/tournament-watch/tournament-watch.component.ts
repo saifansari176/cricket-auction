@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuctionBid } from '../../../core/models/bid';
 import { AuctionSettings } from '../../../core/models/auction-settings';
@@ -14,7 +14,8 @@ import { Unsubscribe } from 'firebase/firestore';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './tournament-watch.component.html',
-  styleUrl: './tournament-watch.component.scss'
+  styleUrl: './tournament-watch.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TournamentWatchComponent implements OnInit, OnDestroy {
   auction: AuctionSettings | null = null;
@@ -22,6 +23,10 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   players: Player[] = [];
   bids: AuctionBid[] = [];
   latestSales: AuctionBid[] = [];
+  currentPlayer?: Player;
+  highestTeam?: Team;
+  unsoldPlayers: Player[] = [];
+  totalSpent = 0;
   liveState: LiveAuctionState | null = null;
   loading = true;
   notFound = false;
@@ -39,7 +44,8 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private auctionService: AuctionService,
     private imagePreview: ImagePreviewService,
-    private zone: NgZone
+    private zone: NgZone,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -53,7 +59,12 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   }
 
   async load(showLoader = true): Promise<void> {
-    if (!this.auctionId) { this.notFound = true; this.loading = false; return; }
+    if (!this.auctionId) {
+      this.notFound = true;
+      this.loading = false;
+      this.changeDetector.markForCheck();
+      return;
+    }
     if (showLoader) this.loading = true;
     try {
       const data = await this.auctionService.getPublicTournament(this.auctionId);
@@ -63,6 +74,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       this.bids = data.bids.filter((bid) => bid.sold);
       this.refreshBidSummaries();
       this.liveState = data.liveState;
+      this.refreshLiveReferences();
       this.lastLiveStateUpdatedAt = data.liveState?.updatedAt || this.lastLiveStateUpdatedAt;
       this.notFound = !data.auction;
       if (this.publicLiveViewEnabled) {
@@ -72,7 +84,10 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       }
     } catch {
       this.notFound = true;
-    } finally { this.loading = false; }
+    } finally {
+      this.loading = false;
+      this.changeDetector.markForCheck();
+    }
   }
 
   get publicLiveViewEnabled(): boolean {
@@ -106,6 +121,8 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     }
 
     this.liveState = state;
+    this.refreshLiveReferences();
+    this.changeDetector.markForCheck();
   }
 
   private stopLiveUpdates(): void {
@@ -118,14 +135,14 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     requestAnimationFrame(() => {
       this.resultAnimation = action;
       if (this.resultAnimationTimer) clearTimeout(this.resultAnimationTimer);
-      this.resultAnimationTimer = setTimeout(() => this.resultAnimation = null, 2200);
+      this.resultAnimationTimer = setTimeout(() => {
+        this.resultAnimation = null;
+        this.changeDetector.markForCheck();
+      }, 2200);
+      this.changeDetector.markForCheck();
     });
   }
 
-  get currentPlayer(): Player | undefined { return this.players.find((p) => p.id === this.liveState?.currentPlayerId); }
-  get highestTeam(): Team | undefined { return this.teams.find((t) => t.id === this.liveState?.highestTeamId); }
-  get unsoldPlayers(): Player[] { return this.players.filter((player) => player.status === 'Unsold'); }
-  get totalSpent(): number { return this.bids.reduce((sum, bid) => sum + Number(bid.bidAmount || 0), 0); }
   soldForTeam(team: Team): AuctionBid[] { return this.soldBidsByTeam.get(team.id || '') || []; }
   spentByTeam(team: Team): number { return this.spentByTeamId.get(team.id || '') || 0; }
   remainingPlayers(team: Team): number {
@@ -164,9 +181,17 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       this.spentByTeamId.set(teamId, (this.spentByTeamId.get(teamId) || 0) + Number(bid.bidAmount || 0));
     }
 
+    this.unsoldPlayers = this.players.filter((player) => player.status === 'Unsold');
+    this.totalSpent = this.bids.reduce((sum, bid) => sum + Number(bid.bidAmount || 0), 0);
+
     this.latestSales = [...this.bids]
       .sort((first, second) => (second.soldDate || '').localeCompare(first.soldDate || ''))
       .slice(0, 8);
+  }
+
+  private refreshLiveReferences(): void {
+    this.currentPlayer = this.players.find((player) => player.id === this.liveState?.currentPlayerId);
+    this.highestTeam = this.teams.find((team) => team.id === this.liveState?.highestTeamId);
   }
 
   openPreview(url: string, name = ''): void {
