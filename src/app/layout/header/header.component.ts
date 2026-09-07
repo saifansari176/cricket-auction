@@ -50,8 +50,7 @@ export class HeaderComponent implements OnInit {
   }
 
   startNormalAuction(): void {
-    this.auctionService.clearSelectedPlayer();
-    this.auctionService.setSelectedCategory('');
+    this.auctionService.startCombinedAuction();
   }
 
   toggleMenu(): void {

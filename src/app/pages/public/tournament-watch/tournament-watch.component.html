@@ -74,8 +74,10 @@
           <div class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName" loading="lazy" decoding="async">
             <div>
               <h3>{{ team.teamName }}</h3>
-              <p>{{ soldForTeam(team).length }} players • {{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}
-                spent</p>
+              <div class="team-stats">
+                <p><b>{{ soldForTeam(team).length }}</b> players • <b>{{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}</b> spent</p>
+                <p class="remaining"><b>{{ remainingPlayers(team) }}</b> players • <b>{{ remainingAmount(team) | currency:'INR':'symbol':'1.0-0' }}</b> remaining</p>
+              </div>
             </div>
           </div>
           <ul>
@@ -88,13 +90,23 @@
     </section>
 
     <section class="reports latest">
-      <div>
-        <p class="eyebrow">LATEST RESULTS</p>
-        <h2>Recent purchases</h2>
+      <div class="latest-columns">
+        <div class="latest-panel">
+          <p class="eyebrow">LATEST RESULTS</p>
+          <h2>Recent purchases</h2>
+          <div class="sale" *ngFor="let sale of latestSales; trackBy: trackById"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
+            }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
+          <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
+        </div>
+        <div class="latest-panel unsold-results">
+          <p class="eyebrow">UNSOLD PLAYERS</p>
+          <h2>Available for return</h2>
+          <div class="unsold-list">
+            <div class="sale" *ngFor="let player of unsoldPlayers; trackBy: trackById"><span>{{ player.firstName }} {{ player.lastName }}</span><b>UNSOLD</b></div>
+            <p *ngIf="!unsoldPlayers.length" class="muted">No unsold players.</p>
+          </div>
+        </div>
       </div>
-      <div class="sale" *ngFor="let sale of latestSales; trackBy: trackById"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
-          }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
-      <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
     </section>
   </ng-container>
 

@@ -276,6 +276,11 @@
     align-items: center
 }
 
+.team-header > div {
+    flex: 1;
+    min-width: 0;
+}
+
 .team-header img {
     width: 42px;
     height: 42px;
@@ -292,6 +297,22 @@
     margin: 4px 0;
     color: #9cb5cb;
     font-size: .85rem
+}
+
+.team-stats {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    width: min(100%, 430px);
+}
+
+.team-stats b {
+    color: #eff8ff;
+}
+
+.team-stats .remaining {
+    color: #73e6ae;
+    text-align: right;
 }
 
 .team ul {
@@ -312,6 +333,30 @@
 .latest .sale {
     grid-template-columns: 1fr 1fr auto;
     display: grid
+}
+
+.latest-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+}
+
+.latest-panel + .latest-panel {
+    border-left: 1px solid #24476d;
+    padding-left: 28px;
+}
+
+.unsold-results .sale b {
+    color: #ff8d9e;
+    font-size: .75rem;
+}
+
+.unsold-list {
+    height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+    scrollbar-color: #31577e transparent;
+    scrollbar-width: thin;
 }
 
 .sale b {
@@ -418,8 +463,27 @@
         grid-template-columns: 1fr auto
     }
 
+    .latest-columns {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    .latest-panel + .latest-panel {
+        border-left: 0;
+        border-top: 1px solid #24476d;
+        padding: 22px 0 0;
+    }
+
     .latest .sale span:nth-child(2) {
         display: none
+    }
+
+    .team-stats {
+        display: block;
+    }
+
+    .team-stats .remaining {
+        text-align: left;
     }
 }
 

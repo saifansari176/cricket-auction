@@ -18,6 +18,7 @@ export interface LiveAuctionState {
 }
 
 export type LiveScreenAction = 'bid' | 'load' | 'sold' | 'unsold' | 'undo';
+export type AuctionScope = 'combined' | 'category';
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +37,7 @@ export class AuctionService {
   activeAuction$ = new BehaviorSubject<AuctionSettings | null>(null);
   selectedPlayer$ = new BehaviorSubject<{id: string, name: string} | null>(null);
   selectedCategoryId$ = new BehaviorSubject<string>('');
+  auctionScope$ = new BehaviorSubject<AuctionScope>('combined');
   private returnToDashboardAfterSale = false;
 
   setReturnToDashboardAfterSale(value: boolean): void {
@@ -427,6 +429,17 @@ export class AuctionService {
 
   setSelectedCategory(categoryId: string): void {
     this.selectedCategoryId$.next(categoryId);
+  }
+
+  startCombinedAuction(): void {
+    this.clearSelectedPlayer();
+    this.setSelectedCategory('');
+    this.auctionScope$.next('combined');
+  }
+
+  startCategoryAuction(categoryId: string): void {
+    this.setSelectedCategory(categoryId);
+    this.auctionScope$.next('category');
   }
 
   clearSelectedPlayer(): void {

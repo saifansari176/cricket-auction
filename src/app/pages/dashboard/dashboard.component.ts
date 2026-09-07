@@ -402,7 +402,7 @@ export class DashboardComponent implements OnInit {
     if (!player.id) return;
 
     const playerName = `${player.firstName} ${player.lastName}`;
-    this.auctionService.setSelectedCategory(player.categoryId || '');
+    this.auctionService.startCategoryAuction(player.categoryId || '');
     this.auctionService.setSelectedPlayer(player.id, playerName);
     this.auctionService.setReturnToDashboardAfterSale(true);
     this.router.navigate(['/auction']);

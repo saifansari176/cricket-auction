@@ -202,13 +202,13 @@ export class PlayerCategoriesComponent {
   async startCategoryAuction(): Promise<void> {
     if (!this.selectedCategory?.id) return;
     this.auctionService.clearSelectedPlayer();
-    this.auctionService.setSelectedCategory(this.selectedCategory.id);
+    this.auctionService.startCategoryAuction(this.selectedCategory.id);
     await this.router.navigate(['/auction']);
   }
 
   async startIndividualAuction(player: Player, category: PlayerCategory): Promise<void> {
     if (!player.id || !category.id || !['Available', 'Unsold'].includes(player.status)) return;
-    this.auctionService.setSelectedCategory(category.id);
+    this.auctionService.startCategoryAuction(category.id);
     this.auctionService.setSelectedPlayer(player.id, `${player.firstName} ${player.lastName}`.trim());
     await this.router.navigate(['/auction']);
   }

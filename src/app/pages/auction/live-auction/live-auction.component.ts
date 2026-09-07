@@ -82,15 +82,18 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
 
   async loadNextPlayer(action: LiveScreenAction = 'load'): Promise<void> {
     const categoryId = this.auctionService.selectedCategoryId$.value;
-    const availablePlayers = (await this.playerService.getAvailablePlayers())
-      .filter((player) => categoryId ? player.categoryId === categoryId : !player.categoryId);
+    const isCategoryAuction = this.auctionService.auctionScope$.value === 'category';
+    const allAvailablePlayers = await this.playerService.getAvailablePlayers();
+    const availablePlayers = isCategoryAuction
+      ? allAvailablePlayers.filter((player) => categoryId ? player.categoryId === categoryId : !player.categoryId)
+      : allAvailablePlayers;
     if (availablePlayers.length > 0) {
       this.setCurrentPlayer(availablePlayers[0], action);
       return;
     }
 
     const unsoldPlayers = (await this.playerService.getPlayers()).filter((player) =>
-      player.status === 'Unsold' && (categoryId ? player.categoryId === categoryId : !player.categoryId)
+      player.status === 'Unsold' && (!isCategoryAuction || (categoryId ? player.categoryId === categoryId : !player.categoryId))
     );
     const shouldBringBackUnsold = unsoldPlayers.length > 0
       && await this.message.confirm(

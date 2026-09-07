@@ -95,9 +95,11 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       && !this.players.some((player) => player.id === state.currentPlayerId);
     const needsTeamRefresh = !!state.highestTeamId
       && !this.teams.some((team) => team.id === state.highestTeamId);
-    const needsBidRefresh = state.lastAction === 'sold' || state.lastAction === 'undo';
+    const needsDataRefresh = state.lastAction === 'sold'
+      || state.lastAction === 'unsold'
+      || state.lastAction === 'undo';
 
-    if (needsPlayerRefresh || needsTeamRefresh || needsBidRefresh) {
+    if (needsPlayerRefresh || needsTeamRefresh || needsDataRefresh) {
       await this.load(false);
       return;
     }
@@ -121,9 +123,18 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
 
   get currentPlayer(): Player | undefined { return this.players.find((p) => p.id === this.liveState?.currentPlayerId); }
   get highestTeam(): Team | undefined { return this.teams.find((t) => t.id === this.liveState?.highestTeamId); }
+  get unsoldPlayers(): Player[] { return this.players.filter((player) => player.status === 'Unsold'); }
   get totalSpent(): number { return this.bids.reduce((sum, bid) => sum + Number(bid.bidAmount || 0), 0); }
   soldForTeam(team: Team): AuctionBid[] { return this.soldBidsByTeam.get(team.id || '') || []; }
   spentByTeam(team: Team): number { return this.spentByTeamId.get(team.id || '') || 0; }
+  remainingPlayers(team: Team): number {
+    return Math.max(0, Number(this.auction?.playersPerTeam || 0) - this.soldForTeam(team).length);
+  }
+  remainingAmount(team: Team): number {
+    // Every team receives the auction's common budget. Calculate from sold
+    // bids so a stale saved team balance cannot show an incorrect amount.
+    return Math.max(0, Number(this.auction?.pointsPerTeam || 0) - this.spentByTeam(team));
+  }
   getBidPhoto(bid: AuctionBid): string {
     return bid.photoUrl || this.playerPhotoById.get(bid.playerId || '') || '/cricbids-logo.png';
   }
