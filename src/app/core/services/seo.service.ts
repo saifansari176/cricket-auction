@@ -32,6 +32,11 @@ export class SeoService {
       title: 'Cricket Player Registration | Cricbids',
       description: 'Register as a player for a cricket auction hosted on Cricbids.',
       indexable: true
+    },
+    '/watch': {
+      title: 'Watch Live Cricket Auctions | Cricbids',
+      description: 'Watch live cricket auctions, follow player bids, view teams, and see results on Cricbids.',
+      indexable: true
     }
   };
 
@@ -43,6 +48,7 @@ export class SeoService {
 
   updateForUrl(url: string): void {
     const path = this.normalisePath(url);
+    const canonicalUrl = this.canonicalUrl(url, path);
     const page = this.pages[path] ?? this.publicAuctionPage(path);
     const seo = page ?? {
       title: 'Cricbids | Cricket Auction Software',
@@ -55,7 +61,7 @@ export class SeoService {
     this.meta.updateTag({ name: 'robots', content: seo.indexable ? 'index, follow' : 'noindex, nofollow' });
     this.meta.updateTag({ property: 'og:title', content: seo.title });
     this.meta.updateTag({ property: 'og:description', content: seo.description });
-    this.meta.updateTag({ property: 'og:url', content: `${this.siteUrl}${path}` });
+    this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
 
     let canonical = this.document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
     if (!canonical) {
@@ -63,12 +69,25 @@ export class SeoService {
       canonical.rel = 'canonical';
       this.document.head.appendChild(canonical);
     }
-    canonical.href = `${this.siteUrl}${path}`;
+    canonical.href = canonicalUrl;
   }
 
   private normalisePath(url: string): string {
     const path = url.split(/[?#]/, 1)[0] || '/';
     return path.length > 1 ? path.replace(/\/$/, '') : path;
+  }
+
+  private canonicalUrl(url: string, path: string): string {
+    // A registration form is tied to one tournament. Keep its public auction
+    // id in the canonical URL so it can be discovered as its own form page.
+    if (path === '/player-registration') {
+      const auctionId = new URL(url, this.siteUrl).searchParams.get('auctionId');
+      if (auctionId) {
+        return `${this.siteUrl}${path}?auctionId=${encodeURIComponent(auctionId)}`;
+      }
+    }
+
+    return `${this.siteUrl}${path}`;
   }
 
   private publicAuctionPage(path: string): PageSeo | undefined {

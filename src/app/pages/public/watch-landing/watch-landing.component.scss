@@ -1,0 +1,12 @@
+.watch-page { min-height: 100vh; background: linear-gradient(135deg, #07152f, #123b88); color: #fff; }
+main { max-width: 940px; margin: 0 auto; padding: clamp(56px, 9vw, 100px) 24px; text-align: center; }
+.eyebrow { margin: 0 0 12px; color: #7dd3fc; font-size: .78rem; font-weight: 800; letter-spacing: .14em; }
+h1 { margin: 0; font-size: clamp(2.25rem, 5vw, 4rem); }
+.intro { max-width: 680px; margin: 20px auto 42px; color: #dbeafe; font-size: 1.1rem; line-height: 1.7; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; text-align: left; }
+.steps article { display: grid; grid-template-columns: 42px 1fr; gap: 14px; padding: 24px 20px; background: #ffffff14; border: 1px solid #bae6fd42; border-radius: 16px; }
+.steps span { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: #38bdf8; color: #082f49; font-weight: 900; }
+h2 { margin: 5px 0 8px; font-size: 1.1rem; }
+.steps p { margin: 0; color: #cbd5e1; line-height: 1.55; }
+.learn-more { display: inline-block; margin-top: 36px; padding: 13px 22px; border-radius: 9px; background: #fff; color: #123b88; font-weight: 800; text-decoration: none; }
+@media (max-width: 720px) { .steps { grid-template-columns: 1fr; } }

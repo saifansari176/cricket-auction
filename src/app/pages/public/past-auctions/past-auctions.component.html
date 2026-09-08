@@ -12,6 +12,7 @@
                 <div>
                     <h2>{{auction.auctionName}}</h2>
                     <p>{{auction.auctionDate || 'Completed auction'}}</p>
+                    <a *ngIf="auction.id" [routerLink]="['/watch', auction.id]">View auction results</a>
                 </div>
             </article>
         </div><ng-template #none>

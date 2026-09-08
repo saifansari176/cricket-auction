@@ -106,6 +106,19 @@
     color: #64748b
 }
 
+.auction-grid a {
+    display: inline-block;
+    margin-top: 10px;
+    color: #1d4ed8;
+    font-size: .9rem;
+    font-weight: 800;
+    text-decoration: none
+}
+
+.auction-grid a:hover {
+    text-decoration: underline
+}
+
 .past-page footer {
     background: #0f172a;
     color: #fff;

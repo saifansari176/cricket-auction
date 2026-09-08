@@ -35,6 +35,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'watch',
+    loadComponent: () =>
+      import('./pages/public/watch-landing/watch-landing.component').then((m) => m.WatchLandingComponent),
+  },
+
+  {
     path: 'dashboard',
     canActivate: [authGuard, auctionSelectionGuard],
     loadComponent: () =>
