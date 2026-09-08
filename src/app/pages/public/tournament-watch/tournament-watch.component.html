@@ -4,17 +4,16 @@
     <p>This public link is invalid or the tournament is no longer available.</p>
   </section>
   <ng-container *ngIf="!notFound">
-    <header class="hero">
+    <header class="hero tournament-hero">
       <img *ngIf="auction?.logo" [src]="auction?.logo" [alt]="auction?.auctionName + ' logo'">
-      <div>
+      <div class="hero-content">
         <p class="eyebrow">CRICBIDS • LIVE TOURNAMENT</p>
         <h1>{{ auction?.auctionName }}</h1>
-        <p>{{ auction?.auctionDate }}</p>
       </div>
-      <span class="live-pill" [class.completed]="liveState?.status === 'completed'">
+      <span class="live-pill tournament-status" [class.completed]="liveState?.status === 'completed'">
         {{ liveState?.status === 'completed'
         ? 'COMPLETED' : 'LIVE' }}</span>
-      <div class="text-center">
+      <div class="tournament-contact text-center">
         <img src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
         <p class="mt-1">SAIF ANSARI: 9823300308</p>
       </div>
@@ -22,23 +21,46 @@
 
     <section class="live-card" *ngIf="publicLiveViewEnabled; else auctionCompleted">
       <div *ngIf="currentPlayer; else waiting" class="live-player">
-        <div class="player-profile">
+        <div class="player-profile featured-player">
           <img class="player-image" [src]="currentPlayer.photo || '/cricbids-logo.png'"
             [alt]="currentPlayer.firstName + ' ' + currentPlayer.lastName">
           <div>
             <p class="eyebrow">CURRENT PLAYER</p>
             <h2>{{ currentPlayer.firstName }} {{ currentPlayer.lastName }}</h2>
+            <div class="player-details" *ngIf="currentPlayer.playerType || currentPlayer.currentTeam || currentPlayer.note">
+              <div class="player-detail" *ngIf="currentPlayer.playerType">
+                <small>Player type</small>
+                <span>{{ currentPlayer.playerType }}</span>
+              </div>
+              <div class="player-detail" *ngIf="currentPlayer.currentTeam">
+                <small>Current team</small>
+                <span>{{ currentPlayer.currentTeam }}</span>
+              </div>
+              <div class="player-detail player-note" *ngIf="currentPlayer.note">
+                <small>Note</small>
+                <span>{{ currentPlayer.note }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="player-auction-meta">
+            <span class="player-number" *ngIf="currentPlayer.jerseyNumber">{{ currentPlayer.jerseyNumber }}</span>
+            <div class="base-price">
+              <span>Base price</span>
+              <strong>{{ currentPlayer.baseBid | currency:'INR':'symbol':'1.0-0' }}</strong>
+            </div>
           </div>
         </div>
-        <div class="current-bid"><span>CURRENT BID</span><strong>{{ (liveState?.currentBid || currentPlayer.baseBid) |
+        <div class="current-bid live-bid bid-panel">
+          <span>CURRENT BID</span>
+          <strong>{{ (liveState?.currentBid ||
+            currentPlayer.baseBid) |
             currency:'INR':'symbol':'1.0-0' }}</strong></div>
-           <div class="player-profile" *ngIf="highestTeam; else noBid">
-          <div>
-            <p class="eyebrow">HIGHEST BID TEAM</p>
-            <h2>{{ highestTeam.teamName }}</h2>
+          <div class="current-bid live-bid bid-panel" *ngIf="highestTeam; else noBid">
+            <div>
+              <span class="eyebrow">HIGHEST BID</span>
+              <strong>{{ highestTeam.teamName }}</strong>
+            </div>
           </div>
-          <img class="team-image" [src]="highestTeam.logo || '/cricbids-logo.png'" [alt]="highestTeam.teamName">
-        </div>
         <ng-template #noBid>
           <div class="highest-bid no-bid"><span>HIGHEST BID</span><b>Waiting for a bid</b></div>
         </ng-template>
@@ -58,19 +80,24 @@
       </section>
     </ng-template>
 
-    <!-- <section class="stats"><article><b>{{ teams.length }}</b><span>Teams</span></article><article><b>{{ bids.length }}</b><span>Players sold</span></article><article><b>{{ totalSpent | currency:'INR':'symbol':'1.0-0' }}</b><span>Total spent</span></article></section> -->
+    <!-- Tournament summary cards intentionally removed from the public watch view.
+      <article><span class="stat-icon teams-icon">â™›</span><b>{{ teams.length }}</b><span>TEAMS</span></article>
+      <article><span class="stat-icon sold-icon">âœ“</span><b>{{ bids.length }}</b><span>PLAYERS SOLD</span></article>
+      <article><span class="stat-icon amount-icon">â‚¹</span><b>{{ totalSpent | currency:'INR':'symbol':'1.0-0' }}</b><span>TOTAL SPENT</span></article>
+    </section>
 
-    <section class="reports">
+    -->
+    <section class="reports team-report">
       <div class="section-title">
         <div>
           <p class="eyebrow">TOURNAMENT REPORT</p>
             <h2>Team squads &amp; budget</h2>
-        </div><button class="d-grid" type="button" (click)="load(false)">
+        </div><button class="refresh-button" type="button" (click)="load(false)">
           <img style="width: 100px; height: auto;" src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
-          Refresh now</button>
+          <span>Refresh</span></button>
       </div>
-      <div class="accordion d-md-none" id="teamsAccordion">
-        <div class="accordion-item team" *ngFor="let team of teams; let index = index; trackBy: trackById">
+      <div class="accordion d-lg-none" id="teamsAccordion">
+        <div class="accordion-item team mobile-team-card" *ngFor="let team of teams; let index = index; trackBy: trackById">
           <h3 class="accordion-header">
             <button class="accordion-button" [class.collapsed]="expandedMobileTeamId !== (team.id || index.toString())" type="button"
               (click)="toggleMobileTeam(team.id || index.toString())" [attr.aria-expanded]="expandedMobileTeamId === (team.id || index.toString())">
@@ -87,6 +114,10 @@
           </h3>
           <div class="accordion-collapse collapse" [class.show]="expandedMobileTeamId === (team.id || index.toString())">
             <div class="accordion-body">
+              <div class="squad-heading">
+                <span>Squad</span>
+                <b>{{ soldForTeam(team).length }} purchased</b>
+              </div>
               <ul>
                 <li *ngFor="let bid of soldForTeam(team); trackBy: trackById"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" loading="lazy" decoding="async" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></li>
                 <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
@@ -95,7 +126,7 @@
           </div>
         </div>
       </div>
-      <div class="team-grid d-none d-md-grid">
+      <div class="team-grid d-none d-lg-grid">
         <article class="team" *ngFor="let team of teams; trackBy: trackById">
           <div class="team-header"><img [src]="team.logo || '/cricbids-logo.png'" [alt]="team.teamName" loading="lazy" decoding="async">
             <div>
@@ -115,15 +146,8 @@
       </div>
     </section>
 
-    <section class="reports latest">
+    <section class="reports latest latest-report">
       <div class="latest-columns">
-        <div class="latest-panel">
-          <p class="eyebrow">LATEST RESULTS</p>
-          <h2>Recent purchases</h2>
-          <div class="sale" *ngFor="let sale of latestSales; trackBy: trackById"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
-            }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
-          <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
-        </div>
         <div class="latest-panel unsold-results">
           <p class="eyebrow">UNSOLD PLAYERS</p>
           <h2>Available for return</h2>
@@ -131,6 +155,13 @@
             <div class="sale" *ngFor="let player of unsoldPlayers; trackBy: trackById"><span>{{ player.firstName }} {{ player.lastName }}</span><b>UNSOLD</b></div>
             <p *ngIf="!unsoldPlayers.length" class="muted">No unsold players.</p>
           </div>
+        </div>
+        <div class="latest-panel">
+          <p class="eyebrow">LATEST RESULTS</p>
+          <h2>Recent purchases</h2>
+          <div class="sale" *ngFor="let sale of latestSales; trackBy: trackById"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
+            }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
+          <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
         </div>
       </div>
     </section>

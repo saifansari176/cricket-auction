@@ -3,7 +3,7 @@
     min-height: 100vh;
     background: #061222;
     color: #eff8ff;
-    font-family: Arial, sans-serif;
+        font-family: Georgia, "Times New Roman", serif;
 }
 
 .live-player {
@@ -23,10 +23,10 @@
 }
 
 @media (max-width: 768px) {
-  .player-profile {
-    width: 100px;
-    height: 150px;
-  }
+    .player-profile {
+        width: 100px;
+        height: 150px;
+    }
 }
 
 .current-bid {
@@ -80,7 +80,7 @@
     display: block;
 }
 
-@media(max-width:760px) {
+@media(max-width:991.98px) {
     .live-player {
         display: flex !important;
         flex-direction: column;
@@ -276,7 +276,7 @@
     align-items: center;
 }
 
-.team-header > div {
+.team-header>div {
     flex: 1;
     min-width: 0;
 }
@@ -320,7 +320,7 @@
     width: 100%;
 }
 
-.accordion .team-header > span:last-child {
+.accordion .team-header>span:last-child {
     flex: 1;
     min-width: 0;
 }
@@ -330,7 +330,7 @@
     width: 100%;
 }
 
-.accordion .team-stats > span {
+.accordion .team-stats>span {
     display: block;
     margin-top: 4px;
     color: #9cb5cb;
@@ -402,7 +402,7 @@
     gap: 28px;
 }
 
-.latest-panel + .latest-panel {
+.latest-panel+.latest-panel {
     border-left: 1px solid #24476d;
     padding-left: 28px;
 }
@@ -424,7 +424,8 @@
     color: #45e797
 }
 
-.team-image, .player-image {
+.team-image,
+.player-image {
     border-radius: 5PX;
     height: 100px;
 }
@@ -529,7 +530,7 @@
         gap: 22px;
     }
 
-    .latest-panel + .latest-panel {
+    .latest-panel+.latest-panel {
         border-left: 0;
         border-top: 1px solid #24476d;
         padding: 22px 0 0;
@@ -586,11 +587,26 @@
         animation: resultRipple 1.5s ease-out infinite;
     }
 
-    &::after { animation-delay: 0.45s; }
+    &::after {
+        animation-delay: 0.45s;
+    }
 }
 
-.unsold-stamp { --stamp-dark: #991b1b; --stamp-main: #ef4444; --stamp-glow: rgba(239, 68, 68, 0.22); --stamp-shadow: rgba(69, 10, 10, 0.7); --stamp-ring: rgba(254, 202, 202, 0.85); }
-.sold-stamp { --stamp-dark: #14532d; --stamp-main: #22c55e; --stamp-glow: rgba(34, 197, 94, 0.24); --stamp-shadow: rgba(5, 46, 22, 0.72); --stamp-ring: rgba(187, 247, 208, 0.88); }
+.unsold-stamp {
+    --stamp-dark: #991b1b;
+    --stamp-main: #ef4444;
+    --stamp-glow: rgba(239, 68, 68, 0.22);
+    --stamp-shadow: rgba(69, 10, 10, 0.7);
+    --stamp-ring: rgba(254, 202, 202, 0.85);
+}
+
+.sold-stamp {
+    --stamp-dark: #14532d;
+    --stamp-main: #22c55e;
+    --stamp-glow: rgba(34, 197, 94, 0.24);
+    --stamp-shadow: rgba(5, 46, 22, 0.72);
+    --stamp-ring: rgba(187, 247, 208, 0.88);
+}
 
 .unsold-label,
 .sold-label {
@@ -601,20 +617,2168 @@
 }
 
 .unsold-subtitle,
-.sold-subtitle { margin-top: 14px; font-size: clamp(11px, 2vw, 17px); font-weight: 800; }
-
-@keyframes resultStampAnimation {
-    0% { transform: translate(-50%, -50%) rotate(-24deg) scale(2.3); opacity: 0; }
-    35% { transform: translate(-50%, -50%) rotate(4deg) scale(0.92); opacity: 1; }
-    52% { transform: translate(-50%, -50%) rotate(-7deg) scale(1.06); }
-    100% { transform: translate(-50%, -50%) rotate(-7deg) scale(1); opacity: 0; }
+.sold-subtitle {
+    margin-top: 14px;
+    font-size: clamp(11px, 2vw, 17px);
+    font-weight: 800;
 }
 
-@keyframes resultRipple { to { width: min(105vw, 1300px); height: min(105vw, 1300px); opacity: 0; } }
+@keyframes resultStampAnimation {
+    0% {
+        transform: translate(-50%, -50%) rotate(-24deg) scale(2.3);
+        opacity: 0;
+    }
+
+    35% {
+        transform: translate(-50%, -50%) rotate(4deg) scale(0.92);
+        opacity: 1;
+    }
+
+    52% {
+        transform: translate(-50%, -50%) rotate(-7deg) scale(1.06);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(-7deg) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes resultRipple {
+    to {
+        width: min(105vw, 1300px);
+        height: min(105vw, 1300px);
+        opacity: 0;
+    }
+}
 
 @media (prefers-reduced-motion: reduce) {
-    .unsold-stamp, .sold-stamp, .unsold-stamp::before, .unsold-stamp::after, .sold-stamp::before, .sold-stamp::after {
+
+    .unsold-stamp,
+    .sold-stamp,
+    .unsold-stamp::before,
+    .unsold-stamp::after,
+    .sold-stamp::before,
+    .sold-stamp::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
     }
 }
+
+/* Vibrant live-tournament treatment */
+:host {
+    background:
+        radial-gradient(circle at 8% 8%, rgba(30, 125, 255, .24), transparent 28rem),
+        radial-gradient(circle at 94% 20%, rgba(157, 52, 255, .18), transparent 24rem),
+        #061222;
+}
+
+.watch-page {
+    position: relative;
+}
+
+.hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 142px;
+    border-color: rgba(103, 199, 255, .42);
+    background: linear-gradient(115deg, #06264a, #152c73 50%, #531b72);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .14);
+}
+
+.hero::before,
+.hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.hero::before {
+    width: 260px;
+    height: 260px;
+    right: -74px;
+    top: -144px;
+    background: rgba(79, 220, 255, .22);
+    filter: blur(2px);
+    animation: heroGlow 7s ease-in-out infinite alternate;
+}
+
+.hero::after {
+    width: 175px;
+    height: 175px;
+    left: 39%;
+    bottom: -135px;
+    border: 1px solid rgba(255, 255, 255, .2);
+    box-shadow: 0 0 0 22px rgba(255, 255, 255, .035), 0 0 0 48px rgba(255, 255, 255, .025);
+}
+
+.hero>img {
+    width: 92px;
+    height: 92px;
+    padding: 7px;
+    border: 2px solid rgba(255, 255, 255, .75);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .28);
+}
+
+.hero-content {
+    min-width: 0;
+}
+
+.hero h1 {
+    font-size: clamp(1.45rem, 3.2vw, 2.25rem);
+    letter-spacing: -.025em;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, .25);
+}
+
+.hero-content>p:last-child {
+    display: inline-flex;
+    align-items: center;
+    min-height: 29px;
+    margin-top: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .11);
+    color: #d9efff;
+    font-weight: 700;
+}
+
+.live-pill {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 7px 18px rgba(220, 28, 65, .34);
+}
+
+.live-pill:not(.completed)::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, .75);
+    animation: livePulse 1.7s infinite;
+}
+
+.tournament-contact {
+    margin-left: auto;
+    padding-left: 18px;
+    border-left: 1px solid rgba(255, 255, 255, .22);
+    color: #d7eeff;
+    font-size: .78rem;
+    font-weight: 700;
+}
+
+.tournament-contact img {
+    width: 88px;
+    height: 42px;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 7px rgba(0, 0, 0, .25));
+}
+
+.tournament-contact p {
+    margin-top: 3px;
+    color: #e4f7ff;
+}
+
+.live-card,
+.reports {
+    border-color: rgba(75, 180, 255, .28);
+    box-shadow: 0 14px 35px rgba(0, 0, 0, .17);
+}
+
+.live-card {
+    background: linear-gradient(145deg, #0b2543, #071525);
+}
+
+.live-player {
+    background:
+        linear-gradient(105deg, rgba(8, 42, 76, .98), rgba(18, 20, 65, .96) 58%, rgba(57, 18, 81, .92));
+}
+
+.player-image,
+.team-image {
+    border: 2px solid rgba(108, 222, 255, .72);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .3);
+}
+
+.current-bid {
+    padding: 13px 21px;
+    border: 1px solid rgba(82, 232, 167, .28);
+    border-radius: 16px;
+    background: rgba(0, 0, 0, .14);
+}
+
+.current-bid strong {
+    color: #7cffb8;
+    text-shadow: 0 0 18px rgba(69, 231, 151, .24);
+}
+
+.reports {
+    background: linear-gradient(145deg, rgba(12, 39, 68, .97), rgba(7, 22, 40, .97));
+}
+
+.section-title button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #16b8ec, #4165e8);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(30, 121, 235, .24);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.section-title button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(30, 121, 235, .32);
+}
+
+.section-title button img {
+    display: none;
+}
+
+.team {
+    border-color: rgba(99, 187, 255, .22);
+    background: linear-gradient(145deg, rgba(17, 49, 82, .88), rgba(8, 25, 44, .96));
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.team:hover {
+    transform: translateY(-3px);
+    border-color: rgba(94, 220, 255, .62);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .2);
+}
+
+.team-header img,
+.player-thumbnail {
+    border: 2px solid rgba(89, 211, 255, .56);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+}
+
+.sale {
+    transition: background .2s ease, padding .2s ease;
+}
+
+.sale:hover {
+    padding-inline: 8px;
+    border-radius: 8px;
+    background: rgba(89, 207, 255, .08);
+}
+
+@keyframes livePulse {
+    70% {
+        box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
+}
+
+@keyframes heroGlow {
+    from {
+        transform: translate3d(0, 0, 0) scale(.92);
+        opacity: .55;
+    }
+
+    to {
+        transform: translate3d(-25px, 42px, 0) scale(1.18);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .watch-page {
+        padding: 14px 12px 34px;
+    }
+
+    .hero {
+        gap: 12px;
+        min-height: 0;
+        padding: 17px;
+    }
+
+    .hero>img {
+        width: 62px;
+        height: 62px;
+    }
+
+    .hero h1 {
+        font-size: 1.35rem;
+    }
+
+    .hero-content>p:last-child {
+        font-size: .78rem;
+    }
+
+    .live-pill {
+        margin: 4px 0 0;
+        padding: 7px 11px;
+        font-size: .75rem;
+    }
+
+    .tournament-contact {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin: 2px 0 0;
+        padding: 8px 0 0;
+        border-top: 1px solid rgba(255, 255, 255, .18);
+        border-left: 0;
+    }
+
+    .tournament-contact img {
+        width: 72px;
+        height: 30px;
+    }
+
+    .tournament-contact p {
+        margin: 0 0 0 8px;
+    }
+
+    .current-bid {
+        width: 100%;
+        padding: 12px 15px;
+        text-align: center !important;
+    }
+
+    .team:hover,
+    .section-title button:hover {
+        transform: none;
+    }
+
+    .hero::before {
+        animation: none;
+    }
+}
+
+/* Keep the live status concise and ensure uploaded logos are never cropped. */
+.broadcast-kicker,
+.tournament-hero .eyebrow,
+.live-player::before {
+    display: none;
+}
+
+/* Final logo treatment: show the original artwork without any white container. */
+.tournament-hero>img,
+.tournament-contact img {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+}
+
+/* Final mobile auction layout. */
+@media (max-width: 991.98px) {
+    .live-card {
+        border-radius: 22px;
+        background: linear-gradient(160deg, #071d40, #07152f 65%, #19113b);
+    }
+
+    .live-player {
+        gap: 11px;
+        padding: 16px;
+    }
+
+    .live-player .player-profile,
+    .live-player .leading-team {
+        min-height: 106px;
+        padding: 13px;
+        border: 1px solid rgba(116, 204, 255, .16);
+        border-radius: 14px;
+        background: linear-gradient(100deg, rgba(29, 73, 127, .76), rgba(40, 35, 88, .55));
+    }
+
+    .live-player .player-profile>img,
+    .live-player .leading-team>img {
+        width: 78px;
+        height: 78px;
+    }
+
+    .live-player .leading-team {
+        grid-template-columns: minmax(0, 1fr) 78px;
+    }
+
+    .live-player .live-bid {
+        min-height: 112px !important;
+        padding: 16px 18px !important;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #061126, #0a2149) !important;
+    }
+
+    .live-bid::before {
+        top: 10px;
+    }
+
+    .live-bid::after {
+        bottom: 10px;
+    }
+
+    .live-bid strong {
+        margin-top: 5px;
+        font-size: clamp(2.25rem, 9vw, 2.8rem) !important;
+        line-height: 1;
+    }
+}
+
+/* Broadcast board override: intentionally last so legacy mobile rules cannot alter it. */
+@media (max-width: 991.98px) {
+    .live-player {
+        display: flex !important;
+        flex-direction: column;
+        gap: 14px !important;
+        padding: 14px !important;
+    }
+
+    .live-player .featured-player {
+        display: grid !important;
+        grid-template-columns: 126px minmax(0, 1fr) !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 170px !important;
+        padding: 14px !important;
+        border: 1px solid #dcb24b !important;
+        border-radius: 15px !important;
+        background: linear-gradient(110deg, #071b3a, #103e7a) !important;
+    }
+
+    .live-player .featured-player>img {
+        grid-row: 1 / span 2;
+        width: 112px !important;
+        height: 100% !important;
+        padding: 4px;
+        border: 2px solid #e9be54 !important;
+        border-radius: 12px !important;
+        background: #fff;
+    }
+
+    .live-player .featured-player h2 {
+        margin: 8px 0 0 !important;
+        color: #fff !important;
+        font-size: 1.65rem !important;
+        white-space: normal !important;
+    }
+
+    .live-player .bid-panel {
+        display: grid !important;
+        min-height: 128px !important;
+        place-content: center;
+        border: 1px solid #e4b542 !important;
+        border-radius: 14px !important;
+        background: linear-gradient(135deg, #041124, #092c5b) !important;
+    }
+
+    .live-player .bid-panel strong {
+        color: #ffd05a !important;
+        font-size: 3rem !important;
+    }
+
+    .live-player .highest-team-panel {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) 104px !important;
+        min-height: 128px !important;
+        padding: 14px 16px !important;
+        border: 1px solid #dcb24b !important;
+        border-radius: 14px !important;
+        background: linear-gradient(110deg, #0a2142, #202050) !important;
+        font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .live-player .highest-team-panel>img {
+        width: 94px !important;
+        height: 94px !important;
+    }
+}
+
+/* Broadcast-style live board in the tournament's gold palette. */
+.live-card {
+    border: 1px solid #d8a72f;
+    background: #04142c;
+}
+
+.live-player {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px;
+    background: linear-gradient(135deg, #061a38, #0a2c5d 58%, #1b1239);
+}
+
+.live-player .featured-player {
+    position: relative;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 148px minmax(0, 1fr) auto;
+    width: 100%;
+    max-width: none;
+    min-height: 172px;
+    padding: 16px;
+    border: 1px solid rgba(229, 184, 73, .75);
+    border-radius: 15px;
+    background: linear-gradient(105deg, rgba(7, 25, 53, .96), rgba(15, 54, 107, .82));
+    overflow: hidden;
+}
+
+.live-player .featured-player::after {
+    content: '';
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    right: -50px;
+    top: -75px;
+    border: 1px solid rgba(235, 193, 82, .3);
+    border-radius: 50%;
+    box-shadow: 0 0 0 24px rgba(235, 193, 82, .035);
+}
+
+.live-player .featured-player>img {
+    width: 132px;
+    height: 132px;
+    padding: 4px;
+    border: 3px solid #e7bb50;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.live-player .featured-player h2 {
+    margin-top: 8px;
+    color: #fff;
+    font-size: clamp(1.5rem, 3.4vw, 2.35rem);
+}
+
+.player-number {
+    position: relative;
+    z-index: 1;
+    align-self: center;
+    padding-right: 8px;
+    color: transparent;
+    font-size: clamp(4rem, 10vw, 7.5rem);
+    font-weight: 900;
+    line-height: .8;
+    -webkit-text-stroke: 1px rgba(238, 193, 79, .55);
+}
+
+.live-player .bid-panel,
+.live-player .highest-team-panel {
+    min-height: 146px !important;
+    margin: 0;
+    padding: 16px 20px !important;
+    border: 1px solid rgba(229, 184, 73, .78) !important;
+    border-radius: 14px;
+    background: linear-gradient(120deg, #07182f, #0c2f5e) !important;
+}
+
+.live-player .bid-panel {
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    text-align: center !important;
+}
+
+.live-player .bid-panel strong {
+    color: #ffd35e;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+    text-shadow: 0 3px 0 #5a3d07, 0 0 20px rgba(255, 205, 80, .2);
+}
+
+.live-player .highest-team-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 92px;
+    gap: 16px;
+    align-items: center;
+    justify-self: stretch;
+    width: 100%;
+    max-width: none;
+}
+
+.live-player .highest-team-panel>img {
+    grid-column: 2;
+    grid-row: 1;
+    width: 88px;
+    height: 88px;
+    border: 2px solid #e7bb50;
+    border-radius: 50%;
+    background: #fff;
+}
+
+@media (max-width: 991.98px) {
+    .live-player {
+        display: flex !important;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .live-player .featured-player {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr);
+        min-height: 128px;
+        padding: 13px;
+    }
+
+    .live-player .featured-player>img {
+        width: 82px;
+        height: 82px;
+    }
+
+    .live-player .featured-player h2 {
+        margin-top: 5px;
+        font-size: 1.4rem;
+    }
+
+    .live-player .featured-player .player-number {
+        display: none;
+    }
+
+    .live-player .bid-panel,
+    .live-player .highest-team-panel {
+        min-height: 108px !important;
+    }
+}
+
+/* Compact, connected mobile auction summary. */
+@media (max-width: 991.98px) {
+    .live-card {
+        border-radius: 22px;
+        background: linear-gradient(160deg, #071d40, #07152f 65%, #19113b);
+    }
+
+    .live-player {
+        gap: 11px;
+        padding: 16px;
+    }
+
+    .live-player .player-profile,
+    .live-player .leading-team {
+        min-height: 106px;
+        padding: 13px;
+        border: 1px solid rgba(116, 204, 255, .16);
+        border-radius: 14px;
+        background: linear-gradient(100deg, rgba(29, 73, 127, .76), rgba(40, 35, 88, .55));
+    }
+
+    .live-player .player-profile>img {
+        width: 78px;
+        height: 78px;
+    }
+
+    .live-player .leading-team {
+        grid-template-columns: minmax(0, 1fr) 78px;
+    }
+
+    .live-player .leading-team>img {
+        width: 78px;
+        height: 78px;
+    }
+
+    .live-player .live-bid {
+        min-height: 112px !important;
+        padding: 16px 18px !important;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #061126, #0a2149) !important;
+    }
+
+    .live-bid::before {
+        top: 10px;
+    }
+
+    .live-bid::after {
+        bottom: 10px;
+    }
+
+    .live-bid strong {
+        margin-top: 5px;
+        font-size: clamp(2.25rem, 9vw, 2.8rem) !important;
+        line-height: 1;
+    }
+}
+
+/* Final masthead cascade: keep these rules after all legacy selectors. */
+.tournament-hero {
+    border-color: #d9aa37;
+    background: linear-gradient(105deg, #020d26, #08295a 54%, #25112f);
+}
+
+.tournament-hero::before {
+    width: 300px;
+    height: 300px;
+    right: -110px;
+    top: -145px;
+    background: radial-gradient(circle, rgba(132, 195, 255, .16), rgba(73, 24, 87, .12) 54%, transparent 71%);
+}
+
+.tournament-hero>img {
+    padding: 6px;
+    border: 3px solid #f1c65e;
+    box-shadow: 0 0 0 7px rgba(241, 198, 94, .13), 0 12px 25px rgba(0, 0, 0, .42);
+}
+
+.tournament-hero .eyebrow {
+    display: inline-flex;
+    margin: 0 0 7px;
+    padding: 4px 8px;
+    border-left: 3px solid #f0be49;
+    color: #a8d8ff !important;
+    font-size: .62rem;
+    letter-spacing: .14em;
+    background: rgba(91, 171, 239, .1);
+}
+
+.tournament-hero h1 {
+    color: #fffdf4;
+    text-shadow: 0 3px 0 rgba(12, 22, 50, .65), 0 0 25px rgba(86, 179, 255, .14);
+}
+
+.tournament-status {
+    min-width: 94px;
+    justify-content: center;
+    border-radius: 7px;
+    box-shadow: 0 0 0 3px rgba(236, 36, 72, .12), 0 8px 17px rgba(120, 1, 29, .34);
+}
+
+.tournament-contact {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.tournament-contact p {
+    margin: 0 !important;
+    color: #fff5c6 !important;
+    font-size: .86rem;
+}
+
+/* Logos must render as their original artwork, without a white card behind them. */
+.tournament-hero>img,
+.tournament-contact img {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+}
+
+@media (max-width: 991.98px) {
+    .tournament-hero {
+        display: grid;
+        grid-template-columns: 112px minmax(0, 1fr);
+        grid-template-areas:
+            'logo details'
+            'logo status'
+            'contact contact';
+        gap: 5px 15px;
+        min-height: 0;
+        padding: 22px 20px 14px;
+    }
+
+    .tournament-hero>img {
+        grid-area: logo;
+        align-self: center;
+        width: 102px;
+        height: 102px;
+    }
+
+    .tournament-hero .hero-content {
+        grid-area: details;
+        align-self: end;
+    }
+
+    .tournament-hero h1 {
+        margin: 0;
+        font-size: clamp(1.55rem, 7vw, 2.05rem);
+        line-height: 1.05;
+    }
+
+    .tournament-hero .tournament-status {
+        grid-area: auto !important;
+        grid-column: 2 !important;
+        grid-row: 2 !important;
+        justify-self: start;
+        align-self: start;
+        margin: 4px 0 0;
+    }
+
+    .tournament-hero .tournament-contact {
+        grid-area: contact;
+        display: flex;
+        align-items: center;
+        min-height: 54px;
+        margin-top: 9px;
+        padding: 9px 0 0;
+        border-top: 1px solid rgba(231, 190, 79, .35);
+    }
+
+    .tournament-hero .tournament-contact img {
+        width: 98px;
+        height: 35px;
+        margin-right: 10px;
+    }
+
+    .tournament-hero .tournament-contact p {
+        margin: 0;
+        color: #fff1ba;
+        font-size: .82rem;
+        letter-spacing: .01em;
+    }
+
+    .tournament-hero::before {
+        width: 160px;
+        height: 160px;
+        right: -72px;
+        top: -80px;
+        opacity: .8;
+    }
+}
+
+/* Branded contact badge and featured price treatment. */
+.tournament-contact img {
+    width: 150px !important;
+    height: 54px !important;
+    padding: 4px 10px;
+    border: 1px solid rgba(231, 190, 79, .68);
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, .22);
+}
+
+.live-bid {
+    position: relative;
+    overflow: hidden;
+    min-height: 138px;
+    border: 2px solid #e4b542 !important;
+    background:
+        linear-gradient(135deg, rgba(6, 24, 50, .98), rgba(1, 9, 23, .99)),
+        repeating-linear-gradient(135deg, transparent 0 10px, rgba(255, 255, 255, .025) 10px 11px) !important;
+    box-shadow: inset 0 0 0 4px #061933, inset 0 -30px 50px rgba(0, 0, 0, .24), 0 10px 22px rgba(0, 0, 0, .3);
+}
+
+.live-bid::before,
+.live-bid::after {
+    content: '';
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(239, 195, 83, .82), transparent);
+}
+
+.live-bid::before {
+    top: 13px;
+}
+
+.live-bid::after {
+    bottom: 13px;
+}
+
+.live-bid span {
+    position: relative;
+    z-index: 1;
+    color: #f1c75f;
+}
+
+.live-bid strong {
+    position: relative;
+    z-index: 1;
+    margin-top: 10px;
+    color: #fff1b6;
+    font-size: clamp(2.6rem, 10vw, 3.45rem);
+    letter-spacing: .02em;
+    text-shadow: 0 3px 0 #59400c, 0 0 24px rgba(239, 195, 83, .18);
+}
+
+@media (max-width: 991.98px) {
+    .tournament-hero .tournament-contact img {
+        width: 142px !important;
+        height: 52px !important;
+    }
+
+    .live-bid {
+        min-height: 157px;
+        padding-top: 26px;
+    }
+
+}
+
+/* Tournament masthead refinement */
+.tournament-hero {
+    overflow: hidden;
+    border-color: #d7a52f;
+    background:
+        linear-gradient(105deg, #020d26 0%, #08295a 52%, #25112f 100%);
+}
+
+.tournament-hero::before {
+    width: 310px;
+    height: 310px;
+    right: -110px;
+    top: -155px;
+    border: 1px solid rgba(132, 196, 255, .17);
+    background: radial-gradient(circle, rgba(134, 195, 255, .17), rgba(71, 25, 88, .11) 52%, transparent 70%);
+}
+
+.tournament-hero>img {
+    padding: 6px;
+    border: 3px solid #f3cb65;
+    background: #fff;
+    box-shadow: 0 0 0 7px rgba(243, 203, 101, .13), 0 12px 26px rgba(0, 0, 0, .4);
+}
+
+.tournament-hero .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    margin-bottom: 7px;
+    padding: 3px 8px;
+    border-left: 3px solid #f0be49;
+    color: #a8d8ff !important;
+    font-size: .62rem;
+    letter-spacing: .14em;
+    background: rgba(91, 171, 239, .1);
+}
+
+.tournament-hero h1 {
+    max-width: 680px;
+    color: #fffdf4;
+    text-shadow: 0 3px 0 rgba(12, 22, 50, .65), 0 0 25px rgba(86, 179, 255, .14);
+}
+
+.tournament-status {
+    min-width: 94px;
+    justify-content: center;
+    border: 1px solid #ff6880;
+    border-radius: 7px;
+    box-shadow: 0 0 0 3px rgba(236, 36, 72, .12), 0 8px 17px rgba(120, 1, 29, .34);
+}
+
+.tournament-contact {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 8px 0 8px 18px;
+}
+
+.tournament-contact::before {
+    // content: 'OFFICIAL PARTNER';
+    position: absolute;
+    margin-top: -47px;
+    color: #e5bd5d;
+    font-size: .53rem;
+    font-weight: 900;
+    letter-spacing: .1em;
+}
+
+.tournament-contact p {
+    margin: 0 !important;
+    color: #fff5c6 !important;
+    font-size: .86rem;
+    letter-spacing: .01em;
+}
+
+@media (max-width: 991.98px) {
+    .tournament-hero .eyebrow {
+        margin-bottom: 6px;
+        font-size: .55rem;
+    }
+
+    .tournament-hero h1 {
+        font-size: clamp(1.45rem, 6.6vw, 2rem);
+    }
+
+    .tournament-contact::before {
+        display: none;
+    }
+
+    .tournament-contact {
+        gap: 10px;
+        padding-bottom: 2px;
+    }
+}
+
+.tournament-hero>img,
+.player-image,
+.team-image,
+.team-header img,
+.player-thumbnail,
+.live-player .player-profile>img {
+    object-fit: contain !important;
+}
+
+@media (min-width: 761px) {
+    .live-player .leading-team {
+        justify-self: end;
+        justify-content: flex-end;
+        width: 100%;
+        max-width: none;
+    }
+
+    .live-player .leading-team>div {
+        flex: 0 1 auto;
+    }
+}
+
+/* IPL-inspired television broadcast theme */
+:host {
+    background: #020b1c;
+    color: #f7f4e8;
+}
+
+.watch-page {
+    max-width: 1240px;
+}
+
+.tournament-hero {
+    min-height: 154px;
+    border: 1px solid rgba(231, 190, 79, .82);
+    border-radius: 8px 8px 24px 24px;
+    background:
+        linear-gradient(90deg, rgba(2, 11, 31, .98), rgba(6, 31, 77, .92) 56%, rgba(41, 12, 53, .88)),
+        repeating-linear-gradient(125deg, transparent 0 24px, rgba(255, 255, 255, .025) 24px 26px);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, .42), inset 0 -3px #c8932e;
+}
+
+.tournament-hero::before {
+    right: -42px;
+    top: -64px;
+    width: 240px;
+    height: 240px;
+    background: rgba(237, 186, 62, .13);
+    filter: none;
+    animation: none;
+}
+
+.tournament-hero::after {
+    display: none;
+}
+
+.tournament-hero>img {
+    width: 94px;
+    height: 94px;
+    border: 3px solid #e7bb57;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 5px rgba(231, 187, 87, .14), 0 10px 20px rgba(0, 0, 0, .45);
+}
+
+.broadcast-kicker {
+    display: inline-block;
+    margin-bottom: 7px;
+    padding: 4px 8px;
+    border-left: 3px solid #e8bb50;
+    color: #e8c86f;
+    font-size: .61rem;
+    font-weight: 900;
+    letter-spacing: .16em;
+    background: rgba(232, 187, 80, .1);
+}
+
+.tournament-hero .eyebrow {
+    color: #9ec9ff !important;
+    font-size: .68rem;
+}
+
+.tournament-hero h1 {
+    color: #fff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(1.65rem, 3.6vw, 2.55rem);
+    font-weight: 900;
+    letter-spacing: -.04em;
+}
+
+.tournament-status {
+    border: 1px solid rgba(255, 139, 139, .75);
+    border-radius: 4px;
+    background: linear-gradient(135deg, #d71635, #7f0922);
+    box-shadow: 0 5px 14px rgba(149, 7, 35, .38);
+}
+
+.tournament-contact {
+    border-left-color: rgba(231, 190, 79, .45);
+}
+
+.live-card {
+    border: 1px solid #b5872d;
+    border-radius: 8px;
+    background: #061731;
+    box-shadow: 0 16px 30px rgba(0, 0, 0, .34);
+}
+
+.live-player {
+    position: relative;
+    padding: 27px;
+    background:
+        linear-gradient(90deg, #061a3a, #0b3876 50%, #201339),
+        repeating-linear-gradient(90deg, transparent 0 10%, rgba(255, 255, 255, .025) 10% 10.2%);
+}
+
+.live-player::before {
+    content: 'LIVE AUCTION';
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 4px 10px;
+    color: #1c1300;
+    font-size: .62rem;
+    font-weight: 950;
+    letter-spacing: .12em;
+    background: #efc158;
+}
+
+.live-player .eyebrow {
+    color: #e5bb5a !important;
+}
+
+.player-image,
+.team-image {
+    border: 3px solid #dfb44f;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.live-bid {
+    min-width: 210px;
+    padding: 13px 23px;
+    border: 2px solid #e6ba53 !important;
+    border-radius: 3px;
+    background: #020d20 !important;
+    box-shadow: inset 0 0 0 3px #071c3d, 0 9px 22px rgba(0, 0, 0, .26);
+}
+
+.live-bid span {
+    color: #dfbd6a;
+    font-size: .67rem;
+    font-weight: 900;
+    letter-spacing: .14em;
+}
+
+.live-bid strong {
+    color: #fff3bc;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2.35rem;
+    text-shadow: none;
+}
+
+.tournament-stats {
+    gap: 0;
+    margin: 20px 0;
+    border: 1px solid #ae8028;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #061933;
+}
+
+.tournament-stats article,
+.tournament-stats article:nth-child(2),
+.tournament-stats article:nth-child(3) {
+    min-height: 118px;
+    border-right: 1px solid rgba(226, 184, 82, .42);
+    border-radius: 0;
+    background: linear-gradient(155deg, #0c3670, #061a3a);
+    box-shadow: none;
+}
+
+.tournament-stats article:nth-child(2) {
+    background: linear-gradient(155deg, #25205c, #10113a);
+}
+
+.tournament-stats article:nth-child(3) {
+    border-right: 0;
+    background: linear-gradient(155deg, #305022, #132d20);
+}
+
+.tournament-stats article::after {
+    display: none;
+}
+
+.tournament-stats b {
+    color: #fff5c7;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.stat-icon {
+    border: 1px solid #e1b54e;
+    border-radius: 2px;
+    color: #f7dc86;
+    background: rgba(0, 0, 0, .2);
+}
+
+.reports {
+    border: 1px solid rgba(195, 149, 48, .75);
+    border-radius: 7px;
+    background: linear-gradient(145deg, #081e3d, #041126);
+    box-shadow: 0 13px 28px rgba(0, 0, 0, .26);
+}
+
+.reports h2 {
+    color: #fff0b0;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.section-title button,
+.refresh-button {
+    border: 1px solid #f0c45b;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #dca831, #8b5116);
+    box-shadow: none;
+}
+
+.team,
+.accordion .mobile-team-card {
+    border-color: rgba(215, 170, 64, .55) !important;
+    border-radius: 5px !important;
+    background: linear-gradient(145deg, #0a2851, #061833) !important;
+}
+
+.team:hover {
+    transform: none;
+    border-color: #f0c45c !important;
+    box-shadow: inset 4px 0 #d6a93d;
+}
+
+.team-header img,
+.player-thumbnail,
+.accordion .mobile-team-card .team-header img {
+    border-color: #e4b64d;
+    border-radius: 50%;
+}
+
+.team h3,
+.accordion .mobile-team-card strong {
+    color: #fff4c6;
+}
+
+.team-stats .remaining,
+.accordion .mobile-team-card .team-stats .remaining,
+.sale b {
+    color: #e6c86f;
+}
+
+.latest-report .latest-panel {
+    border-color: rgba(207, 164, 61, .35);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, .16);
+}
+
+@media (max-width: 991.98px) {
+    .tournament-hero {
+        border-radius: 5px 5px 18px 18px;
+    }
+
+    .live-player {
+        padding-top: 31px;
+        background: linear-gradient(155deg, #071b3b, #0a3772 52%, #211338);
+    }
+
+    .live-bid {
+        min-width: 0;
+        border-radius: 3px;
+    }
+
+    .tournament-stats article,
+    .tournament-stats article:nth-child(2),
+    .tournament-stats article:nth-child(3) {
+        min-height: 104px;
+        padding-inline: 5px;
+    }
+
+    .tournament-stats article>span:last-child {
+        font-size: .56rem;
+    }
+
+    .accordion .mobile-team-card {
+        border-radius: 5px !important;
+    }
+
+    .accordion .mobile-team-card .accordion-button,
+    .accordion .mobile-team-card .accordion-button:not(.collapsed) {
+        border-radius: 4px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero::before,
+    .live-pill:not(.completed)::before {
+        animation: none;
+    }
+
+    .team,
+    .section-title button,
+    .sale {
+        transition: none;
+    }
+}
+
+/* Mobile-first live score board layout */
+.tournament-stats {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.tournament-stats article {
+    position: relative;
+    overflow: hidden;
+    min-height: 126px;
+    padding: 17px 10px 13px;
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #123d70, #0a1f42);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .18);
+}
+
+.tournament-stats article:nth-child(2) {
+    background: linear-gradient(145deg, #5b257e, #26164d);
+}
+
+.tournament-stats article:nth-child(3) {
+    background: linear-gradient(145deg, #087461, #063d3d);
+}
+
+.tournament-stats article::after {
+    content: '';
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    right: -38px;
+    bottom: -47px;
+    border: 18px solid rgba(255, 255, 255, .075);
+    border-radius: 50%;
+}
+
+.tournament-stats b {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    color: #fff;
+    font-size: clamp(1.15rem, 4.5vw, 1.65rem);
+    line-height: 1.2;
+    text-overflow: ellipsis;
+}
+
+.tournament-stats article>span:last-child {
+    position: relative;
+    z-index: 1;
+    margin-top: 5px;
+    color: rgba(255, 255, 255, .72);
+    font-size: .63rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.stat-icon {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    margin: 0 auto 7px;
+    place-items: center;
+    border-radius: 9px;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 900;
+    background: rgba(255, 255, 255, .16);
+}
+
+.team-report .section-title {
+    gap: 14px;
+}
+
+.team-report .section-title h2,
+.latest-report h2 {
+    font-size: clamp(1.2rem, 5vw, 1.5rem);
+}
+
+.refresh-button {
+    flex: 0 0 auto;
+}
+
+.mobile-team-card {
+    margin-bottom: 11px;
+    border: 1px solid rgba(94, 213, 255, .26) !important;
+    border-radius: 16px !important;
+    background: linear-gradient(135deg, #0d2c50, #091a34) !important;
+    box-shadow: 0 9px 20px rgba(0, 0, 0, .16);
+}
+
+.accordion .mobile-team-card .accordion-button,
+.accordion .mobile-team-card .accordion-button:not(.collapsed) {
+    min-height: 83px;
+    padding: 12px 14px;
+    border-radius: 15px !important;
+    background: transparent;
+}
+
+.accordion .mobile-team-card .accordion-button:not(.collapsed) {
+    border-bottom: 1px solid rgba(87, 204, 255, .2);
+    background: linear-gradient(90deg, rgba(35, 108, 165, .42), rgba(88, 43, 132, .23));
+}
+
+.accordion .mobile-team-card .team-header img {
+    width: 54px;
+    height: 54px;
+    padding: 3px;
+    border: 2px solid #6ce2ff;
+    box-shadow: 0 5px 13px rgba(0, 0, 0, .24);
+}
+
+.accordion .mobile-team-card strong {
+    display: block;
+    max-width: 185px;
+    overflow: hidden;
+    color: #fff;
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accordion .mobile-team-card .team-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 6px;
+}
+
+.accordion .mobile-team-card .team-stats>span {
+    width: auto;
+    margin: 0;
+    padding: 3px 7px;
+    border-radius: 6px;
+    color: #ccecff;
+    font-size: .68rem;
+    background: rgba(87, 190, 255, .12);
+}
+
+.accordion .mobile-team-card .team-stats .remaining {
+    color: #a8ffcf;
+    background: rgba(35, 207, 121, .11);
+}
+
+.accordion .mobile-team-card .accordion-body {
+    padding: 3px 14px 13px;
+    border-radius: 0 0 15px 15px;
+    background: transparent;
+}
+
+.accordion .mobile-team-card li {
+    align-items: center;
+    min-height: 48px;
+    padding: 7px 0;
+    border-color: rgba(121, 204, 255, .13);
+}
+
+.accordion .mobile-team-card li>span:nth-child(2) {
+    flex: 1;
+    overflow: hidden;
+    margin-left: 7px;
+    color: #e5f5ff;
+    font-size: .86rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.accordion .mobile-team-card li b {
+    padding: 4px 7px;
+    border-radius: 7px;
+    color: #99ffd2;
+    font-size: .73rem;
+    background: rgba(37, 206, 124, .1);
+}
+
+.latest-report .latest-panel {
+    position: relative;
+    padding: 16px;
+    border: 1px solid rgba(91, 198, 255, .17);
+    border-radius: 15px;
+    background: rgba(1, 14, 33, .26);
+}
+
+.latest-report .latest-panel+.latest-panel {
+    padding-left: 16px;
+    border-left: 1px solid rgba(91, 198, 255, .17);
+}
+
+.latest-report .sale {
+    align-items: center;
+    min-height: 42px;
+    font-size: .86rem;
+}
+
+.latest-report .sale b {
+    padding: 4px 7px;
+    border-radius: 7px;
+    font-size: .75rem;
+    background: rgba(48, 221, 139, .1);
+}
+
+@media (max-width: 991.98px) {
+    .tournament-hero {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr);
+    }
+
+    .tournament-hero .tournament-status {
+        grid-column: 1 / -1;
+        justify-self: start;
+    }
+
+    .tournament-hero .tournament-contact {
+        grid-column: 1 / -1;
+    }
+
+    .live-card {
+        margin-top: 14px;
+        border-radius: 19px;
+    }
+
+    .live-player {
+        gap: 14px;
+        padding: 17px;
+    }
+
+    .live-player .player-profile {
+        display: grid;
+        grid-template-columns: 82px minmax(0, 1fr);
+        width: 100%;
+        max-width: none;
+        height: auto;
+        padding: 11px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, .055);
+    }
+
+    .live-player .player-profile>img {
+        grid-row: 1 / span 2;
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+    }
+
+    .live-player .player-profile h2 {
+        overflow: hidden;
+        font-size: 1.1rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .live-player .leading-team {
+        grid-template-columns: minmax(0, 1fr) 72px;
+    }
+
+    .live-player .leading-team>img {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+    }
+
+    .live-player .live-bid {
+        border: 1px solid rgba(93, 255, 177, .32) !important;
+        background: linear-gradient(100deg, rgba(28, 146, 103, .25), rgba(12, 81, 109, .26));
+    }
+
+    .live-bid strong {
+        font-size: 1.75rem;
+    }
+
+    .tournament-stats {
+        gap: 8px;
+        margin: 14px 0;
+    }
+
+    .tournament-stats article {
+        min-height: 112px;
+        border-radius: 14px;
+    }
+
+    .reports {
+        margin-top: 14px;
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .team-grid {
+        gap: 10px;
+    }
+
+    .latest-columns {
+        gap: 13px;
+    }
+
+    .latest-report .latest-panel+.latest-panel {
+        border-top: 1px solid rgba(91, 198, 255, .17);
+    }
+}
+
+/* The header uses one status indicator: the LIVE badge. */
+.broadcast-kicker,
+.tournament-hero .eyebrow,
+.live-player::before {
+    display: none;
+}
+
+/* Final logo treatment: show the original artwork without any white container. */
+.tournament-hero>img,
+.tournament-contact img {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+}
+
+/* Final mobile auction layout. */
+@media (max-width: 991.98px) {
+    .live-card {
+        border-radius: 22px;
+        background: linear-gradient(160deg, #071d40, #07152f 65%, #19113b);
+    }
+
+    .live-player {
+        gap: 11px;
+        padding: 16px;
+    }
+
+    .live-player .player-profile,
+    .live-player .leading-team {
+        min-height: 106px;
+        padding: 13px;
+        border: 1px solid rgba(116, 204, 255, .16);
+        border-radius: 14px;
+        background: linear-gradient(100deg, rgba(29, 73, 127, .76), rgba(40, 35, 88, .55));
+    }
+
+    .live-player .player-profile>img,
+    .live-player .leading-team>img {
+        width: 78px;
+        height: 78px;
+    }
+
+    .live-player .leading-team {
+        grid-template-columns: minmax(0, 1fr) 78px;
+    }
+
+    .live-player .live-bid {
+        min-height: 112px !important;
+        padding: 16px 18px !important;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #061126, #0a2149) !important;
+    }
+
+    .live-bid::before {
+        top: 10px;
+    }
+
+    .live-bid::after {
+        bottom: 10px;
+    }
+
+    .live-bid strong {
+        margin-top: 5px;
+        font-size: clamp(2.25rem, 9vw, 2.8rem) !important;
+        line-height: 1;
+    }
+}
+
+/* Final live-board composition. */
+@media (max-width: 991.98px) {
+    .live-player {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 14px !important;
+        padding: 14px !important
+    }
+
+    .live-player .featured-player {
+        display: grid !important;
+        grid-template-columns: 126px minmax(0, 1fr) !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 170px !important;
+        padding: 14px !important;
+        border: 1px solid #dcb24b !important;
+        border-radius: 15px !important;
+        background: linear-gradient(110deg, #071b3a, #103e7a) !important
+    }
+
+    .live-player .featured-player>img {
+        grid-row: 1 / span 2;
+        width: 112px !important;
+        height: 100% !important;
+        padding: 4px;
+        border: 2px solid #e9be54 !important;
+        border-radius: 12px !important;
+        background: #fff
+    }
+
+    .live-player .featured-player h2 {
+        margin: 8px 0 0 !important;
+        color: #fff !important;
+        font-size: 1.65rem !important;
+        white-space: normal !important
+    }
+
+    .live-player .bid-panel {
+        display: grid !important;
+        flex: 1 1 calc(50% - 7px);
+        min-width: 0;
+        min-height: 128px !important;
+        place-content: center;
+        border: 1px solid #e4b542 !important;
+        border-radius: 14px !important;
+        background: linear-gradient(135deg, #041124, #092c5b) !important
+    }
+
+    .live-player .bid-panel strong {
+        color: #ffd05a !important;
+        font-size: 2.25rem !important
+    }
+
+    .live-player .highest-team-panel {
+        display: grid !important;
+        flex: 1 1 calc(50% - 7px);
+        grid-template-columns: minmax(0, 1fr) 64px !important;
+        min-width: 0;
+        min-height: 128px !important;
+        padding: 14px 12px !important;
+        border: 1px solid #dcb24b !important;
+        border-radius: 14px !important;
+        background: linear-gradient(110deg, #0a2142, #202050) !important
+    }
+
+    .live-player .highest-team-panel h2 {
+        overflow: hidden;
+        font-size: 1.15rem !important;
+        text-overflow: ellipsis;
+        white-space: nowrap
+    }
+
+    .live-player .highest-team-panel>img {
+        width: 58px !important;
+        height: 58px !important
+    }
+}
+
+/* Facts under the player name: rendered only for fields present on the player. */
+.player-details {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 7px;
+    margin-top: 12px;
+}
+
+.player-detail {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    padding: 5px 8px;
+    border-left: 2px solid #e4b542;
+    background: rgba(4, 18, 42, .32);
+}
+
+.player-detail small {
+    color: #a9c5de;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.player-details .player-detail span {
+    display: block;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: #f6f9ff;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: transparent;
+}
+
+.player-details .player-note {
+    flex-basis: 100%;
+}
+
+@media (max-width: 991.98px) {
+    .live-player .featured-player {
+        min-height: 0 !important;
+    }
+
+    .player-details .player-detail span {
+        font-size: .7rem;
+    }
+}
+
+/* Final mobile overrides for the jersey number and expanded squad panel. */
+@media (max-width:991.98px) {
+    .live-player .featured-player {
+        grid-template-columns: 126px minmax(0, 1fr) auto !important
+    }
+
+    .live-player .featured-player .player-number {
+        display: block;
+        align-self: center;
+        padding-right: 0;
+        font-size: clamp(2.75rem, 13vw, 4.5rem)
+    }
+
+    .accordion .mobile-team-card .accordion-body {
+        padding: 12px !important;
+        background: linear-gradient(180deg, rgba(2, 15, 35, .42), rgba(5, 26, 55, .2)) !important
+    }
+
+    .accordion .mobile-team-card .accordion-body ul {
+        margin: 0;
+        overflow: hidden;
+        border: 1px solid rgba(106, 210, 255, .16);
+        border-radius: 11px;
+        background: rgba(3, 19, 43, .56)
+    }
+
+    .accordion .mobile-team-card .squad-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 2px 8px;
+        color: #9dcced;
+        font-size: .66rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase
+    }
+
+    .accordion .mobile-team-card .squad-heading b {
+        padding: 3px 7px;
+        border-radius: 999px;
+        color: #9dffd0;
+        font-size: .61rem;
+        letter-spacing: .04em;
+        background: rgba(39, 203, 129, .12)
+    }
+
+    .accordion .mobile-team-card li {
+        min-height: 58px;
+        margin: 0 10px;
+        padding: 7px 2px
+    }
+
+    .accordion .mobile-team-card li:first-child {
+        border-top: 0
+    }
+
+    .accordion .mobile-team-card li .player-thumbnail {
+        width: 40px;
+        height: 40px
+    }
+
+    .accordion .mobile-team-card li b {
+        min-width: 68px;
+        padding: 5px 8px;
+        text-align: center
+    }
+}
+
+/* Player auction facts: jersey number with its base-price card. */
+.live-player .player-auction-meta {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: end;
+    align-content: center;
+    gap: 14px;
+    min-width: 132px
+}
+
+.live-player .player-auction-meta .player-number {
+    padding-right: 0
+}
+
+.live-player .base-price {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #1ebff4;
+    border-radius: 12px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(5, 45, 100, .9), rgba(7, 25, 67, .92));
+    box-shadow: inset 0 1px 0 rgba(121, 222, 255, .12), 0 6px 18px rgba(0, 0, 0, .18)
+}
+
+.live-player .base-price span {
+    display: block;
+    color: #84d9ff;
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase
+}
+
+.live-player .base-price strong {
+    display: block;
+    margin-top: 3px;
+    color: #fff;
+    font-size: clamp(1.35rem, 3vw, 2rem);
+    line-height: 1.1;
+    white-space: nowrap
+}
+
+@media (max-width:991.98px) {
+    .live-player .player-auction-meta {
+        gap: 8px;
+        min-width: clamp(70px, 25vw, 108px)
+    }
+
+    .live-player .base-price {
+        padding: 7px 5px;
+        border-radius: 9px
+    }
+
+    .live-player .base-price span {
+        font-size: .5rem
+    }
+
+    .live-player .base-price strong {
+        font-size: clamp(.9rem, 4.5vw, 1.25rem)
+    }
+}
+
+/* Balanced player-card proportions on phone-sized screens. */
+@media (max-width:991.98px) {
+    .live-player .featured-player { grid-template-columns: 104px minmax(0, 1fr) 94px !important; padding: 12px !important }
+    .live-player .featured-player > img { width: 90px !important; height: 118px !important }
+    .live-player .featured-player h2 { margin-top: 5px !important; font-size: 1.3rem !important; line-height: 1.1 !important }
+    .live-player .player-auction-meta { min-width: 94px; gap: 7px }
+    .live-player .featured-player .player-number { font-size: clamp(2.5rem, 12vw, 3.5rem) }
+    .live-player .player-details { gap: 4px; margin-top: 7px }
+    .live-player .player-detail { padding: 3px 5px }
+    .live-player .player-detail small { font-size: .48rem }
+    .live-player .player-details .player-detail span { font-size: .62rem }
+}
+
+/* Wide player profile composition for the public live board. */
+@media (min-width:992px) {
+    .live-player .featured-player {
+        grid-template-columns: 220px minmax(0, 1fr) 210px;
+        min-height: 270px;
+        padding: 18px;
+    }
+
+    .live-player .featured-player > img { width: 202px; height: 232px; }
+    .live-player .featured-player h2 { margin-top: 12px; font-size: clamp(2rem, 3.2vw, 3rem); }
+    .live-player .player-auction-meta { min-width: 190px; gap: 18px; }
+    .live-player .player-auction-meta .player-number { font-size: clamp(5rem, 8vw, 7rem); }
+    .live-player .base-price { padding: 16px; border-radius:15px; }
+    .live-player .base-price span { font-size:.76rem; }
+    .live-player .base-price strong { font-size:clamp(1.8rem, 3vw, 2.5rem); }
+
+    .live-player .player-details { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 18px; margin-top:18px; }
+    .live-player .player-detail { position:relative; min-height:52px; padding:7px 8px 7px 18px; border-left:0; background:transparent; }
+    .live-player .player-detail::before { content:''; position:absolute; left:0; top:11px; width:8px; height:8px; border:2px solid #73dfff; border-radius:50%; box-shadow:0 0 12px rgba(78,211,255,.45); }
+    .live-player .player-detail small { font-size:.67rem; }
+    .live-player .player-details .player-detail span { overflow:visible; color:#caeaff; font-size:.98rem; white-space:normal; }
+    .live-player .player-details .player-note { grid-column:1 / -1; }
+}
+
+/* Keep the player image and auction values locked to the card edges. */
+@media (max-width:991.98px) {
+    .live-player { gap: 9px !important; }
+    .live-player .featured-player { grid-template-columns: 112px minmax(0, 1fr) !important; gap: 10px; padding-right: 112px !important; }
+    .live-player .featured-player > img { grid-row: 1 / -1; width: 100px !important; height: 100% !important; min-height: 176px; align-self: stretch; object-fit: cover; }
+    .live-player .player-auction-meta { position: absolute; top: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column; justify-content: space-between; min-width: 88px; }
+    .live-player .player-auction-meta .player-number { align-self: flex-end; }
+    .live-player .base-price { margin-top: auto; }
+}
+
+@media (min-width:992px) {
+    .live-player .featured-player > img { height: 100%; align-self: stretch; object-fit: cover; }
+    .live-player .player-auction-meta { align-self: stretch; align-content: space-between; }
+    .live-player .player-auction-meta .player-number { align-self: end; }
+}
+
+/* Match the highest-bid team card to the current-bid card. */
+.live-player .highest-team-panel {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    place-content: center;
+    text-align: center;
+}
+
+.live-player .highest-team-panel .eyebrow { margin: 0; }
+.live-player .highest-team-panel h2 {
+    margin: 6px 0 0;
+    color: #ffd05a !important;
+    font-size: clamp(1.7rem, 3.5vw, 2.7rem) !important;
+    line-height: 1.1;
+}
+
+@media (max-width:991.98px) {
+    .live-player .highest-team-panel {
+        flex: 1 1 calc(50% - 7px);
+        min-width: 0;
+        min-height: 128px !important;
+        padding: 14px !important;
+        border: 1px solid #e4b542 !important;
+        border-radius: 14px !important;
+        background: linear-gradient(135deg, #041124, #092c5b) !important;
+    }
+    .live-player .highest-team-panel h2 { font-size: clamp(1.25rem, 5vw, 1.7rem) !important; }
+}
+
+/* Highest-bid team panel: logo, name, and compact status line. */
+.live-player .highest-team-panel {
+    grid-template-columns: 66px minmax(0, 1fr) !important;
+    gap: 12px;
+    place-content: unset;
+    align-items: center;
+    text-align: left;
+}
+.live-player .highest-team-panel > img {
+    grid-column: 1;
+    grid-row: 1;
+    width: 62px !important;
+    height: 62px !important;
+    padding: 3px;
+    border: 2px solid #e7bb50;
+    border-radius: 50%;
+    background: #07152f;
+    object-fit: contain;
+}
+.live-player .highest-team-panel > div { min-width: 0; }
+.live-player .highest-team-panel h2 {
+    overflow: hidden;
+    margin: 5px 0 0;
+    color: #fff !important;
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem) !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.live-player .highest-team-summary { margin: 6px 0 0; color: #a8dcff; font-size: .78rem; white-space: nowrap; }
+.live-player .highest-team-summary b { color: #fff; }
+.live-player .highest-team-summary span { margin: 0 5px; color: #65dfff; }
+@media (min-width:992px) { .live-player .highest-team-panel { grid-template-columns: 92px minmax(0, 1fr) !important; gap:16px; } .live-player .highest-team-panel > img { width:88px !important; height:88px !important; } }
+
+/* Compact bid cards on phones: prevent team details from colliding. */
+@media (max-width:991.98px) {
+    .live-player .bid-panel,
+    .live-player .highest-team-panel {
+        flex: 1 1 calc(50% - 5px) !important;
+        min-height: 110px !important;
+        padding: 10px !important;
+    }
+    .live-player .bid-panel strong { font-size: 2rem !important; }
+    .live-player .highest-team-panel { grid-template-columns: 43px minmax(0, 1fr) !important; gap: 6px; }
+    .live-player .highest-team-panel > img { width: 40px !important; height: 40px !important; }
+    .live-player .highest-team-panel .eyebrow { overflow: visible; font-size: .56rem; letter-spacing: .04em; text-overflow: clip; white-space: nowrap; }
+    .live-player .highest-team-panel h2 { margin-top: 2px; font-size: 1.05rem !important; }
+    .live-player .highest-team-summary { margin-top: 2px; font-size: .6rem; }
+    .live-player .highest-team-summary span { display: none; }
+}
+
+/* Highest Bid Team uses the same visual treatment as Current Bid. */
+.live-player .highest-team-panel {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    place-content: center;
+    gap: 0;
+    text-align: center;
+    border-color: #e4b542 !important;
+    background: linear-gradient(135deg, #041124, #092c5b) !important;
+}
+.live-player .highest-team-panel .eyebrow { margin: 0; }
+.live-player .highest-team-panel h2 {
+    margin: 6px 0 0;
+    color: #ffd05a !important;
+    font-size: clamp(1.7rem, 3.5vw, 2.7rem) !important;
+    line-height: 1.1;
+}
+@media (max-width:991.98px) { .live-player .highest-team-panel h2 { font-size: 2rem !important; } }
+
+/* Compact stacked highest-team card, matched to Current Bid height. */
+.live-player .highest-team-panel {
+    min-height: 124px !important;
+    padding: 10px !important;
+}
+.live-player .highest-team-panel > div {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    text-align: center;
+    gap: 2px;
+}
+.live-player .highest-team-panel > div > img {
+    width: 52px !important;
+    height: 52px !important;
+    padding: 2px;
+    border: 2px solid #e7bb50;
+    border-radius: 50%;
+    background: #07152f;
+    object-fit: contain;
+}
+.live-player .highest-team-panel .eyebrow { font-size: .58rem; letter-spacing: .06em; }
+.live-player .highest-team-panel h2 { margin: 0; font-size: 1.4rem !important; }
+@media (max-width:991.98px) {
+    .live-player .bid-panel,
+    .live-player .highest-team-panel { min-height: 110px !important; height: 110px; }
+    .live-player .highest-team-panel > div > img { width: 42px !important; height: 42px !important; }
+    .live-player .highest-team-panel .eyebrow { font-size: .5rem; }
+    .live-player .highest-team-panel h2 { font-size: 1.15rem !important; }
+}
+
+/* Highest bid card: logo column plus team-information column. */
+.live-player .highest-team-panel {
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    gap: 9px;
+    place-content: unset;
+    align-items: center;
+    text-align: left;
+}
+.live-player .highest-team-panel > img {
+    grid-column: 1;
+    grid-row: 1;
+    width: 52px !important;
+    height: 52px !important;
+}
+.live-player .highest-team-panel > div { display: block; min-width: 0; }
+.live-player .highest-team-panel .eyebrow { margin: 0; font-size: .62rem; white-space: nowrap; }
+.live-player .highest-team-panel h2 { overflow: hidden; margin: 4px 0 0; font-size: 1.35rem !important; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width:991.98px) {
+    .live-player .highest-team-panel { grid-template-columns: 46px minmax(0, 1fr) !important; gap: 7px; }
+    .live-player .highest-team-panel > img { width: 42px !important; height: 42px !important; }
+    .live-player .highest-team-panel .eyebrow { font-size: .53rem; letter-spacing: .04em; }
+    .live-player .highest-team-panel h2 { font-size: 1.12rem !important; }
+}
+
+/* Use the same label/value typography in both bid cards. */
+.live-player .bid-panel > span,
+.live-player .bid-panel > div > .eyebrow {
+    display: block;
+    color: #e5bb5a !important;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+.live-player .bid-panel strong {
+    color: #ffd05a !important;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem) !important;
+    text-shadow: 0 3px 0 #5a3d07, 0 0 20px rgba(255, 205, 80, .2);
+}
+@media (max-width:991.98px) {
+    .live-player .bid-panel > span,
+    .live-player .bid-panel > div > .eyebrow { font-size: .68rem; }
+    .live-player .bid-panel strong { font-size: 2rem !important; }
+}
+
+/* Keep both bid cards on one identical color palette. */
+.live-player .bid-panel {
+    border-color: #e4b542 !important;
+    background: linear-gradient(135deg, #041124, #092c5b) !important;
+}
+
