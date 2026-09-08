@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Subscription, filter } from 'rxjs';
 import { HeaderComponent } from './layout/header/header.component';
@@ -7,6 +7,7 @@ import { MessageModalComponent } from './shared/message-modal/message-modal.comp
 import { AppLoaderComponent } from './shared/app-loader/app-loader.component';
 import { ImagePreviewComponent } from './shared/image-preview/image-preview.component';
 import { AnalyticsService } from './core/services/analytics.service';
+import { SeoService } from './core/services/seo.service';
 
 @Component({
   selector: 'app-root',
@@ -29,20 +30,29 @@ export class AppComponent implements OnDestroy {
 
   constructor(
     private router: Router,
-    private analytics: AnalyticsService
+    private analytics: AnalyticsService,
+    private seo: SeoService,
+    @Inject(PLATFORM_ID) private platformId: object
   ) {
     this.navigationSubscription = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => this.analytics.trackPageView(event.urlAfterRedirects));
+      .subscribe((event) => {
+        this.seo.updateForUrl(event.urlAfterRedirects);
+        this.analytics.trackPageView(event.urlAfterRedirects);
+      });
 
-    window.addEventListener('pageshow', this.onPageShow);
-    document.addEventListener('visibilitychange', this.onVisibilityChange);
+    if (isPlatformBrowser(this.platformId)) {
+      window.addEventListener('pageshow', this.onPageShow);
+      document.addEventListener('visibilitychange', this.onVisibilityChange);
+    }
   }
 
   ngOnDestroy(): void {
     this.navigationSubscription.unsubscribe();
-    window.removeEventListener('pageshow', this.onPageShow);
-    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    if (isPlatformBrowser(this.platformId)) {
+      window.removeEventListener('pageshow', this.onPageShow);
+      document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    }
   }
 
   private onPageShow = (event: PageTransitionEvent): void => {

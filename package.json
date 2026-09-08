@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "serve:ssr:cricket-auction": "node dist/cricket-auction/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -18,9 +19,12 @@
     "@angular/material": "^21.2.14",
     "@angular/platform-browser": "^21.2.18",
     "@angular/platform-browser-dynamic": "^21.2.18",
+    "@angular/platform-server": "^21.2.18",
     "@angular/router": "^21.2.18",
+    "@angular/ssr": "^21.2.18",
     "bootstrap": "^5.3.8",
     "cloudinary": "^2.10.0",
+    "express": "^5.1.0",
     "firebase": "^12.15.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
@@ -31,7 +35,9 @@
     "@angular-devkit/build-angular": "^21.2.18",
     "@angular/cli": "^21.2.18",
     "@angular/compiler-cli": "^21.2.18",
+    "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
+    "@types/node": "^20.17.19",
     "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
