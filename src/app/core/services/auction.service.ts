@@ -57,9 +57,12 @@ export class AuctionService {
     const now = new Date().toISOString();
     let activeAuctionId = auctionId;
     const user = await this.authService.waitForUser();
+    const existingAuction = activeAuctionId
+      ? await this.getAuctionById(activeAuctionId)
+      : null;
     const ownerDetails = {
-      createdBy: settings.createdBy || user?.uid || '',
-      createdByEmail: settings.createdByEmail || user?.email || ''
+      createdBy: existingAuction?.createdBy || settings.createdBy || user?.uid || '',
+      createdByEmail: existingAuction?.createdByEmail || settings.createdByEmail || user?.email || ''
     };
 
     if (activeAuctionId) {

@@ -137,6 +137,7 @@
 .screen-shell {
 
   position: relative;
+  z-index: 2;
 
   width: 100%;
   height: 100%;
@@ -158,6 +159,17 @@
     minmax(50px, 8vh);
 
   gap: clamp(8px, 1.2vh, 18px);
+}
+
+/* Keep the title, live badge and stats entirely above the live-card frames.
+   The old 14vh row could be shorter than the heading on medium-height screens. */
+@media (min-width: 821px) {
+  .screen-shell {
+    grid-template-rows:
+      minmax(140px, 16vh)
+      minmax(0, 1fr)
+      minmax(50px, 8vh);
+  }
 }
 
 
@@ -777,23 +789,14 @@
 
 
 .player-content {
-
   position: relative;
   z-index: 3;
-
   width: 100%;
   height: 100%;
-
   display: grid;
-
   grid-template-columns:
-    minmax(260px, 0.95fr)
-    minmax(280px, 1fr);
-
+    minmax(260px, 0.95fr) minmax(280px, 1fr);
   align-items: center;
-
-  gap:
-    clamp(25px, 4vw, 70px);
 }
 
 
@@ -865,8 +868,6 @@
 
   width: 100%;
   height: 100%;
-
-  object-fit: cover;
 
   border-radius: 50%;
 
@@ -2229,6 +2230,30 @@
   left: 0;
 }
 
+/* Tag shape keeps category visually distinct from the player-type icon. */
+.category-icon::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 3px;
+  width: 17px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-radius: 4px 4px 4px 2px;
+  transform: rotate(-45deg);
+}
+
+.category-icon::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 13px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
 .note-icon {
   border: 2px solid currentColor;
   border-radius: 3px;
@@ -2308,7 +2333,6 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   object-position: center;
 }
 
@@ -2538,5 +2562,201 @@
   .player-portrait {
     width: min(100%, clamp(170px, 33vh, 300px));
     height: auto;
+  }
+}
+
+/* A single clipped frame avoids the duplicate animated outlines colliding when
+   cards become narrow or are rendered at non-integer display scaling. */
+.broadcast-card {
+  isolation: isolate;
+}
+
+.broadcast-layout > * {
+  min-width: 0;
+}
+
+.current-player-card::before,
+.highest-bid-card::before {
+  display: none;
+}
+
+.running-border::after {
+  inset: 0;
+  border: clamp(1px, 0.1vw, 2px) solid rgba(32, 193, 255, 0.82);
+  border-radius: inherit;
+  box-shadow: inset 0 0 12px rgba(0, 178, 255, 0.14);
+}
+
+@media (min-width: 651px) and (max-width: 820px) {
+  .live-screen {
+    position: absolute;
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .screen-shell {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-rows: auto auto auto;
+  }
+
+  .screen-header {
+    grid-template-columns: 90px minmax(0, 1fr) 180px;
+  }
+
+  .broadcast-layout {
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .broadcast-card {
+    min-height: 480px;
+  }
+}
+
+@media (min-width: 821px) and (max-width: 900px) {
+  .screen-shell {
+    grid-template-rows:
+      minmax(120px, 16vh)
+      minmax(0, 1fr)
+      minmax(50px, 8vh);
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  .screen-shell {
+    grid-template-rows:
+      minmax(100px, 16vh)
+      minmax(0, 1fr)
+      minmax(42px, 7vh);
+  }
+}
+
+/* Show the complete uploaded player photo and use the unused portrait space. */
+.player-portrait {
+  width: min(100%, clamp(340px, 58vh, 650px));
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.player-portrait img {
+  object-position: center;
+}
+
+@media (min-width: 651px) and (max-width: 900px) {
+  .player-portrait {
+    width: min(100%, clamp(260px, 48vh, 440px));
+  }
+}
+
+/* Use the complete visual area for a rectangular player photo. */
+.player-portrait {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.player-portrait::before,
+.player-portrait img,
+.portrait-glow {
+  border-radius: inherit;
+}
+
+.player-portrait img {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Lift the broadcast background without reducing text and panel contrast. */
+.live-screen {
+  background:
+    linear-gradient(180deg, rgba(1, 12, 35, 0.08), rgba(1, 8, 25, 0.38)),
+    url('/banner-poster.png') center center / cover no-repeat;
+}
+
+.live-screen::before {
+  opacity: 0.38;
+  filter: brightness(1.16) saturate(1.18);
+}
+
+.live-screen::after {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 169, 255, 0.26), transparent 35%),
+    radial-gradient(circle at 80% 30%, rgba(0, 129, 255, 0.22), transparent 35%),
+    linear-gradient(180deg, rgba(0, 5, 20, 0.02), rgba(0, 4, 18, 0.24));
+}
+
+/* Restore one animated frame per card; it is clipped inside the card and does
+   not use the duplicate card pseudo-element that previously overlapped. */
+.running-border {
+  padding: 2px;
+}
+
+.running-border::before {
+  display: block;
+  animation-duration: 20s;
+}
+
+.running-border::after {
+  inset: 2px;
+  border: 0;
+  border-radius: calc(18px - 2px);
+  // background: linear-gradient(135deg, rgba(3, 20, 49, 0.93), rgba(1, 10, 29, 0.97));
+}
+
+/* Keep the animated highlight on the edge only; do not tint card content. */
+.running-border {
+  padding: 0;
+}
+
+.running-border::before {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  border-radius: inherit;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.running-border::after {
+  display: none;
+}
+
+.highest-bid-card .running-border::before {
+  animation-direction: reverse;
+}
+
+/* Edge-only strips avoid the diagonal fill caused by mask-composite on Chrome. */
+.running-border::before {
+  padding: 0;
+  border: 1px solid rgba(0, 186, 255, 0.78);
+  box-shadow: inset 0 0 10px rgba(0, 186, 255, 0.16);
+  -webkit-mask: none;
+  mask: none;
+  background:
+    linear-gradient(90deg, transparent 35%, #00baff 47%, #fff 50%, #00baff 53%, transparent 65%) 0 0 / 200% 2px repeat-x,
+    linear-gradient(180deg, transparent 35%, #00baff 47%, #fff 50%, #00baff 53%, transparent 65%) 100% 0 / 2px 200% repeat-y,
+    linear-gradient(270deg, transparent 35%, #00baff 47%, #fff 50%, #00baff 53%, transparent 65%) 100% 100% / 200% 2px repeat-x,
+    linear-gradient(0deg, transparent 35%, #00baff 47%, #fff 50%, #00baff 53%, transparent 65%) 0 100% / 2px 200% repeat-y;
+  animation: borderLineRun 6s linear infinite;
+}
+
+@keyframes borderLineRun {
+  to {
+    background-position:
+      200% 0,
+      100% 200%,
+      -200% 100%,
+      0 -200%;
   }
 }

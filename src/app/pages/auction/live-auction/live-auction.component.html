@@ -94,7 +94,11 @@
     <button class="next" [disabled]="actionInProgress" (click)="nextPlayer()">LOAD PLAYER</button>
   </div>
 
-  <div class="teams-grid" [style.--team-count]="teams.length || 1">
+  <div
+    class="teams-grid"
+    [style.--team-count]="teams.length || 1"
+    [class.compact-teams]="teams.length > 10"
+    [class.dense-teams]="teams.length > 14">
     <div
       *ngFor="let team of teams; trackBy: trackByTeam"
       class="team-card"

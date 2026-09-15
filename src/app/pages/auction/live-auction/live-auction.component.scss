@@ -329,7 +329,7 @@
 
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(var(--team-count), minmax(0, 1fr));
   gap: 6px;
   min-height: 0;
   overflow: hidden;
@@ -474,6 +474,57 @@
   transform: none;
 }
 
+/* Keep every team visible in one row without letting card contents collide. */
+.teams-grid.compact-teams .team-bid-btn {
+  min-height: 66px;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 4px;
+  padding: 6px;
+}
+
+.teams-grid.compact-teams .team-logo-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+}
+
+.teams-grid.compact-teams .team-button-main {
+  gap: 3px;
+}
+
+.teams-grid.compact-teams .team-name {
+  font-size: clamp(9px, .72vw, 12px);
+}
+
+.teams-grid.compact-teams .team-stats,
+.teams-grid.compact-teams .bid-label {
+  font-size: 8px;
+}
+
+.teams-grid.compact-teams .bid-pill {
+  gap: 3px;
+  padding: 4px 5px;
+}
+
+.teams-grid.compact-teams .bid-amount {
+  font-size: clamp(10px, .8vw, 13px);
+}
+
+.teams-grid.dense-teams .team-bid-btn {
+  min-height: 58px;
+  grid-template-columns: 30px minmax(0, 1fr);
+  padding: 4px;
+}
+
+.teams-grid.dense-teams .team-logo-wrap {
+  width: 30px;
+  height: 30px;
+}
+
+.teams-grid.dense-teams .team-stats {
+  display: none;
+}
+
 .completed {
   text-align: center;
   font-size: 36px;
@@ -535,7 +586,6 @@
 
   .teams-grid {
     width: 100%;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   }
 
   .team-bid-btn {
@@ -595,6 +645,7 @@
   .action-buttons {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 
   .action-buttons button {
@@ -602,7 +653,47 @@
   }
 
   .teams-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    overflow: visible;
+  }
+
+  .teams-grid.compact-teams .team-bid-btn,
+  .teams-grid.dense-teams .team-bid-btn {
+    min-height: 74px;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 7px;
+    padding: 8px;
+  }
+
+  .teams-grid.compact-teams .team-logo-wrap,
+  .teams-grid.dense-teams .team-logo-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+  }
+
+  .teams-grid.compact-teams .team-button-main {
+    gap: 5px;
+  }
+
+  .teams-grid.compact-teams .team-name {
+    font-size: 12px;
+  }
+
+  .teams-grid.compact-teams .team-stats,
+  .teams-grid.dense-teams .team-stats {
+    display: flex;
+    font-size: 9px;
+  }
+
+  .teams-grid.compact-teams .bid-pill {
+    gap: 6px;
+    padding: 5px 8px;
+  }
+
+  .teams-grid.compact-teams .bid-amount {
+    font-size: 13px;
   }
 }
 
