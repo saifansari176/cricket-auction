@@ -17,28 +17,33 @@
       <p class="hint">{{editingUser ? 'Update user role and status.' : 'Create login access with email and password.'}}</p>
 
       <form [formGroup]="form" (ngSubmit)="save()">
+        <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
         <div class="mb-3">
-          <label class="form-label">Email</label>
-          <input class="form-control" formControlName="email" [readonly]="editingUser">
+          <label class="form-label" for="user-control-email">Email <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="user-control-email" aria-describedby="user-control-email-error" [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched" [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched" aria-required="true" class="form-control" formControlName="email" [readonly]="editingUser">
+          <app-field-error [control]="form.controls.email" label="Email" fieldId="user-control-email" />
         </div>
 
         <div class="mb-3" *ngIf="!editingUser">
-          <label class="form-label">Password</label>
-          <input type="password" class="form-control" formControlName="password">
+          <label class="form-label" for="user-control-password">Password <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="user-control-password" aria-describedby="user-control-password-error" [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched" [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched" aria-required="true" type="password" class="form-control" formControlName="password">
+          <app-field-error [control]="form.controls.password" label="Password" fieldId="user-control-password" />
           <small class="hint">Minimum 6 characters.</small>
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Display Name</label>
-          <input class="form-control" formControlName="displayName">
+          <label class="form-label" for="user-control-displayName">Display Name <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="user-control-displayName" aria-describedby="user-control-displayName-error" [class.is-invalid]="form.controls.displayName.invalid && form.controls.displayName.touched" [attr.aria-invalid]="form.controls.displayName.invalid && form.controls.displayName.touched" aria-required="true" class="form-control" formControlName="displayName">
+          <app-field-error [control]="form.controls.displayName" label="Display Name" fieldId="user-control-displayName" />
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Role</label>
-          <select class="form-control" formControlName="role">
+          <label class="form-label" for="user-control-role">Role <span class="required-marker" aria-hidden="true">*</span></label>
+          <select id="user-control-role" aria-describedby="user-control-role-error" [class.is-invalid]="form.controls.role.invalid && form.controls.role.touched" [attr.aria-invalid]="form.controls.role.invalid && form.controls.role.touched" aria-required="true" class="form-control" formControlName="role">
             <option value="user">User</option>
             <option value="admin">Admin</option>
           </select>
+          <app-field-error [control]="form.controls.role" label="Role" fieldId="user-control-role" />
         </div>
 
         <label class="form-check mb-3">
@@ -113,6 +118,7 @@
 
 <div class="access-modal-backdrop" *ngIf="editingAuction" (click)="closeAuctionAccess()">
   <form class="access-form" [formGroup]="accessForm" (ngSubmit)="saveAuctionAccess()" (click)="$event.stopPropagation()">
+    <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
     <div class="access-modal-header">
       <div>
         <h4>Edit Auction Access</h4>
@@ -122,12 +128,14 @@
     </div>
 
     <div class="mb-3">
-      <label class="form-label">Team Limit</label>
-      <input type="number" min="1" class="form-control" formControlName="teamLimit">
+      <label class="form-label" for="user-control-teamLimit">Team Limit <span class="required-marker" aria-hidden="true">*</span></label>
+      <input id="user-control-teamLimit" aria-describedby="user-control-teamLimit-error" [class.is-invalid]="accessForm.controls.teamLimit.invalid && accessForm.controls.teamLimit.touched" [attr.aria-invalid]="accessForm.controls.teamLimit.invalid && accessForm.controls.teamLimit.touched" aria-required="true" type="number" min="1" class="form-control" formControlName="teamLimit">
+      <app-field-error [control]="accessForm.controls.teamLimit" label="Team Limit" fieldId="user-control-teamLimit" />
     </div>
     <div class="mb-4">
-      <label class="form-label">Player Limit</label>
-      <input type="number" min="1" class="form-control" formControlName="playerLimit">
+      <label class="form-label" for="user-control-playerLimit">Player Limit <span class="required-marker" aria-hidden="true">*</span></label>
+      <input id="user-control-playerLimit" aria-describedby="user-control-playerLimit-error" [class.is-invalid]="accessForm.controls.playerLimit.invalid && accessForm.controls.playerLimit.touched" [attr.aria-invalid]="accessForm.controls.playerLimit.invalid && accessForm.controls.playerLimit.touched" aria-required="true" type="number" min="1" class="form-control" formControlName="playerLimit">
+      <app-field-error [control]="accessForm.controls.playerLimit" label="Player Limit" fieldId="user-control-playerLimit" />
     </div>
 
     <div class="access-modal-actions">

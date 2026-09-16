@@ -7,6 +7,35 @@ body { margin: 0; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; 
 body { overflow-x: hidden; }
 img { max-width: 100%; }
 
+.required-marker {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.required-fields-hint {
+  color: #475569;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+app-field-error { display: block; }
+.field-error {
+  display: block;
+  color: #b91c1c;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+}
+.field-error:empty { display: none; }
+form input.is-invalid, form select.is-invalid, form textarea.is-invalid {
+  border-color: #b91c1c;
+}
+form input.is-invalid:focus, form select.is-invalid:focus, form textarea.is-invalid:focus {
+  border-color: #b91c1c;
+  box-shadow: 0 0 0 0.2rem rgb(185 28 28 / 15%);
+}
+
 .share-btn {
   border: 0;
   background: #dbeafe;

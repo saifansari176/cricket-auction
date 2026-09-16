@@ -2,6 +2,7 @@
   <app-public-header />
   <a class="back-home" routerLink="/">← Back to home</a>
   <form class="login-card" [formGroup]="form" (ngSubmit)="login()">
+    <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
     <div class="brand"><img class="brand-logo" src="/cricbids-logo.png" alt="Cricbids logo">
       <h1>Cricbids</h1>
       <p>{{isRegistering ? 'Create your account' : 'Sign in to continue'}}</p>
@@ -9,16 +10,15 @@
     <div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
     <div class="alert alert-success" *ngIf="successMessage">{{successMessage}}</div>
     <ng-container *ngIf="phoneMode; else emailLogin">
-      <div class="mb-3"><label class="form-label">Phone Number</label>
-        <div class="phone-input"><span>+91</span><input type="tel" inputmode="numeric" maxlength="10"
+      <div class="mb-3"><label class="form-label" for="login-phone">Phone Number <span class="required-marker" aria-hidden="true">*</span></label>
+        <div class="phone-input"><span>+91</span><input id="login-phone" aria-describedby="login-phone-error" [class.is-invalid]="form.controls.phone.invalid && form.controls.phone.touched" [attr.aria-invalid]="form.controls.phone.invalid && form.controls.phone.touched" aria-required="true" type="tel" inputmode="numeric" maxlength="10"
             class="form-control" formControlName="phone" (input)="keepPhoneDigits()"
             placeholder="10-digit mobile number"></div>
-        <div class="invalid-feedback d-block" *ngIf="phone.touched && phone.invalid">Enter a valid 10-digit Indian
-          mobile number.</div>
+        <app-field-error [control]="form.controls.phone" label="Phone Number" fieldId="login-phone" patternMessage="Enter a valid 10-digit Indian mobile number." />
       </div>
-      <div class="mb-3" *ngIf="otpSent"><label class="form-label">OTP</label><input type="text" inputmode="numeric"
+      <div class="mb-3" *ngIf="otpSent"><label class="form-label" for="login-otp">OTP <span class="required-marker" aria-hidden="true">*</span></label><input id="login-otp" aria-describedby="login-otp-error" [class.is-invalid]="form.controls.otp.invalid && form.controls.otp.touched" [attr.aria-invalid]="form.controls.otp.invalid && form.controls.otp.touched" aria-required="true" type="text" inputmode="numeric"
           maxlength="6" class="form-control" formControlName="otp" placeholder="6-digit OTP">
-        <div class="invalid-feedback d-block" *ngIf="otp.touched && otp.invalid">Enter the 6-digit OTP.</div>
+      <app-field-error [control]="form.controls.otp" label="OTP" fieldId="login-otp" patternMessage="Enter the 6-digit OTP." />
       </div>
       <div #recaptchaContainer></div>
       <button *ngIf="!otpSent" class="btn btn-primary w-100" type="button" [disabled]="loading"
@@ -27,38 +27,23 @@
         'Verifying...' : 'Verify OTP and Login'}}</button>
     </ng-container>
     <ng-template #emailLogin>
-      <div class="mb-3" *ngIf="isRegistering"><label class="form-label">Display Name</label><input type="text"
-          class="form-control" [class.is-invalid]="displayName.invalid && (displayName.touched || displayName.dirty)"
-          formControlName="displayName" placeholder="Your name">
-        <div class="invalid-feedback" *ngIf="displayName.invalid && (displayName.touched || displayName.dirty)">Display
-          name must be at least 2 characters.</div>
-      </div>
-      <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control"
-          [class.is-invalid]="email.invalid && (email.touched || email.dirty)" formControlName="email"
-          placeholder="admin@example.com">
-        <div class="invalid-feedback" *ngIf="email.hasError('required') && (email.touched || email.dirty)">Email is
-          required.</div>
-        <div class="invalid-feedback" *ngIf="email.hasError('email') && (email.touched || email.dirty)">Enter a valid
-          email address.</div>
-      </div>
-      <div class="mb-3"><label class="form-label">Password</label><input type="password" class="form-control"
-          [class.is-invalid]="password.invalid && (password.touched || password.dirty)" formControlName="password"
-          placeholder="Minimum 6 characters">
-        <div class="invalid-feedback" *ngIf="password.hasError('required') && (password.touched || password.dirty)">
-          Password is required.</div>
-        <div class="invalid-feedback" *ngIf="password.hasError('minlength') && (password.touched || password.dirty)">
-          Password must be at least 6 characters.</div>
-      </div>
-      <div class="mb-3" *ngIf="isRegistering"><label class="form-label">Confirm Password</label><input type="password"
+      <div class="mb-3" *ngIf="isRegistering"><label class="form-label" for="login-displayName">Display Name <span class="required-marker" aria-hidden="true">*</span></label><input id="login-displayName" aria-describedby="login-displayName-error" [class.is-invalid]="form.controls.displayName.invalid && form.controls.displayName.touched" [attr.aria-invalid]="form.controls.displayName.invalid && form.controls.displayName.touched" aria-required="true" type="text"
           class="form-control"
-          [class.is-invalid]="confirmPassword.invalid && (confirmPassword.touched || confirmPassword.dirty)"
+          formControlName="displayName" placeholder="Your name">
+      <app-field-error [control]="form.controls.displayName" label="Display Name" fieldId="login-displayName" />
+      </div>
+      <div class="mb-3"><label class="form-label" for="login-email">Email <span class="required-marker" aria-hidden="true">*</span></label><input id="login-email" aria-describedby="login-email-error" [class.is-invalid]="form.controls.email.invalid && form.controls.email.touched" [attr.aria-invalid]="form.controls.email.invalid && form.controls.email.touched" aria-required="true" type="email" class="form-control" formControlName="email"
+          placeholder="admin@example.com">
+      <app-field-error [control]="form.controls.email" label="Email" fieldId="login-email" />
+      </div>
+      <div class="mb-3"><label class="form-label" for="login-password">Password <span class="required-marker" aria-hidden="true">*</span></label><input id="login-password" aria-describedby="login-password-error" [class.is-invalid]="form.controls.password.invalid && form.controls.password.touched" [attr.aria-invalid]="form.controls.password.invalid && form.controls.password.touched" aria-required="true" type="password" class="form-control" formControlName="password"
+          placeholder="Minimum 6 characters">
+      <app-field-error [control]="form.controls.password" label="Password" fieldId="login-password" />
+      </div>
+      <div class="mb-3" *ngIf="isRegistering"><label class="form-label" for="login-confirmPassword">Confirm Password <span class="required-marker" aria-hidden="true">*</span></label><input id="login-confirmPassword" aria-describedby="login-confirmPassword-error" [class.is-invalid]="form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched" [attr.aria-invalid]="form.controls.confirmPassword.invalid && form.controls.confirmPassword.touched" aria-required="true" type="password"
+          class="form-control"
           formControlName="confirmPassword" placeholder="Re-enter your password">
-        <div class="invalid-feedback"
-          *ngIf="confirmPassword.hasError('required') && (confirmPassword.touched || confirmPassword.dirty)">Confirm
-          your password.</div>
-        <div class="invalid-feedback"
-          *ngIf="confirmPassword.hasError('mismatch') && (confirmPassword.touched || confirmPassword.dirty)">Passwords
-          do not match.</div>
+      <app-field-error [control]="form.controls.confirmPassword" label="Confirm Password" fieldId="login-confirmPassword" />
       </div><button class="btn btn-primary w-100" type="submit" [disabled]="loading">{{loading ? (isRegistering ?
         'Creating account...' : 'Signing in...') : (isRegistering ? 'Register' : 'Login')}}</button><button
         class="btn btn-link w-100 mt-2" type="button" (click)="setRegisterMode(!isRegistering)"

@@ -34,13 +34,15 @@
         <div class="auction-title-text">
           <h1>{{ loadedAuction.auctionName }}</h1>
 
-          <span
-            class="live-status"
-            [class.completed]="!publicLiveViewEnabled"
-          >
-            <i></i>
-            {{ publicLiveViewEnabled ? 'LIVE' : 'COMPLETED' }}
-          </span>
+          <img
+            *ngIf="publicLiveViewEnabled; else completedStatus"
+            class="live-status-image"
+            src="/live.png"
+            alt="Live"
+          />
+          <ng-template #completedStatus>
+            <span class="live-status completed">COMPLETED</span>
+          </ng-template>
         </div>
 
       </div>

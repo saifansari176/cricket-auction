@@ -1,3 +1,5 @@
+import { nonBlank, wholeNumber } from '../../../shared/validation/validators';
+import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -11,7 +13,7 @@ import { AuctionSettings } from '../../../core/models/auction-settings';
 @Component({
   selector: 'app-user-control',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [FieldErrorComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './user-control.component.html',
   styleUrl: './user-control.component.scss'
 })
@@ -32,15 +34,15 @@ export class UserControlComponent implements OnInit {
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.minLength(6)]],
-    displayName: ['', Validators.required],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    displayName: ['', [Validators.required, nonBlank]],
     role: ['user' as UserRole, Validators.required],
     active: [true]
   });
 
   accessForm = this.fb.group({
-    teamLimit: [2, [Validators.required, Validators.min(1)]],
-    playerLimit: [10, [Validators.required, Validators.min(1)]]
+    teamLimit: [2, [Validators.required, Validators.min(1), wholeNumber]],
+    playerLimit: [10, [Validators.required, Validators.min(1), wholeNumber]]
   });
 
   async ngOnInit(): Promise<void> {
@@ -56,6 +58,8 @@ export class UserControlComponent implements OnInit {
 
   edit(user: AppUser): void {
     this.editingUser = user;
+    this.form.controls.password.clearValidators();
+    this.form.controls.password.updateValueAndValidity();
     this.form.patchValue({
       email: user.email,
       password: '',
@@ -67,6 +71,8 @@ export class UserControlComponent implements OnInit {
 
   newUser(): void {
     this.editingUser = null;
+    this.form.controls.password.setValidators([Validators.required, Validators.minLength(6)]);
+    this.form.controls.password.updateValueAndValidity();
     this.form.reset({
       email: '',
       password: '',

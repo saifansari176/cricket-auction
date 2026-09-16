@@ -6,40 +6,42 @@
   <section class="category-panel">
     <h3>{{editingCategory ? 'Edit Category' : 'Add Category'}}</h3>
     <form [formGroup]="form" (ngSubmit)="save()" class="category-form d-block">
+      <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
   <div class="category-row">
 
     <div class="field">
-      <label>Category Name</label>
-      <input
+      <label for="player-categories-name">Category Name <span class="required-marker" aria-hidden="true">*</span></label>
+      <input id="player-categories-name" aria-describedby="player-categories-name-error" [class.is-invalid]="form.controls.name.invalid && form.controls.name.touched" [attr.aria-invalid]="form.controls.name.invalid && form.controls.name.touched" aria-required="true"
         class="form-control"
         formControlName="name"
         placeholder="Category name, e.g. Premium Players">
+      <app-field-error [control]="form.controls.name" label="Category Name" fieldId="player-categories-name" />
     </div>
 
     <div class="field">
-      <label>Base Price <span class="text-danger">*</span></label>
-      <input
+      <label for="player-categories-basePrice">Base Price</label>
+      <input id="player-categories-basePrice" aria-describedby="player-categories-basePrice-error" [class.is-invalid]="form.controls.basePrice.invalid && form.controls.basePrice.touched" [attr.aria-invalid]="form.controls.basePrice.invalid && form.controls.basePrice.touched"
         class="form-control"
         type="number"
         formControlName="basePrice"
-        required
         placeholder="Base price"
         (focus)="clearDefaultZero('basePrice')">
+      <app-field-error [control]="form.controls.basePrice" label="Base Price" fieldId="player-categories-basePrice" />
     </div>
 
     <div class="field">
-      <label>Bid Increase By <span class="text-danger">*</span></label>
-      <input
+      <label for="player-categories-bidIncreaseBy">Bid Increase By</label>
+      <input id="player-categories-bidIncreaseBy" aria-describedby="player-categories-bidIncreaseBy-error" [class.is-invalid]="form.controls.bidIncreaseBy.invalid && form.controls.bidIncreaseBy.touched" [attr.aria-invalid]="form.controls.bidIncreaseBy.invalid && form.controls.bidIncreaseBy.touched"
         class="form-control"
         type="number"
         formControlName="bidIncreaseBy"
-        required
         placeholder="Bid increase amount"
         (focus)="clearDefaultZero('bidIncreaseBy')">
+      <app-field-error [control]="form.controls.bidIncreaseBy" label="Bid Increase By" fieldId="player-categories-bidIncreaseBy" />
     </div>
 
     <div class="actions">
-      <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving">
+      <button class="btn btn-primary" type="submit" [disabled]="saving">
         {{ saving ? 'Saving...' : (editingCategory ? 'Update Category' : 'Add Category') }}
       </button>
 

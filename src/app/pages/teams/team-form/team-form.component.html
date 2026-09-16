@@ -22,7 +22,8 @@
 
         <div class="card-body">
 
-            <form [formGroup]="form">
+            <form [formGroup]="form" (ngSubmit)="save()">
+              <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
 
                 <div class="row">
 
@@ -36,25 +37,25 @@
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Team Name *</label>
+                        <label for="team-form-teamName">Team Name <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <input class="form-control" formControlName="teamName">
-
+                        <input id="team-form-teamName" aria-describedby="team-form-teamName-error" [class.is-invalid]="form.controls.teamName.invalid && form.controls.teamName.touched" [attr.aria-invalid]="form.controls.teamName.invalid && form.controls.teamName.touched" aria-required="true" class="form-control" formControlName="teamName">
+                        <app-field-error [control]="form.controls.teamName" label="Team Name" fieldId="team-form-teamName" />
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Owner Name *</label>
+                        <label for="team-form-ownerName">Owner Name</label>
 
-                        <input class="form-control" formControlName="ownerName">
-
+                        <input id="team-form-ownerName" aria-describedby="team-form-ownerName-error" [class.is-invalid]="form.controls.ownerName.invalid && form.controls.ownerName.touched" [attr.aria-invalid]="form.controls.ownerName.invalid && form.controls.ownerName.touched" class="form-control" formControlName="ownerName">
+                        <app-field-error [control]="form.controls.ownerName" label="Owner Name" fieldId="team-form-ownerName" />
                     </div>
 
                 </div>
 
                 <div class="text-center">
 
-                    <button type="button" class="btn btn-success btn-lg" [disabled]="saving || uploading" (click)="save()">
+                    <button type="submit" class="btn btn-success btn-lg" [disabled]="saving || uploading">
 
                         {{ saving ? 'Saving...' : 'Save Team' }}
 

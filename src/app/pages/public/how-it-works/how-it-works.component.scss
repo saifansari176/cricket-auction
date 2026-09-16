@@ -6,38 +6,6 @@
     flex-direction: column
 }
 
-.guide-header {
-    height: 74px;
-    padding: 10px clamp(20px, 6vw, 88px);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #fff;
-    border-bottom: 1px solid #e5eaf2
-}
-
-.guide-header img {
-    width: 108px;
-    height: 54px;
-    object-fit: contain
-}
-
-.guide-header nav {
-    display: flex;
-    gap: 18px
-}
-
-.guide-header a {
-    color: #334155;
-    text-decoration: none;
-    font-weight: 700
-}
-
-.guide-header a:hover,
-.guide-header a.active {
-    color: #1d4ed8
-}
-
 .guide-page main {
     flex: 1
 }
@@ -45,8 +13,7 @@
 .guide-hero {
     padding: 72px 24px;
     text-align: center;
-    // background: linear-gradient(120deg, #0f172a, #1d4ed8);
-  background: linear-gradient(135deg, rgba(8, 20, 47, .94), rgba(15, 55, 144, .86)), url('/banner-poster.png') center / cover fixed;
+    background: linear-gradient(135deg, rgba(8, 20, 47, .94), rgba(15, 55, 144, .86)), url('/banner-poster.png') center / cover fixed;
 
     color: #fff
 }
@@ -86,7 +53,7 @@
     padding: 24px
 }
 
-.guide-steps span {
+.guide-steps .step-number {
     display: grid;
     place-items: center;
     width: 38px;
@@ -156,18 +123,6 @@
 }
 
 @media(max-width:600px) {
-    .guide-header {
-        padding: 9px 16px
-    }
-
-    .guide-header img {
-        width: 82px
-    }
-
-    .guide-header nav {
-        gap: 10px;
-        font-size: .85rem
-    }
 
     .guide-steps {
         padding: 34px 16px
@@ -175,10 +130,38 @@
 
     .guide-steps article {
         padding: 18px;
-        gap: 14px
+        gap: 14px;
+        grid-template-columns: 38px minmax(0, 1fr);
     }
 
     .contact-grid {
         grid-template-columns: 1fr
     }
+}
+.guide-steps .step-details { margin-top: 10px; }
+.getting-started { padding-bottom: 12px; }
+.getting-started a { color: #1d4ed8; font-weight: 600; }
+.channel-link {
+    display: block;
+    width: fit-content;
+    margin: 24px auto 0;
+    color: #fff;
+    text-underline-offset: 4px;
+}
+.tutorial-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 700;
+    text-decoration: none;
+}
+.tutorial-link:hover { background: #dbeafe; }
+.guide-page main a:focus-visible {
+    outline: 3px solid #60a5fa;
+    outline-offset: 4px;
 }

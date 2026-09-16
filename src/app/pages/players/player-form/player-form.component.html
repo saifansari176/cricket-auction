@@ -22,52 +22,33 @@
 
         <div class="card-body">
 
-            <form [formGroup]="form">
+            <form [formGroup]="form" (ngSubmit)="save()">
+              <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
 
                 <div class="row">
 
                     <div class="col-md-12 mb-3">
-                        <label>Photo <span class="text-danger">*</span></label>
+                        <label for="player-form-photo">Photo <span class="required-marker" aria-hidden="true">*</span></label>
                         <img *ngIf="form.value.photo" [src]="form.value.photo" width="120" class="rounded-circle mb-3">
 
-                        <input type="file" accept="image/*" class="form-control" [disabled]="uploadingPhoto || saving" (change)="onPhotoChange($event)">
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.photo.touched && form.controls.photo.invalid">
-
-                            <small *ngIf="form.controls.photo.errors?.['required']">
-                                Player Picture is required.
-                            </small>
-
-                        </div>
+                        <input id="player-form-photo" aria-required="true" aria-describedby="player-form-photo-error" [class.is-invalid]="form.controls.photo.invalid && form.controls.photo.touched" [attr.aria-invalid]="form.controls.photo.invalid && form.controls.photo.touched" (blur)="form.controls.photo.markAsTouched()" type="file" accept="image/*" class="form-control" [disabled]="uploadingPhoto || saving" (change)="onPhotoChange($event)">
+                        <app-field-error [control]="form.controls.photo" label="Photo" fieldId="player-form-photo" />
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>First Name<span class="text-danger">*</span></label>
+                        <label for="player-form-firstName">First Name <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <input class="form-control" formControlName="firstName">
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.firstName.touched && form.controls.firstName.invalid">
-
-                            <small *ngIf="form.controls.firstName.errors?.['required']">
-                                First Name is required.
-                            </small>
-
-                        </div>
-
+                        <input id="player-form-firstName" aria-describedby="player-form-firstName-error" [class.is-invalid]="form.controls.firstName.invalid && form.controls.firstName.touched" [attr.aria-invalid]="form.controls.firstName.invalid && form.controls.firstName.touched" aria-required="true" class="form-control" formControlName="firstName">
+                        <app-field-error [control]="form.controls.firstName" label="First Name" fieldId="player-form-firstName" />
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Last Name<span class="text-danger">*</span></label>
+                        <label for="player-form-lastName">Last Name <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <input class="form-control" formControlName="lastName">
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.lastName.touched && form.controls.lastName.invalid">
-                            <small *ngIf="form.controls.lastName.errors?.['required']">
-                                Last Name is required.
-                            </small>
-                        </div>
+                        <input id="player-form-lastName" aria-describedby="player-form-lastName-error" [class.is-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched" [attr.aria-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched" aria-required="true" class="form-control" formControlName="lastName">
+                        <app-field-error [control]="form.controls.lastName" label="Last Name" fieldId="player-form-lastName" />
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -80,24 +61,18 @@
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Jersey Number<span class="text-danger">*</span></label>
+                        <label for="player-form-jerseyNumber">Jersey Number <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <input type="tel" maxlength="3" class="form-control" formControlName="jerseyNumber"
+                        <input id="player-form-jerseyNumber" aria-describedby="player-form-jerseyNumber-error" [class.is-invalid]="form.controls.jerseyNumber.invalid && form.controls.jerseyNumber.touched" [attr.aria-invalid]="form.controls.jerseyNumber.invalid && form.controls.jerseyNumber.touched" aria-required="true" type="tel" maxlength="3" class="form-control" formControlName="jerseyNumber"
                             placeholder="Enter jersey number" (keypress)="allowOnlyNumbers($event)">
-
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.jerseyNumber.touched && form.controls.jerseyNumber.invalid">
-                            <small *ngIf="form.controls.jerseyNumber.errors?.['required']">Jersey number is required.</small>
-                            <small *ngIf="form.controls.jerseyNumber.errors?.['pattern']">Jersey number must contain up to 3 digits.</small>
-                        </div>
-
+                        <app-field-error [control]="form.controls.jerseyNumber" label="Jersey Number" fieldId="player-form-jerseyNumber" patternMessage="Jersey number must contain 1 to 3 digits." />
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Player Type<span class="text-danger">*</span></label>
+                        <label for="player-form-playerType">Player Type <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <select class="form-select" formControlName="playerType">
+                        <select id="player-form-playerType" aria-describedby="player-form-playerType-error" [class.is-invalid]="form.controls.playerType.invalid && form.controls.playerType.touched" [attr.aria-invalid]="form.controls.playerType.invalid && form.controls.playerType.touched" aria-required="true" class="form-select" formControlName="playerType">
 
                             <option value="">Select</option>
 
@@ -110,12 +85,7 @@
                             <option>Wicket Keeper</option>
 
                         </select>
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.playerType.touched && form.controls.playerType.invalid">
-                            <small *ngIf="form.controls.playerType.errors?.['required']">
-                                Player Type is required.
-                            </small>
-                        </div>
+                        <app-field-error [control]="form.controls.playerType" label="Player Type" fieldId="player-form-playerType" />
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -125,31 +95,18 @@
 
                     <div class="col-md-6 mb-3">
 
-                        <label>Mobile Number <span class="text-danger">*</span></label>
+                        <label for="player-form-mobile">Mobile Number <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <input type="tel" maxlength="10" class="form-control" formControlName="mobile"
+                        <input id="player-form-mobile" aria-describedby="player-form-mobile-error" [class.is-invalid]="form.controls.mobile.invalid && form.controls.mobile.touched" [attr.aria-invalid]="form.controls.mobile.invalid && form.controls.mobile.touched" aria-required="true" type="tel" maxlength="10" class="form-control" formControlName="mobile"
                             placeholder="Enter 10 digit mobile number" (keypress)="allowOnlyNumbers($event)">
-
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.mobile.touched && form.controls.mobile.invalid">
-
-                            <small *ngIf="form.controls.mobile.errors?.['required']">
-                                Mobile Number is required.
-                            </small>
-
-                            <small *ngIf="form.controls.mobile.errors?.['pattern']">
-                                Mobile Number must be exactly 10 digits.
-                            </small>
-
-                        </div>
-
+                        <app-field-error [control]="form.controls.mobile" label="Mobile Number" fieldId="player-form-mobile" patternMessage="Enter a valid 10-digit mobile number." />
                     </div>
 
                     <div class="col-md-6 mb-3">
 
-                        <label>T-Shirt Size<span class="text-danger">*</span></label>
+                        <label for="player-form-tshirtSize">T-Shirt Size <span class="required-marker" aria-hidden="true">*</span></label>
 
-                        <select class="form-select" formControlName="tshirtSize">
+                        <select id="player-form-tshirtSize" aria-describedby="player-form-tshirtSize-error" [class.is-invalid]="form.controls.tshirtSize.invalid && form.controls.tshirtSize.touched" [attr.aria-invalid]="form.controls.tshirtSize.invalid && form.controls.tshirtSize.touched" aria-required="true" class="form-select" formControlName="tshirtSize">
 
                             <option value="">Select</option>
 
@@ -168,12 +125,7 @@
                             <option>4XL</option>
 
                         </select>
-                        <div class="text-danger mt-1"
-                            *ngIf="form.controls.tshirtSize.touched && form.controls.tshirtSize.invalid">
-                            <small *ngIf="form.controls.tshirtSize.errors?.['required']">
-                                T-Shirt Size is required.
-                            </small>
-                        </div>
+                        <app-field-error [control]="form.controls.tshirtSize" label="T-Shirt Size" fieldId="player-form-tshirtSize" />
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -248,7 +200,7 @@
 
                 <div class="text-center button-group">
 
-                    <button class="btn btn-success btn-lg" type="button" [disabled]="saving || uploadingPhoto" (click)="save()">
+                    <button class="btn btn-success btn-lg" type="submit" [disabled]="saving || uploadingPhoto" >
 
                         {{saving ? 'Saving...' : (uploadingPhoto ? 'Uploading photo...' : (isEdit ? 'Update Player' : 'Submit Registration'))}}
 

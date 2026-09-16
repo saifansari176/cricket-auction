@@ -1,3 +1,5 @@
+import { nonBlank } from '../../../shared/validation/validators';
+import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,7 +17,7 @@ import { PlayerCategoryService } from '../../../core/services/player-category.se
 @Component({
   selector: 'app-player-registration',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [FieldErrorComponent, CommonModule, ReactiveFormsModule],
   templateUrl: './player-registration.component.html',
   styleUrl: './player-registration.component.scss'
 })
@@ -40,8 +42,8 @@ export class PlayerRegistrationComponent implements OnDestroy {
   private photoUploadVersion = 0;
 
   form = this.fb.group({
-    firstName: ['', [Validators.required, Validators.minLength(2)]],
-    lastName: ['', Validators.required],
+    firstName: ['', [Validators.required, nonBlank, Validators.minLength(2)]],
+    lastName: ['', [Validators.required, nonBlank]],
     mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
     jerseyNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{1,3}$/)]],
     playerType: ['', Validators.required],

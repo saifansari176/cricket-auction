@@ -1,3 +1,6 @@
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { matchesControl, nonBlank } from '../../../shared/validation/validators';
+import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ConfirmationResult } from 'firebase/auth';
@@ -10,7 +13,7 @@ import { PublicHeaderComponent } from '../../../shared/public-header/public-head
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, PublicHeaderComponent],
+  imports: [FieldErrorComponent, CommonModule, ReactiveFormsModule, RouterLink, PublicHeaderComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -37,6 +40,12 @@ export class LoginComponent {
     phone: [''],
     otp: ['']
   });
+
+  constructor() {
+    this.password.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.confirmPassword.updateValueAndValidity({ emitEvent: false });
+    });
+  }
 
   ngOnInit(): void {
     this.setRegisterMode(this.route.snapshot.queryParamMap.get('register') === 'true');
@@ -66,8 +75,8 @@ export class LoginComponent {
     this.errorMessage = '';
     this.successMessage = '';
 
-    this.displayName.setValidators(isRegistering ? [Validators.required, Validators.minLength(2)] : []);
-    this.confirmPassword.setValidators(isRegistering ? [Validators.required] : []);
+    this.displayName.setValidators(isRegistering ? [Validators.required, nonBlank, Validators.minLength(2)] : []);
+    this.confirmPassword.setValidators(isRegistering ? [Validators.required, matchesControl(this.password)] : []);
     this.displayName.updateValueAndValidity();
     this.confirmPassword.updateValueAndValidity();
   }
@@ -126,6 +135,11 @@ export class LoginComponent {
   }
 
   async login(): Promise<void> {
+    if (this.loading) return;
+    if (this.phoneMode) {
+      await (this.otpSent ? this.verifyOtp() : this.sendOtp());
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

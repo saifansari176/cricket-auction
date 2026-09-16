@@ -6,8 +6,8 @@
       <p *ngIf="!isAdmin">Select one of your auctions, or create a new auction to continue.</p>
     </div>
 
-    <button type="button" class="btn btn-primary" (click)="createNewAuction()">
-      Create New Auction
+    <button type="button" class="btn btn-primary" [disabled]="loading || uploading" (click)="showForm ? cancelForm() : createNewAuction()">
+      {{showForm ? 'Cancel' : 'Create New Auction'}}
     </button>
   </div>
 
@@ -16,7 +16,7 @@
         <h3>Selected Auction Details</h3>
         <span>Active now</span>
       </div>
-  
+
       <div class="settings-summary">
         <div>
           <span>Auction</span>
@@ -141,6 +141,7 @@
     </div>
 
     <form [formGroup]="form" (ngSubmit)="save()">
+      <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
       <div class="logo-row">
         <div class="logo-preview">
           <img *ngIf="logoPreview" [src]="logoPreview" alt="Auction Logo Preview">
@@ -161,48 +162,45 @@
 
       <div class="form-grid">
         <div>
-          <label class="form-label">Auction Name</label>
-          <input type="text" class="form-control" formControlName="auctionName">
+          <label class="form-label" for="auction-settings-auctionName">Auction Name <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-auctionName" aria-describedby="auction-settings-auctionName-error" [class.is-invalid]="form.controls.auctionName.invalid && form.controls.auctionName.touched" [attr.aria-invalid]="form.controls.auctionName.invalid && form.controls.auctionName.touched" aria-required="true" type="text" class="form-control" formControlName="auctionName">
+          <small id="auction-settings-auctionName-error" class="field-error" *ngIf="fieldError(form.controls.auctionName, 'Auction Name') as error">{{error}}</small>
         </div>
 
         <div>
-          <label class="form-label">Auction Date</label>
-          <input type="date" class="form-control" formControlName="auctionDate">
+          <label class="form-label" for="auction-settings-auctionDate">Auction Date <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-auctionDate" aria-describedby="auction-settings-auctionDate-error" [class.is-invalid]="form.controls.auctionDate.invalid && form.controls.auctionDate.touched" [attr.aria-invalid]="form.controls.auctionDate.invalid && form.controls.auctionDate.touched" aria-required="true" type="date" class="form-control" formControlName="auctionDate">
+          <small id="auction-settings-auctionDate-error" class="field-error" *ngIf="fieldError(form.controls.auctionDate, 'Auction Date') as error">{{error}}</small>
         </div>
 
         <div>
-          <label class="form-label">Points Per Team</label>
-          <input type="number" class="form-control" formControlName="pointsPerTeam" (focus)="clearDefaultZero('pointsPerTeam')">
+          <label class="form-label" for="auction-settings-pointsPerTeam">Points Per Team <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-pointsPerTeam" aria-describedby="auction-settings-pointsPerTeam-error" [class.is-invalid]="form.controls.pointsPerTeam.invalid && form.controls.pointsPerTeam.touched" [attr.aria-invalid]="form.controls.pointsPerTeam.invalid && form.controls.pointsPerTeam.touched" aria-required="true" type="number" class="form-control" formControlName="pointsPerTeam" (focus)="clearDefaultZero('pointsPerTeam')">
+          <small id="auction-settings-pointsPerTeam-error" class="field-error" *ngIf="fieldError(form.controls.pointsPerTeam, 'Points Per Team') as error">{{error}}</small>
         </div>
 
         <div>
-          <label class="form-label">Players Per Team</label>
-          <input type="number" class="form-control" formControlName="playersPerTeam" (focus)="clearDefaultZero('playersPerTeam')">
-        </div>
-
-        <!-- <div class="col-md-6 mb-3">
-          <label class="form-label">Team Access Limit</label>
-          <input type="number" min="1" class="form-control" formControlName="teamLimit">
-        </div>
-
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Player Access Limit</label>
-          <input type="number" min="1" class="form-control" formControlName="playerLimit">
-        </div> -->
-
-        <div>
-          <label class="form-label">Base Player Price</label>
-          <input type="number" class="form-control" formControlName="basePlayerPrice" (focus)="clearDefaultZero('basePlayerPrice')">
+          <label class="form-label" for="auction-settings-playersPerTeam">Players Per Team <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-playersPerTeam" aria-describedby="auction-settings-playersPerTeam-error" [class.is-invalid]="form.controls.playersPerTeam.invalid && form.controls.playersPerTeam.touched" [attr.aria-invalid]="form.controls.playersPerTeam.invalid && form.controls.playersPerTeam.touched" aria-required="true" type="number" class="form-control" formControlName="playersPerTeam" (focus)="clearDefaultZero('playersPerTeam')">
+          <small id="auction-settings-playersPerTeam-error" class="field-error" *ngIf="fieldError(form.controls.playersPerTeam, 'Players Per Team') as error">{{error}}</small>
         </div>
 
         <div>
-          <label class="form-label">Minimum Bid</label>
-          <input type="number" class="form-control" formControlName="minimumBid" (focus)="clearDefaultZero('minimumBid')">
+          <label class="form-label" for="auction-settings-basePlayerPrice">Base Player Price <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-basePlayerPrice" aria-describedby="auction-settings-basePlayerPrice-error" [class.is-invalid]="form.controls.basePlayerPrice.invalid && form.controls.basePlayerPrice.touched" [attr.aria-invalid]="form.controls.basePlayerPrice.invalid && form.controls.basePlayerPrice.touched" aria-required="true" type="number" class="form-control" formControlName="basePlayerPrice" (focus)="clearDefaultZero('basePlayerPrice')">
+          <small id="auction-settings-basePlayerPrice-error" class="field-error" *ngIf="fieldError(form.controls.basePlayerPrice, 'Base Player Price') as error">{{error}}</small>
         </div>
 
         <div>
-          <label class="form-label">Bid Increase By</label>
-          <input type="number" class="form-control" formControlName="bidIncreaseBy" (focus)="clearDefaultZero('bidIncreaseBy')">
+          <label class="form-label" for="auction-settings-minimumBid">Minimum Bid <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-minimumBid" aria-describedby="auction-settings-minimumBid-error" [class.is-invalid]="form.controls.minimumBid.invalid && form.controls.minimumBid.touched" [attr.aria-invalid]="form.controls.minimumBid.invalid && form.controls.minimumBid.touched" aria-required="true" type="number" class="form-control" formControlName="minimumBid" (focus)="clearDefaultZero('minimumBid')">
+          <small id="auction-settings-minimumBid-error" class="field-error" *ngIf="fieldError(form.controls.minimumBid, 'Minimum Bid') as error">{{error}}</small>
+        </div>
+
+        <div>
+          <label class="form-label" for="auction-settings-bidIncreaseBy">Bid Increase By <span class="required-marker" aria-hidden="true">*</span></label>
+          <input id="auction-settings-bidIncreaseBy" aria-describedby="auction-settings-bidIncreaseBy-error" [class.is-invalid]="form.controls.bidIncreaseBy.invalid && form.controls.bidIncreaseBy.touched" [attr.aria-invalid]="form.controls.bidIncreaseBy.invalid && form.controls.bidIncreaseBy.touched" aria-required="true" type="number" class="form-control" formControlName="bidIncreaseBy" (focus)="clearDefaultZero('bidIncreaseBy')">
+          <small id="auction-settings-bidIncreaseBy-error" class="field-error" *ngIf="fieldError(form.controls.bidIncreaseBy, 'Bid Increase By') as error">{{error}}</small>
         </div>
       </div>
 

@@ -1,3 +1,5 @@
+import { nonBlank } from '../../../shared/validation/validators';
+import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
@@ -19,7 +21,7 @@ import { MessageService } from '../../../core/services/message.service';
 @Component({
   selector: 'app-team-form',
   standalone: true,
-  imports: [
+  imports: [FieldErrorComponent,
     CommonModule,
     ReactiveFormsModule
   ],
@@ -56,9 +58,9 @@ export class TeamFormComponent {
 
     logo: [''],
 
-    teamName: ['', Validators.required],
+    teamName: ['', [Validators.required, nonBlank]],
 
-    ownerName: ['', Validators.required]
+    ownerName: ['']
 
   });
 
@@ -186,7 +188,7 @@ if (!settings) {
 
       teamName: this.form.value.teamName!,
 
-      ownerName: this.form.value.ownerName!,
+      ownerName: this.form.value.ownerName?.trim() || '',
 
       auctionId: this.existingTeam?.auctionId || settings.activeAuctionId || '',
 

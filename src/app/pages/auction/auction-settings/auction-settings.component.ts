@@ -1,3 +1,5 @@
+import { nonBlank, wholeNumber } from '../../../shared/validation/validators';
+import { fieldError } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
@@ -28,6 +30,8 @@ import { AppUser } from '../../../core/models/app-user';
 })
 export class AuctionSettingsComponent {
 
+  readonly fieldError = fieldError;
+
   private fb = inject(FormBuilder);
 
   private auctionService = inject(AuctionService);
@@ -55,13 +59,15 @@ export class AuctionSettingsComponent {
 
   showForm = false;
 
+  private selectionBeforeForm: { auction: AuctionSettings | null; id: string } | null = null;
+
   shareAuction: AuctionSettings | null = null;
 
   form = this.fb.group({
 
     logo: [''],
 
-    auctionName: ['', Validators.required],
+    auctionName: ['', [Validators.required, nonBlank]],
 
     auctionDate: ['', Validators.required],
 
@@ -71,13 +77,13 @@ export class AuctionSettingsComponent {
 
     bidIncreaseBy: [0, [Validators.required, Validators.min(1)]],
 
-    playersPerTeam: [0, [Validators.required, Validators.min(1)]],
+    playersPerTeam: [0, [Validators.required, Validators.min(1), wholeNumber]],
 
-    teamLimit: [2, [Validators.required, Validators.min(1)]],
+    teamLimit: [2, [Validators.required, Validators.min(1), wholeNumber]],
 
-    playerLimit: [10, [Validators.required, Validators.min(1)]],
+    playerLimit: [10, [Validators.required, Validators.min(1), wholeNumber]],
 
-    basePlayerPrice: [0]
+    basePlayerPrice: [0, [Validators.required, Validators.min(1)]]
 
   });
 
@@ -187,6 +193,7 @@ export class AuctionSettingsComponent {
       this.selectAuction(auction);
 
       this.showForm = false;
+      this.selectionBeforeForm = null;
 
       this.message.success(`"${auction.auctionName}" selected successfully.`, 'Auction Selected');
 
@@ -205,6 +212,8 @@ export class AuctionSettingsComponent {
 
   editAuction(auction: AuctionSettings): void {
 
+    this.rememberSelection();
+
     this.selectAuction(auction);
 
     this.showForm = true;
@@ -214,6 +223,8 @@ export class AuctionSettingsComponent {
 
 
   createNewAuction(): void {
+
+    this.rememberSelection();
 
     this.showForm = true;
 
@@ -257,12 +268,21 @@ export class AuctionSettingsComponent {
 
     this.form.reset();
 
-    if (!this.selectedAuctionId && this.auctions.length === 0 && !this.isAdmin) {
-
-      this.createNewAuction();
-
+    if (this.selectionBeforeForm) {
+      this.activeAuction = this.selectionBeforeForm.auction;
+      this.selectedAuctionId = this.selectionBeforeForm.id;
+      this.selectionBeforeForm = null;
     }
 
+  }
+
+  private rememberSelection(): void {
+    if (!this.showForm) {
+      this.selectionBeforeForm = {
+        auction: this.activeAuction,
+        id: this.selectedAuctionId
+      };
+    }
   }
 
   clearDefaultZero(controlName: string): void {
@@ -441,6 +461,8 @@ export class AuctionSettingsComponent {
 
   async save() {
 
+    if (this.loading || this.uploading) return;
+
     if (this.form.invalid) {
 
       this.form.markAllAsTouched();
@@ -502,6 +524,7 @@ export class AuctionSettingsComponent {
       }
 
       this.showForm = false;
+      this.selectionBeforeForm = null;
 
       this.message.success('Auction settings saved successfully.');
 

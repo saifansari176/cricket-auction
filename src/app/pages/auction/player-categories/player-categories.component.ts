@@ -1,3 +1,5 @@
+import { nonBlank } from '../../../shared/validation/validators';
+import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,7 +16,7 @@ import { Player } from '../../../core/models/player';
 @Component({
   selector: 'app-player-categories',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [FieldErrorComponent, CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './player-categories.component.html',
   styleUrl: './player-categories.component.scss'
 })
@@ -41,9 +43,9 @@ export class PlayerCategoriesComponent {
   saving = false;
 
   form = this.fb.group({
-    name: ['', Validators.required],
-    basePrice: [0, [Validators.required, Validators.min(1)]],
-    bidIncreaseBy: [0, [Validators.required, Validators.min(1)]]
+    name: ['', [Validators.required, nonBlank]],
+    basePrice: [0, [Validators.min(0)]],
+    bidIncreaseBy: [0, [Validators.min(0)]]
   });
 
   async ngOnInit(): Promise<void> {

@@ -1,3 +1,5 @@
+import { nonBlank } from '../../../shared/validation/validators';
+import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
@@ -24,7 +26,7 @@ import { PlayerCategoryService } from '../../../core/services/player-category.se
 @Component({
   selector: 'app-player-form',
   standalone: true,
-  imports: [
+  imports: [FieldErrorComponent,
     CommonModule,
     ReactiveFormsModule
   ],
@@ -58,9 +60,9 @@ export class PlayerFormComponent {
 
   form = this.fb.group({
 
-    firstName: ['', [Validators.required, Validators.minLength(2)]],
+    firstName: ['', [Validators.required, nonBlank, Validators.minLength(2)]],
 
-    lastName: ['', Validators.required],
+    lastName: ['', [Validators.required, nonBlank]],
 
     mobile: [
       '',
