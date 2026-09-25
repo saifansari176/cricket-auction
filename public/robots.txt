@@ -3,6 +3,7 @@ Allow: /
 Disallow: /login
 Disallow: /dashboard
 Disallow: /players
+Disallow: /player-list/
 Disallow: /teams
 Disallow: /auction
 Disallow: /reports

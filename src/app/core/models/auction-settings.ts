@@ -28,6 +28,12 @@ export interface AuctionSettings {
 
   publicLiveViewEnabled?: boolean;
 
+  publicPlayerListEnabled?: boolean;
+
+  publicPlayerListToken?: string;
+
+  publicPlayerListSlug?: string;
+
   isActive?: boolean;
 
   createdAt?: string;

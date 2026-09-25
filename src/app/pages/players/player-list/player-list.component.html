@@ -25,6 +25,13 @@
             Export Excel
 
         </button>
+
+        <label class="form-check form-switch public-list-toggle mb-0">
+            <input class="form-check-input" type="checkbox" [checked]="publicPlayerListEnabled" [disabled]="updatingPublicPlayerList || !activeAuctionId" (change)="togglePublicPlayerList()">
+            <span class="form-check-label">Public list {{publicPlayerListEnabled ? 'On' : 'Off'}}</span>
+        </label>
+
+        <button *ngIf="publicPlayerListEnabled" type="button" class="btn btn-outline-primary" (click)="copyPublicPlayerListLink()">Copy Public Link</button>
         
          <input
             #fileInput

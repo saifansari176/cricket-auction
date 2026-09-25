@@ -136,6 +136,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'player-list/:publicLink',
+    loadComponent: () =>
+      import('./pages/public/public-player-list/public-player-list.component').then((m) => m.PublicPlayerListComponent),
+  },
+
+  {
     path: 'live-screen/:auctionId',
     loadComponent: () =>
       import('./pages/public/live-screen/live-screen.component').then((m) => m.LiveScreenComponent),

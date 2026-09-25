@@ -1,0 +1,61 @@
+<main class="directory-page" *ngIf="!loading; else loadingState">
+  <section *ngIf="notFound" class="empty-state">
+    <h1>Player list Closed </h1>
+    <p>This public link is closed by the Organizers.</p>
+  </section>
+
+  <ng-container *ngIf="!notFound">
+    <header class="directory-hero">
+      <div class="hero-main">
+        <img *ngIf="auction?.logo" [src]="auction?.logo" [alt]="auction?.auctionName + ' logo'">
+        <div>
+          <p class="eyebrow">CRICBIDS &bull; PLAYER DIRECTORY</p>
+          <h1>{{auction?.auctionName}}</h1>
+          <span class="availability-pill">AVAILABLE PLAYERS</span>
+        </div>
+      </div>
+      <div class="directory-contact">
+        <img src="/cricbids-logo.png" alt="Cricbids Auctions">
+        <a href="https://www.cricbids.com" target="_blank" rel="noopener noreferrer">www.cricbids.com</a>
+        <a href="tel:9823300308">Saif Ansari: 9823300308</a>
+      </div>
+    </header>
+
+    <section class="filters" aria-label="Filter available players">
+      <input type="search" [(ngModel)]="search" placeholder="Search by name, type, category, or jersey number" aria-label="Search players">
+      <select [(ngModel)]="playerType" aria-label="Filter player type">
+        <option value="">All player types</option>
+        <option *ngFor="let type of playerTypes" [value]="type">{{type}}</option>
+      </select>
+      <select [(ngModel)]="category" aria-label="Filter player category">
+        <option value="">All categories</option>
+        <option value="__regular__">Regular players</option>
+        <option *ngFor="let item of categories" [value]="item">{{item}}</option>
+      </select>
+    </section>
+
+    <p class="result-count">{{filteredPlayers.length}} available player{{filteredPlayers.length === 1 ? '' : 's'}}</p>
+
+    <section class="player-grid" *ngIf="filteredPlayers.length; else noPlayers">
+      <article class="player-card" *ngFor="let player of filteredPlayers">
+        <span *ngIf="player.jerseyNumber" class="jersey-number">{{player.jerseyNumber}}</span>
+        <button type="button" class="photo" (click)="openPreview(player)" [disabled]="!player.photo || brokenPhotoUrls.has(player.photo)" [attr.aria-label]="'Preview photo of ' + player.firstName + ' ' + player.lastName">
+          <img *ngIf="player.photo && !brokenPhotoUrls.has(player.photo); else noPhoto" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" (error)="markPhotoBroken(player.photo)">
+          <ng-template #noPhoto><span>No photo</span></ng-template>
+        </button>
+        <div class="player-info">
+          <h2>{{player.firstName}} {{player.lastName}}</h2>
+          <p>{{player.playerType || 'Player'}}</p>
+          <small *ngIf="player.note" class="player-note">{{player.note}}</small>
+          <div class="meta">
+            <span *ngIf="player.categoryName">{{player.categoryName}}</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #noPlayers><p class="empty-state compact">No available players match these filters.</p></ng-template>
+  </ng-container>
+</main>
+
+<ng-template #loadingState><main class="loading-state">Loading available players&hellip;</main></ng-template>

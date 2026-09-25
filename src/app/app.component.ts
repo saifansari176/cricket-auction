@@ -76,7 +76,7 @@ export class AppComponent implements OnDestroy {
   };
 
   get showShell(): boolean {
-    const publicPaths = ['/', '/login', '/player-registration', '/watch', '/live-screen', '/how-it-works', '/past-auctions'];
+    const publicPaths = ['/', '/login', '/player-registration', '/player-list', '/watch', '/live-screen', '/how-it-works', '/past-auctions'];
     return !publicPaths.some((path) => path === '/' ? this.router.url === '/' : this.router.url.startsWith(path));
   }
 

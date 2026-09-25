@@ -229,6 +229,39 @@ export class AuctionService {
     return { auction, teams, players, bids, liveState };
   }
 
+  /** Read-only player directory resolved from an opaque, share-only token. */
+  async getPublicPlayers(publicToken: string): Promise<{
+    auction: AuctionSettings | null;
+    players: Player[];
+  }> {
+    if (!publicToken) return { auction: null, players: [] };
+
+    const auction = await this.firebase.getOneByField<AuctionSettings>(
+      this.auctionsCollection,
+      'publicPlayerListToken',
+      publicToken
+    );
+    if (!auction?.id || auction.publicPlayerListEnabled !== true) {
+      return { auction: null, players: [] };
+    }
+
+    const players = await this.firebase.getAll<Player>(this.auctionCollection(auction.id, 'players'));
+    return { auction, players };
+  }
+
+  async setPublicPlayerListEnabled(auctionId: string, enabled: boolean): Promise<{ token: string; slug: string }> {
+    const auction = enabled ? await this.getAuctionById(auctionId) : null;
+    const token = enabled ? this.createPublicToken() : '';
+    const slug = enabled ? this.toPublicSlug(auction?.auctionName || '') : '';
+    await this.firebase.update(this.auctionsCollection, auctionId, {
+      publicPlayerListEnabled: enabled,
+      publicPlayerListToken: token,
+      publicPlayerListSlug: slug,
+      updatedAt: new Date().toISOString()
+    });
+    return { token, slug };
+  }
+
   async saveLiveState(state: LiveAuctionState, auctionId?: string): Promise<void> {
     const id = auctionId || await this.getActiveAuctionId();
     if (!id) return;
@@ -455,6 +488,21 @@ export class AuctionService {
 
   auctionCollection(auctionId: string, name: string): string {
     return `${this.auctionsCollection}/${auctionId}/${name}`;
+  }
+
+  private createPublicToken(): string {
+    const bytes = new Uint8Array(32);
+    crypto.getRandomValues(bytes);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  private toPublicSlug(value: string): string {
+    const slug = value
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return slug || 'cricket-auction';
   }
 
   private selectionPath(): string {

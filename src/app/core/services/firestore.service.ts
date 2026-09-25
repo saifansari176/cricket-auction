@@ -67,6 +67,14 @@ export class FirebaseService {
     });
   }
 
+  async getOneByField<T>(collectionName: string, field: string, value: unknown): Promise<T | null> {
+    return this.loading.track(async () => {
+      const snapshot = await getDocs(query(collection(db, collectionName), where(field, '==', value)));
+      const record = snapshot.docs[0];
+      return record ? ({ id: record.id, ...record.data() } as T) : null;
+    });
+  }
+
   // ==========================
   // Add New Document
   // ==========================

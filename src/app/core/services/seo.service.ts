@@ -78,6 +78,12 @@ export class SeoService {
   }
 
   private canonicalUrl(url: string, path: string): string {
+    // Public player lists use a private share token. Do not put that token in
+    // canonical or social metadata, where crawlers could retain it.
+    if (path.startsWith('/player-list/')) {
+      return `${this.siteUrl}/player-list`;
+    }
+
     // A registration form is tied to one tournament. Keep its public auction
     // id in the canonical URL so it can be discovered as its own form page.
     if (path === '/player-registration') {
@@ -104,6 +110,15 @@ export class SeoService {
         title: 'Live Cricket Auction Screen | Cricbids',
         description: 'Follow the live player, current bid, teams, and auction activity on Cricbids.',
         indexable: true
+      };
+    }
+
+    if (path.startsWith('/player-list/')) {
+      return {
+        title: 'Available Cricket Players | Cricbids',
+        description: 'Browse the available players for this Cricbids auction.',
+        // The URL is a private, share-only link and must never be indexed.
+        indexable: false
       };
     }
 

@@ -23,6 +23,11 @@ export class PlayerListComponent {
   playerTypeFilter = '';
   playerStatusFilter = '';
   categoryFilter = '';
+  publicPlayerListEnabled = false;
+  updatingPublicPlayerList = false;
+  activeAuctionId = '';
+  publicPlayerListToken = '';
+  publicPlayerListSlug = '';
   
   constructor(
     private playerService: PlayerService,
@@ -33,6 +38,7 @@ export class PlayerListComponent {
 
   async ngOnInit(): Promise<void> {
     await this.loadPlayers();
+    await this.loadPublicPlayerListSetting();
   }
 
   async loadPlayers() {
@@ -78,6 +84,41 @@ get categories(): string[] {
       ].some((value) => String(value ?? '').toLowerCase().includes(search));
       return matchesType && matchesStatus && matchesSearch && matchesCategory;
     });
+  }
+
+  async togglePublicPlayerList(): Promise<void> {
+    if (!this.activeAuctionId || this.updatingPublicPlayerList) return;
+
+    this.updatingPublicPlayerList = true;
+    const enabled = !this.publicPlayerListEnabled;
+    try {
+      const access = await this.auctionService.setPublicPlayerListEnabled(this.activeAuctionId, enabled);
+      this.publicPlayerListToken = access.token;
+      this.publicPlayerListSlug = access.slug;
+      this.publicPlayerListEnabled = enabled;
+      this.message.success(enabled ? 'Public player list is now enabled.' : 'Public player list is now disabled.');
+    } finally {
+      this.updatingPublicPlayerList = false;
+    }
+  }
+
+  async copyPublicPlayerListLink(): Promise<void> {
+    if (!this.publicPlayerListToken) return;
+    const link = `${window.location.origin}/player-list/${encodeURIComponent(this.publicPlayerListSlug)}--${encodeURIComponent(this.publicPlayerListToken)}`;
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(link);
+      this.message.success('Public player-list link copied.');
+      return;
+    }
+    this.message.info(`Copy public player-list link:\n${link}`);
+  }
+
+  private async loadPublicPlayerListSetting(): Promise<void> {
+    const auction = await this.auctionService.get();
+    this.activeAuctionId = auction?.activeAuctionId || auction?.id || '';
+    this.publicPlayerListToken = auction?.publicPlayerListToken || '';
+    this.publicPlayerListSlug = auction?.publicPlayerListSlug || '';
+    this.publicPlayerListEnabled = auction?.publicPlayerListEnabled === true && !!this.publicPlayerListToken;
   }
 
   exportExcel() {

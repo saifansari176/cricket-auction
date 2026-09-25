@@ -10,6 +10,9 @@
 }
 
 .player-list-actions { flex-wrap: nowrap; }
+.public-list-toggle { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; white-space: nowrap; background: #fff; }
+.public-list-toggle .form-check-input { margin: 0; cursor: pointer; }
+.public-list-toggle .form-check-input:disabled { cursor: not-allowed; }
 
 .mobile-player-list { display: none; }
 
@@ -24,6 +27,7 @@
   .player-list-actions { width: 100%; gap: 6px !important; }
   .player-list-actions .btn { flex: 1 1 0; padding: 7px 6px; font-size: 12px; white-space: nowrap; }
   .player-list-actions .me-2 { margin-right: 0 !important; }
+  .public-list-toggle { font-size: 12px; }
   .desktop-table { display: none; }
   .mobile-player-list { display: grid; gap: 10px; }
   .player-accordion { border: 1px solid #dbe3ef; border-radius: 10px; background: #fff; overflow: hidden; }
