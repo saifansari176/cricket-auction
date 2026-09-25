@@ -13,11 +13,12 @@ import { StorageService } from '../../../core/services/storage.service';
 import { MessageService } from '../../../core/services/message.service';
 import { PlayerCategory } from '../../../core/models/player-category';
 import { PlayerCategoryService } from '../../../core/services/player-category.service';
+import { ImageCropperComponent } from '../../../shared/image-cropper/image-cropper.component';
 
 @Component({
   selector: 'app-player-registration',
   standalone: true,
-  imports: [FieldErrorComponent, CommonModule, ReactiveFormsModule],
+  imports: [FieldErrorComponent, CommonModule, ReactiveFormsModule, ImageCropperComponent],
   templateUrl: './player-registration.component.html',
   styleUrl: './player-registration.component.scss'
 })
@@ -37,6 +38,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
   submitted = false;
   photoPreview = '';
   uploadingPhoto = false;
+  cropFile: File | null = null;
   categories: PlayerCategory[] = [];
   private localPreviewUrl = '';
   private photoUploadVersion = 0;
@@ -127,7 +129,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
     }
   }
 
-  async onPhotoChange(event: Event): Promise<void> {
+  onPhotoChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
 
@@ -139,6 +141,14 @@ export class PlayerRegistrationComponent implements OnDestroy {
       return;
     }
 
+    // Invalidate a prior upload as soon as a new image is selected.
+    this.photoUploadVersion++;
+    this.cropFile = file;
+    input.value = '';
+  }
+
+  async uploadCroppedPhoto(file: File): Promise<void> {
+    this.cropFile = null;
     const uploadVersion = ++this.photoUploadVersion;
     this.form.patchValue({ photo: '' });
     this.setLocalPreview(file);

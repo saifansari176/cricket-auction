@@ -22,13 +22,14 @@ import { AuctionSettings } from '../../../core/models/auction-settings';
 import { MessageService } from '../../../core/services/message.service';
 import { PlayerCategory } from '../../../core/models/player-category';
 import { PlayerCategoryService } from '../../../core/services/player-category.service';
+import { ImageCropperComponent } from '../../../shared/image-cropper/image-cropper.component';
 
 @Component({
   selector: 'app-player-form',
   standalone: true,
   imports: [FieldErrorComponent,
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule, ImageCropperComponent
   ],
   templateUrl: './player-form.component.html',
   styleUrl: './player-form.component.scss'
@@ -56,6 +57,7 @@ export class PlayerFormComponent {
   categories: PlayerCategory[] = [];
   saving = false;
   uploadingPhoto = false;
+  cropFile: File | null = null;
   private photoUploadVersion = 0;
 
   form = this.fb.group({
@@ -260,7 +262,7 @@ export class PlayerFormComponent {
 
   // =========================================
 
-  async onPhotoChange(event: Event): Promise<void> {
+  onPhotoChange(event: Event): void {
 
     const input = event.target as HTMLInputElement;
 
@@ -278,6 +280,14 @@ export class PlayerFormComponent {
       return;
     }
 
+    // Invalidate a prior upload as soon as a new image is selected.
+    this.photoUploadVersion++;
+    this.cropFile = file;
+    input.value = '';
+  }
+
+  async uploadCroppedPhoto(file: File): Promise<void> {
+    this.cropFile = null;
     const uploadVersion = ++this.photoUploadVersion;
     this.form.patchValue({ photo: '' });
     this.uploadingPhoto = true;

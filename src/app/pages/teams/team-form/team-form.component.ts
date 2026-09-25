@@ -17,13 +17,15 @@ import { AuctionService } from '../../../core/services/auction.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { MessageService } from '../../../core/services/message.service';
+import { ImageCropperComponent } from '../../../shared/image-cropper/image-cropper.component';
 
 @Component({
   selector: 'app-team-form',
   standalone: true,
   imports: [FieldErrorComponent,
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ImageCropperComponent
   ],
   templateUrl: './team-form.component.html',
   styleUrl: './team-form.component.scss'
@@ -53,6 +55,8 @@ export class TeamFormComponent {
 
   uploading = false;
   saving = false;
+  cropFile: File | null = null;
+  private logoUploadVersion = 0;
 
   form = this.fb.group({
 
@@ -106,7 +110,7 @@ export class TeamFormComponent {
 
   // ====================================
 
-  async onLogoChange(event: Event) {
+  onLogoChange(event: Event): void {
 
     const input = event.target as HTMLInputElement;
 
@@ -124,6 +128,14 @@ export class TeamFormComponent {
       return;
     }
 
+    this.logoUploadVersion++;
+    this.cropFile = file;
+    input.value = '';
+  }
+
+  async uploadCroppedLogo(file: File): Promise<void> {
+    this.cropFile = null;
+    const uploadVersion = ++this.logoUploadVersion;
     this.uploading = true;
 
     try {
@@ -131,20 +143,16 @@ export class TeamFormComponent {
       const imageUrl =
         await this.storageService.uploadTeamLogo(file);
 
-      this.form.patchValue({
-
-        logo: imageUrl
-
-      });
+      if (uploadVersion === this.logoUploadVersion) this.form.patchValue({ logo: imageUrl });
 
     }
     catch (e) {
 
-      this.message.error('Logo upload failed.');
+      if (uploadVersion === this.logoUploadVersion) this.message.error('Logo upload failed.');
 
     }
 
-    this.uploading = false;
+    if (uploadVersion === this.logoUploadVersion) this.uploading = false;
 
   }
 

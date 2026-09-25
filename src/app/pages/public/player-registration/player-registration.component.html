@@ -35,6 +35,7 @@
           (change)="onPhotoChange($event)"
         />
         <app-field-error [control]="form.controls.photo" label="Photo" fieldId="player-registration-photo" />
+        <app-image-cropper *ngIf="cropFile" [file]="cropFile" (cropped)="uploadCroppedPhoto($event)" (cancelled)="cropFile = null" />
       </div>
 
       <div class="form-grid">

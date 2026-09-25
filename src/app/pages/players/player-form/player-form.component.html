@@ -33,6 +33,7 @@
 
                         <input id="player-form-photo" aria-required="true" aria-describedby="player-form-photo-error" [class.is-invalid]="form.controls.photo.invalid && form.controls.photo.touched" [attr.aria-invalid]="form.controls.photo.invalid && form.controls.photo.touched" (blur)="form.controls.photo.markAsTouched()" type="file" accept="image/*" class="form-control" [disabled]="uploadingPhoto || saving" (change)="onPhotoChange($event)">
                         <app-field-error [control]="form.controls.photo" label="Photo" fieldId="player-form-photo" />
+                        <app-image-cropper *ngIf="cropFile" [file]="cropFile" (cropped)="uploadCroppedPhoto($event)" (cancelled)="cropFile = null" />
                     </div>
 
                     <div class="col-md-6 mb-3">
