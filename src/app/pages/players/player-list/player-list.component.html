@@ -26,12 +26,15 @@
 
         </button>
 
-        <label class="form-check form-switch public-list-toggle mb-0">
-            <input class="form-check-input" type="checkbox" [checked]="publicPlayerListEnabled" [disabled]="updatingPublicPlayerList || !activeAuctionId" (change)="togglePublicPlayerList()">
-            <span class="form-check-label">Public list {{publicPlayerListEnabled ? 'On' : 'Off'}}</span>
-        </label>
-
-        <button *ngIf="publicPlayerListEnabled" type="button" class="btn btn-outline-primary" (click)="copyPublicPlayerListLink()">Copy Public Link</button>
+        <div class="public-list-toggle">
+            <label class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" [checked]="publicPlayerListEnabled" [disabled]="updatingPublicPlayerList || !activeAuctionId" (change)="togglePublicPlayerList()">
+                <span class="form-check-label">Public list {{publicPlayerListEnabled ? 'On' : 'Off'}}</span>
+            </label>
+            <button *ngIf="publicPlayerListEnabled" type="button" class="public-list-copy" (click)="copyPublicPlayerListLink()" title="Copy public player-list link" aria-label="Copy public player-list link">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8.5V5.8A1.8 1.8 0 0 1 9.8 4h8.4A1.8 1.8 0 0 1 20 5.8v8.4a1.8 1.8 0 0 1-1.8 1.8h-2.7M5.8 8h8.4A1.8 1.8 0 0 1 16 9.8v8.4a1.8 1.8 0 0 1-1.8 1.8H5.8A1.8 1.8 0 0 1 4 18.2V9.8A1.8 1.8 0 0 1 5.8 8Z"/></svg>
+            </button>
+        </div>
         
          <input
             #fileInput

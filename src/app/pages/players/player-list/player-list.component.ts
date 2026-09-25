@@ -77,13 +77,22 @@ get categories(): string[] {
     return this.players.filter((player) => {
       const matchesType = !type || player.playerType.toLowerCase() === type;
       const matchesStatus = !status || player.status.toLowerCase() === status;
-      const matchesCategory = !category || player.categoryName?.toLowerCase() === category;
+      const matchesCategory = !category
+        || (category === '__regular__' && !player.categoryName)
+        || player.categoryName?.toLowerCase() === category;
       const matchesSearch = !search || [
         player.firstName, player.lastName, player.mobile, player.jerseyNumber,
         player.playerType, player.status, player.baseBid
       ].some((value) => String(value ?? '').toLowerCase().includes(search));
       return matchesType && matchesStatus && matchesSearch && matchesCategory;
     });
+  }
+
+  clearFilters(): void {
+    this.playerFilter = '';
+    this.playerTypeFilter = '';
+    this.playerStatusFilter = '';
+    this.categoryFilter = '';
   }
 
   async togglePublicPlayerList(): Promise<void> {
