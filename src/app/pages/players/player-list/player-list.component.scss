@@ -9,7 +9,15 @@
   margin-bottom: 16px;
 }
 
-.player-list-actions { flex-wrap: nowrap; }
+.player-list-actions { flex-wrap: wrap; }
+.file-action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 13px; border: 1px solid currentColor; border-radius: 7px; font-size: 14px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.file-action svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.excel-action { color: #176b42; background: #edf8f1; }
+.excel-action:hover:not(:disabled) { background: #d5efdf; }
+.pdf-action { color: #b4232c; background: #fff1f2; }
+.pdf-action:hover:not(:disabled) { background: #ffe0e3; }
+.file-action:disabled { opacity: .6; cursor: wait; }
+.file-action:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
 .public-list-toggle { display: flex; align-items: center; gap: 8px; padding: 5px 7px 5px 10px; border: 1px solid #cbd5e1; border-radius: 6px; white-space: nowrap; background: #fff; }
 .public-list-toggle .form-check { display: flex; align-items: center; gap: 7px; }.public-list-toggle .form-check-input { margin: 0; cursor: pointer; }.public-list-toggle .form-check-input:disabled { cursor: not-allowed; }
 .public-list-copy { display: grid; width: 28px; height: 28px; padding: 5px; place-items: center; border: 0; border-radius: 5px; color: #fff; background: #0d6efd; }.public-list-copy:hover { background: #0b5ed7; }.public-list-copy svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }

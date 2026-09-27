@@ -12,20 +12,20 @@
 
         </a>
 
-         <button
-            class="btn btn-primary me-2"
-            (click)="fileInput.click()">
-            Import Excel
+        <button type="button" class="file-action excel-action import-action" (click)="fileInput.click()" title="Import Excel" aria-label="Import Excel">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H4v20h16V8Z M14 2v6h6 M7 11l5 7m0-7-5 7 M17 18v-7m-3 3 3-3 3 3"/></svg>
+            <span>Import Excel</span>
         </button>
-
-        <button
-            class="btn btn-primary"
-            (click)="exportExcel()">
-
-            Export Excel
-
+        <button type="button" class="file-action excel-action" [disabled]="exportingExcel || !players.length" [attr.aria-busy]="exportingExcel" (click)="exportExcel()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H4v20h16V8Z M14 2v6h6 M7 11l5 7m0-7-5 7 M17 11v7m-3-3 3 3 3-3"/></svg>
+            <span *ngIf="exportingExcel" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span aria-live="polite">{{exportingExcel ? 'Preparing Excel...' : (excelDownloadUrl ? 'Download Excel' : 'Prepare Excel')}}</span>
         </button>
-
+        <button type="button" class="file-action pdf-action" [disabled]="preparingCatalogue || !filteredPlayers.length" [attr.aria-busy]="preparingCatalogue" (click)="downloadCatalogue()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H4v20h16V8Z M14 2v6h6 M12 11v7m-3-3 3 3 3-3"/></svg>
+            <span *ngIf="preparingCatalogue" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span aria-live="polite">{{preparingCatalogue ? 'Preparing PDF...' : (pdfDownloadUrl ? 'Download PDF' : 'Prepare PDF')}}</span>
+        </button>
         <div class="public-list-toggle">
             <label class="form-check form-switch mb-0">
                 <input class="form-check-input" type="checkbox" [checked]="publicPlayerListEnabled" [disabled]="updatingPublicPlayerList || !activeAuctionId" (change)="togglePublicPlayerList()">
@@ -49,6 +49,10 @@
 
 <div class="player-filters">
     <input type="search" class="form-control" [(ngModel)]="playerFilter" placeholder="Search players">
+</div>
+
+<div *ngIf="excelExportError" class="mb-3" aria-live="polite">
+    <p *ngIf="excelExportError" class="text-danger" role="alert">{{excelExportError}}</p>
 </div>
 
 <div class="table-responsive desktop-table">

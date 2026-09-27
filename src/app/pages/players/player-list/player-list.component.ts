@@ -1,13 +1,15 @@
-﻿import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { PlayerService } from '../../../core/services/player.service';
 import { RouterLink, RouterModule } from '@angular/router';
 import { Player } from '../../../core/models/player';
 import * as XLSX from 'xlsx';
+import { createPlayerExcel } from '../../../shared/player-excel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from '../../../core/services/message.service';
 import { AuctionService } from '../../../core/services/auction.service';
 import { ImagePreviewService } from '../../../shared/image-preview/image-preview.service';
+import { createPlayerPdf } from '../../../shared/player-pdf';
 
 @Component({
   selector: 'app-player-list',
@@ -16,7 +18,7 @@ import { ImagePreviewService } from '../../../shared/image-preview/image-preview
   templateUrl: './player-list.component.html',
   styleUrl: './player-list.component.scss'
 })
-export class PlayerListComponent {
+export class PlayerListComponent implements OnDestroy {
   players: Player[] = [];
   brokenPhotoUrls = new Set<string>();
   playerFilter = '';
@@ -28,6 +30,39 @@ export class PlayerListComponent {
   activeAuctionId = '';
   publicPlayerListToken = '';
   publicPlayerListSlug = '';
+  auctionName = 'Cricbids';
+  preparingCatalogue = false;
+  pdfDownloadUrl = '';
+  exportingExcel = false;
+  excelDownloadUrl = '';
+  excelExportError = '';
+  private destroyed = false;
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    if (this.excelDownloadUrl) URL.revokeObjectURL(this.excelDownloadUrl);
+    if (this.pdfDownloadUrl) URL.revokeObjectURL(this.pdfDownloadUrl);
+  }
+
+  async downloadCatalogue(): Promise<void> {
+    if (this.preparingCatalogue || !this.filteredPlayers.length) return;
+    if (this.pdfDownloadUrl) {
+      this.downloadPreparedFile(this.pdfDownloadUrl, 'Players.pdf');
+      return;
+    }
+    this.preparingCatalogue = true;
+    if (this.pdfDownloadUrl) URL.revokeObjectURL(this.pdfDownloadUrl);
+    this.pdfDownloadUrl = '';
+    try {
+      const { bytes } = await createPlayerPdf(this.auctionName, [...this.filteredPlayers]);
+      if (this.destroyed) return;
+      this.pdfDownloadUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    } catch {
+      this.message.error('Unable to prepare the catalogue. Please try again.');
+    } finally {
+      this.preparingCatalogue = false;
+    }
+  }
   
   constructor(
     private playerService: PlayerService,
@@ -124,54 +159,45 @@ get categories(): string[] {
 
   private async loadPublicPlayerListSetting(): Promise<void> {
     const auction = await this.auctionService.get();
+    this.auctionName = auction?.auctionName || 'Cricbids';
     this.activeAuctionId = auction?.activeAuctionId || auction?.id || '';
     this.publicPlayerListToken = auction?.publicPlayerListToken || '';
     this.publicPlayerListSlug = auction?.publicPlayerListSlug || '';
     this.publicPlayerListEnabled = auction?.publicPlayerListEnabled === true && !!this.publicPlayerListToken;
   }
 
-  exportExcel() {
-    const data = this.players.map(player => ({
-      'First Name': player.firstName,
-      'Last Name': player.lastName,
-      'Mobile': player.mobile,
-      'Jersey Number': player.jerseyNumber,
-      'Player Type': player.playerType,
-      'T-Shirt Size': player.tshirtSize,
-      'Trouser Size': player.trouserSize,
-      'Base Bid': player.baseBid,
-      'Photo': player.photo,
-      'Note': player.note,
-      'Status': player.status
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(data);
-
-    worksheet['!cols'] = [
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 18 },
-      { wch: 12 },
-      { wch: 14 },
-      { wch: 12 },
-      { wch: 60 },
-      { wch: 30 },
-      { wch: 12 }
-    ];
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Players');
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
-
-    const blob = new Blob([excelBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-
-    this.downloadFile(blob, 'Players.xlsx');
+  async exportExcel(): Promise<void> {
+    if (this.exportingExcel || !this.players.length) return;
+    if (this.excelDownloadUrl) {
+      this.downloadPreparedFile(this.excelDownloadUrl, 'Players.xlsx');
+      return;
+    }
+    this.exportingExcel = true;
+    this.excelExportError = '';
+    if (this.excelDownloadUrl) URL.revokeObjectURL(this.excelDownloadUrl);
+    this.excelDownloadUrl = '';
+    try {
+      const { bytes } = await createPlayerExcel([...this.players]);
+      if (this.destroyed) return;
+      const blob = new Blob([bytes], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      this.excelDownloadUrl = URL.createObjectURL(blob);
+    } catch (error: unknown) {
+      console.error('Player Excel export failed', error);
+      this.excelExportError = 'Unable to export Excel. Please refresh the page and try again.';
+      this.message.error(this.excelExportError);
+    } finally {
+      this.exportingExcel = false;
+    }
+  }
+  private downloadPreparedFile(url: string, filename: string): void {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.append(link);
+    link.click();
+    link.remove();
   }
 
   importExcel(event: Event) {
@@ -282,13 +308,5 @@ markPhotoBroken(url: string): void {
     }
   }
 
-  private downloadFile(blob: Blob, fileName: string): void {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    URL.revokeObjectURL(url);
-  }
 
 }
