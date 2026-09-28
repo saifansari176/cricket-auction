@@ -75,6 +75,14 @@ export class PlayerService {
 
   }
 
+  async isMobileRegistered(auctionId: string, mobile: string): Promise<boolean> {
+    const normalizedMobile = mobile.trim();
+    if (!auctionId || !normalizedMobile) return false;
+
+    const players = await this.firebase.getAll<Player>(this.auctionCollection(auctionId));
+    return players.some((player) => player.mobile.trim() === normalizedMobile);
+  }
+
   async canAddPlayer(auctionId?: string): Promise<boolean> {
     const user = await this.auctionService.authService.waitForUser();
     if (this.auctionService.authService.isAdmin(user)) return true;

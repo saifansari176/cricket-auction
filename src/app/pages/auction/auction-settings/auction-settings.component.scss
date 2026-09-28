@@ -227,6 +227,126 @@
   font-size: 13px;
 }
 
+.payment-form-option small {
+  display: block;
+  margin-top: 8px;
+  color: #64748b;
+}
+
+.share-payment-settings {
+  margin: 16px 0 0;
+  padding: 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.share-registration-settings {
+  margin: 22px 0;
+  padding: 14px;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.share-registration-settings > .registration-link-switch {
+  margin: 0;
+}
+
+.share-registration-settings > .share-modal-help {
+  margin: 8px 0 0;
+}
+
+.share-payment-settings .registration-link-switch {
+  margin: 0;
+}
+
+.share-payment-fee {
+  margin-top: 12px;
+}
+
+.share-payment-fee small {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.payment-summary {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.payment-summary-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.payment-summary-heading h4,
+.payment-summary-heading p {
+  margin: 0;
+}
+
+.payment-summary-heading p,
+.payment-summary-heading > span,
+.payment-summary-empty {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.payment-summary-grid > div {
+  padding: 12px;
+  border: 1px solid #dbe3ef;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.payment-summary-grid span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.payment-summary-grid strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 22px;
+}
+
+.payment-summary-grid .total {
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.payment-records {
+  margin-top: 18px;
+}
+
+.payment-records h5 {
+  margin: 0 0 10px;
+}
+
+.payment-records table {
+  min-width: 700px;
+}
+
+.payment-records code {
+  font-size: 12px;
+  word-break: break-all;
+}
+
+
 .share-modal-actions {
   justify-content: flex-end;
   margin-top: 20px;
@@ -338,6 +458,10 @@
   .settings-summary {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .payment-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .form-grid {

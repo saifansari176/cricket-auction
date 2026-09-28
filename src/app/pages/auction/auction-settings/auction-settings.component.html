@@ -242,12 +242,29 @@
       <button type="button" class="btn-close" aria-label="Close" (click)="closeSharePopup()"></button>
     </div>
 
+    <section class="share-registration-settings">
     <label class="form-check form-switch registration-link-switch">
       <input class="form-check-input" type="checkbox" [checked]="shareAuction.registrationLinkEnabled" (change)="toggleRegistrationLink()">
       <span class="form-check-label">Enable player registration for this auction</span>
     </label>
 
     <p class="share-modal-help">Only this auction’s registration form is affected.</p>
+
+    <section *ngIf="shareAuction.registrationLinkEnabled" class="share-payment-settings">
+      <label class="form-check form-switch registration-link-switch">
+        <input class="form-check-input" type="checkbox" [(ngModel)]="shareAuction.registrationPaymentEnabled" (ngModelChange)="onRegistrationPaymentToggle($event)">
+        <span class="form-check-label">Require online payment for player registration</span>
+      </label>
+
+      <div *ngIf="shareAuction.registrationPaymentEnabled" class="share-payment-fee">
+        <label class="form-label" for="share-registration-fee">Player registration fee (₹)</label>
+        <input id="share-registration-fee" type="number" min="1" step="1" class="form-control" [(ngModel)]="shareAuction.registrationPaymentAmount">
+        <small>Players must complete Razorpay payment before submitting this form.</small>
+      </div>
+
+      <button type="button" class="btn btn-success btn-sm mt-2" (click)="saveRegistrationPaymentSettings()">Save payment settings</button>
+    </section>
+    </section>
 
     <label class="form-check form-switch registration-link-switch">
       <input class="form-check-input" type="checkbox" [checked]="shareAuction.publicLiveViewEnabled !== false" (change)="togglePublicLiveView()">

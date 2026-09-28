@@ -14,6 +14,7 @@ import { MessageService } from '../../../core/services/message.service';
 import { PlayerCategory } from '../../../core/models/player-category';
 import { PlayerCategoryService } from '../../../core/services/player-category.service';
 import { ImageCropperComponent } from '../../../shared/image-cropper/image-cropper.component';
+import { PaymentService } from '../../../core/services/payment.service';
 
 @Component({
   selector: 'app-player-registration',
@@ -30,6 +31,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
   private message = inject(MessageService);
   private route = inject(ActivatedRoute);
   private categoryService = inject(PlayerCategoryService);
+  private paymentService = inject(PaymentService);
 
   auction: AuctionSettings | null = null;
   registrationEnabled = false;
@@ -39,6 +41,9 @@ export class PlayerRegistrationComponent implements OnDestroy {
   photoPreview = '';
   uploadingPhoto = false;
   cropFile: File | null = null;
+  checkingMobile = false;
+  paying = false;
+  verifiedPaymentAmount = 0;
   categories: PlayerCategory[] = [];
   private localPreviewUrl = '';
   private photoUploadVersion = 0;
@@ -54,7 +59,10 @@ export class PlayerRegistrationComponent implements OnDestroy {
     tshirtSize: ['', Validators.required],
     trouserSize: [''],
     note: [''],
-    photo: ['', Validators.required]
+    photo: ['', Validators.required],
+    paymentOrderId: [''],
+    paymentId: [''],
+    paymentVerified: [false]
   });
 
   ngOnDestroy(): void {
@@ -77,12 +85,17 @@ export class PlayerRegistrationComponent implements OnDestroy {
   }
 
   async submit(): Promise<void> {
-    if (this.saving || this.uploadingPhoto) {
+    if (this.saving || this.uploadingPhoto || this.paying) {
       return;
     }
 
     if (this.form.invalid || !this.registrationEnabled) {
       this.form.markAllAsTouched();
+      return;
+    }
+
+    if (this.paymentRequired && !this.form.value.paymentVerified) {
+      this.message.warning('Please complete the registration payment first.');
       return;
     }
 
@@ -101,6 +114,12 @@ export class PlayerRegistrationComponent implements OnDestroy {
       bidIncreaseBy: Number(this.getSelectedCategory()?.bidIncreaseBy ?? this.auction?.bidIncreaseBy ?? 0),
       note: this.form.value.note || '',
       photo: this.form.value.photo || '',
+      paymentRequired: this.paymentRequired,
+      paymentOrderId: this.form.value.paymentOrderId || '',
+      paymentId: this.form.value.paymentId || '',
+      paymentAmount: this.paymentRequired ? this.verifiedPaymentAmount : 0,
+      paymentPaidAt: this.paymentRequired ? new Date().toISOString() : '',
+      paymentStatus: this.paymentRequired ? 'Verified' : 'Not required',
       status: 'Available',
       auctionId: this.auction?.activeAuctionId || this.auction?.id || ''
     };
@@ -122,6 +141,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
 
       this.submitted = true;
       this.form.reset();
+      this.verifiedPaymentAmount = 0;
       this.photoPreview = '';
       this.clearLocalPreview();
     } finally {
@@ -170,6 +190,62 @@ export class PlayerRegistrationComponent implements OnDestroy {
       if (uploadVersion === this.photoUploadVersion) {
         this.uploadingPhoto = false;
       }
+    }
+  }
+
+  get paymentRequired(): boolean {
+    return this.auction?.registrationPaymentEnabled === true;
+  }
+
+  get registrationPaymentAmount(): number {
+    return Number(this.auction?.registrationPaymentAmount || 0);
+  }
+
+  async payNow(): Promise<void> {
+    if (this.paying || this.checkingMobile || this.form.value.paymentVerified) return;
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.message.warning('Please complete your registration details and upload your photo before payment.');
+      return;
+    }
+
+    const auctionId = this.auction?.activeAuctionId || this.auction?.id || '';
+    if (!auctionId || this.registrationPaymentAmount < 1) {
+      this.message.warning('Registration payment is not configured. Please contact the organiser.');
+      return;
+    }
+
+    this.checkingMobile = true;
+    try {
+      if (await this.playerService.isMobileRegistered(auctionId, this.form.value.mobile || '')) {
+        this.message.warning('Player with this mobile number is already registered for this auction.');
+        return;
+      }
+    } finally {
+      this.checkingMobile = false;
+    }
+
+    this.paying = true;
+    try {
+      const payment = await this.paymentService.payForRegistration(
+        auctionId,
+        this.auction?.auctionName || 'Cricket Auction',
+        this.registrationPaymentAmount
+      );
+      this.form.patchValue({
+        paymentOrderId: payment.orderId,
+        paymentId: payment.paymentId,
+        paymentVerified: true
+      });
+      this.verifiedPaymentAmount = payment.amount;
+      this.paying = false;
+      await this.submit();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Please try again.';
+      this.message.error(message);
+    } finally {
+      this.paying = false;
     }
   }
 

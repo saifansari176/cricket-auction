@@ -16,6 +16,24 @@ import { AuctionSettings } from '../../../core/models/auction-settings';
 import { MessageService } from '../../../core/services/message.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { AppUser } from '../../../core/models/app-user';
+import { Player } from '../../../core/models/player';
+import { PaymentService } from '../../../core/services/payment.service';
+
+interface PaymentSummary {
+  registrations: number;
+  paidRegistrations: number;
+  pendingRegistrations: number;
+  totalCollected: number;
+  registrationFee: number;
+}
+
+interface PaymentRecord {
+  playerName: string;
+  mobile: string;
+  amount: number;
+  paymentId: string;
+  paidAt: string;
+}
 
 @Component({
   selector: 'app-auction-settings',
@@ -41,6 +59,7 @@ export class AuctionSettingsComponent {
   private storageService = inject(StorageService);
   private message = inject(MessageService);
   private authService = inject(AuthService);
+  private paymentService = inject(PaymentService);
 
   loading = false;
 
@@ -56,6 +75,10 @@ export class AuctionSettingsComponent {
   isAdmin = false;
 
   selectedAuctionId = '';
+
+  paymentSummary: PaymentSummary | null = null;
+  paymentSummaryLoading = false;
+  paymentRecords: PaymentRecord[] = [];
 
   showForm = false;
 
@@ -83,7 +106,7 @@ export class AuctionSettingsComponent {
 
     playerLimit: [10, [Validators.required, Validators.min(1), wholeNumber]],
 
-    basePlayerPrice: [0, [Validators.required, Validators.min(1)]]
+    basePlayerPrice: [0, [Validators.required, Validators.min(1)]],
 
   });
 
@@ -106,6 +129,10 @@ export class AuctionSettingsComponent {
         this.activeAuction = this.auctions.find((auction) => auction.id === auctionId) || data;
       this.selectedAuctionId = data.activeAuctionId || this.activeAuction.id || '';
 
+      }
+
+      if (this.activeAuction) {
+        await this.loadPaymentSummary(this.activeAuction);
       }
 
       if (!this.selectedAuctionId && this.auctions.length === 0 && !this.isAdmin) {
@@ -168,12 +195,82 @@ export class AuctionSettingsComponent {
 
       playerLimit: Number(auction.playerLimit ?? 10),
 
-      basePlayerPrice: Number(auction.basePlayerPrice)
+      basePlayerPrice: Number(auction.basePlayerPrice),
 
     });
 
     this.logoPreview = auction.logo || '';
 
+    void this.loadPaymentSummary(auction);
+
+  }
+
+  private async loadPaymentSummary(auction: AuctionSettings): Promise<void> {
+    if (!auction.id) {
+      this.paymentSummary = null;
+      return;
+    }
+
+    this.paymentSummaryLoading = true;
+    try {
+      const players = await this.auctionService.getPlayersForAuction(auction.id);
+      const paymentPlayers = await Promise.all(players.map((player) => this.restorePaymentAmount(auction.id!, player)));
+      const paidPlayers = paymentPlayers.filter((player) => this.isPaidRegistration(player));
+      const registrationFee = Number(auction.registrationPaymentAmount || 0);
+      const totalCollected = paidPlayers.reduce(
+        (total, player) => total + Number(player.paymentAmount || 0),
+        0
+      );
+
+      // Ignore a slow response after the user has selected another auction.
+      if (this.selectedAuctionId !== auction.id) return;
+
+      this.paymentSummary = {
+        registrations: players.length,
+        paidRegistrations: paidPlayers.length,
+        pendingRegistrations: players.filter((player) => player.paymentRequired && !this.isPaidRegistration(player)).length,
+        totalCollected,
+        registrationFee
+      };
+      this.paymentRecords = paidPlayers
+        .map((player) => ({
+          playerName: `${player.firstName} ${player.lastName}`.trim() || 'Player',
+          mobile: player.mobile || '-',
+          amount: Number(player.paymentAmount || 0),
+          paymentId: player.paymentId || '-',
+          paidAt: player.paymentPaidAt || ''
+        }))
+        .sort((a, b) => b.paidAt.localeCompare(a.paidAt));
+    } catch (error) {
+      console.error('Unable to load payment summary:', error);
+      if (this.selectedAuctionId === auction.id) {
+        this.paymentSummary = null;
+        this.paymentRecords = [];
+      }
+    } finally {
+      if (this.selectedAuctionId === auction.id) this.paymentSummaryLoading = false;
+    }
+  }
+
+  private isPaidRegistration(player: Player): boolean {
+    return player.paymentStatus === 'Verified' && !!player.paymentId;
+  }
+
+  /** Backfill legacy verified registrations with Razorpay's recorded amount once. */
+  private async restorePaymentAmount(auctionId: string, player: Player): Promise<Player> {
+    if (!this.isPaidRegistration(player) || Number(player.paymentAmount || 0) > 0 || !player.paymentId) {
+      return player;
+    }
+
+    try {
+      const paymentAmount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId);
+      const updatedPlayer = { ...player, auctionId, paymentAmount };
+      await this.playerService.updatePlayer(updatedPlayer);
+      return updatedPlayer;
+    } catch (error) {
+      console.error(`Unable to restore payment amount for ${player.paymentId}:`, error);
+      return player;
+    }
   }
 
   async activateAuction(auction: AuctionSettings): Promise<void> {
@@ -231,6 +328,8 @@ export class AuctionSettingsComponent {
     this.activeAuction = null;
 
       this.selectedAuctionId = '';
+      this.paymentSummary = null;
+      this.paymentRecords = [];
 
     this.logoPreview = '';
 
@@ -254,7 +353,7 @@ export class AuctionSettingsComponent {
 
       playerLimit: 10,
 
-      basePlayerPrice: 0
+      basePlayerPrice: 0,
 
     });
 
@@ -328,6 +427,8 @@ export class AuctionSettingsComponent {
         this.activeAuction = null;
 
         this.selectedAuctionId = '';
+        this.paymentSummary = null;
+        this.paymentRecords = [];
 
       }
 
@@ -362,6 +463,45 @@ export class AuctionSettingsComponent {
 
     const auction = this.auctions.find((item) => item.id === this.shareAuction?.id);
     if (auction) auction.registrationLinkEnabled = enabled;
+  }
+
+  async saveRegistrationPaymentSettings(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+
+    const paymentEnabled = this.shareAuction.registrationPaymentEnabled === true;
+    const amount = Number(this.shareAuction.registrationPaymentAmount || 0);
+    if (paymentEnabled && (!Number.isFinite(amount) || amount < 1)) {
+      this.message.warning('Enter a registration fee of at least ₹1 before enabling online payment.');
+      return;
+    }
+
+    try {
+      await this.auctionService.setRegistrationPaymentSettings(this.shareAuction.id, paymentEnabled, amount);
+      const auction = this.auctions.find((item) => item.id === this.shareAuction?.id);
+      if (auction) {
+        auction.registrationPaymentEnabled = paymentEnabled;
+        auction.registrationPaymentAmount = paymentEnabled ? amount : 0;
+      }
+      if (this.activeAuction?.id === this.shareAuction.id) {
+        this.activeAuction.registrationPaymentEnabled = paymentEnabled;
+        this.activeAuction.registrationPaymentAmount = paymentEnabled ? amount : 0;
+        void this.loadPaymentSummary(this.activeAuction);
+      }
+      this.message.success(paymentEnabled ? 'Online payment is enabled for this registration link.' : 'Online payment is disabled for this registration link.');
+    } catch (error) {
+      console.error(error);
+      this.message.error('Unable to save registration payment settings.');
+    }
+  }
+
+  onRegistrationPaymentToggle(enabled: boolean): void {
+    if (!this.shareAuction) return;
+    this.shareAuction.registrationPaymentEnabled = enabled;
+
+    // Disabling payment needs no fee input, so persist it immediately.
+    if (!enabled) {
+      void this.saveRegistrationPaymentSettings();
+    }
   }
 
   async togglePublicLiveView(): Promise<void> {
@@ -493,7 +633,7 @@ export class AuctionSettingsComponent {
 
       playerLimit: Number(this.form.value.playerLimit),
 
-      basePlayerPrice: Number(this.form.value.basePlayerPrice)
+      basePlayerPrice: Number(this.form.value.basePlayerPrice),
 
     };
     try {

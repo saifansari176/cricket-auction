@@ -374,6 +374,29 @@ export class AuctionService {
     });
   }
 
+  async setRegistrationPaymentSettings(auctionId: string, enabled: boolean, amount: number): Promise<void> {
+    await this.firebase.update(this.auctionsCollection, auctionId, {
+      registrationPaymentEnabled: enabled,
+      registrationPaymentAmount: enabled ? amount : 0,
+      updatedAt: new Date().toISOString()
+    });
+
+    const activeAuction = this.activeAuction$.value;
+    if (activeAuction && (activeAuction.id === auctionId || activeAuction.activeAuctionId === auctionId)) {
+      this.activeAuction$.next({
+        ...activeAuction,
+        registrationPaymentEnabled: enabled,
+        registrationPaymentAmount: enabled ? amount : 0
+      });
+    }
+  }
+
+  /** Registration and payment reporting must always be read inside one auction. */
+  async getPlayersForAuction(auctionId: string): Promise<Player[]> {
+    if (!auctionId) return [];
+    return this.firebase.getAll<Player>(this.auctionCollection(auctionId, 'players'));
+  }
+
   async setPublicLiveViewEnabled(auctionId: string, enabled: boolean): Promise<void> {
     await this.firebase.update(this.auctionsCollection, auctionId, {
       publicLiveViewEnabled: enabled,

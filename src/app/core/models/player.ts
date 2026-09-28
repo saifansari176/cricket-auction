@@ -28,6 +28,20 @@ export interface Player {
 
   note: string;
 
+  paymentRequired?: boolean;
+
+  paymentOrderId?: string;
+
+  paymentId?: string;
+
+  /** Amount paid for this registration, retained for auction-wise reconciliation. */
+  paymentAmount?: number;
+
+  /** ISO timestamp recorded after the Razorpay signature has been verified. */
+  paymentPaidAt?: string;
+
+  paymentStatus?: 'Not required' | 'Verified';
+
   baseBid: number;
 
   bidIncreaseBy?: number;

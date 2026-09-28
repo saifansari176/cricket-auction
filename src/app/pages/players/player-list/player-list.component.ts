@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+﻿import { Component, OnDestroy } from '@angular/core';
 import { PlayerService } from '../../../core/services/player.service';
 import { RouterLink, RouterModule } from '@angular/router';
 import { Player } from '../../../core/models/player';
@@ -10,6 +10,8 @@ import { MessageService } from '../../../core/services/message.service';
 import { AuctionService } from '../../../core/services/auction.service';
 import { ImagePreviewService } from '../../../shared/image-preview/image-preview.service';
 import { createPlayerPdf } from '../../../shared/player-pdf';
+import { PaymentService } from '../../../core/services/payment.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-player-list',
@@ -37,9 +39,28 @@ export class PlayerListComponent implements OnDestroy {
   excelDownloadUrl = '';
   excelExportError = '';
   private destroyed = false;
+  paymentEnabled = false;
+  private activeAuctionSubscription?: Subscription;
+
+  constructor(
+    private playerService: PlayerService,
+    private auctionService: AuctionService,
+    private message: MessageService,
+    private imagePreview: ImagePreviewService,
+    private paymentService: PaymentService
+  ) {}
+
+  async ngOnInit(): Promise<void> {
+    this.activeAuctionSubscription = this.auctionService.activeAuction$.subscribe((auction) => {
+      this.paymentEnabled = auction?.registrationPaymentEnabled === true;
+    });
+    await this.loadPlayers();
+    await this.loadPublicPlayerListSetting();
+  }
 
   ngOnDestroy(): void {
     this.destroyed = true;
+    this.activeAuctionSubscription?.unsubscribe();
     if (this.excelDownloadUrl) URL.revokeObjectURL(this.excelDownloadUrl);
     if (this.pdfDownloadUrl) URL.revokeObjectURL(this.pdfDownloadUrl);
   }
@@ -63,21 +84,48 @@ export class PlayerListComponent implements OnDestroy {
       this.preparingCatalogue = false;
     }
   }
-  
-  constructor(
-    private playerService: PlayerService,
-    private auctionService: AuctionService,
-    private message: MessageService,
-    private imagePreview: ImagePreviewService
-  ) {}
-
-  async ngOnInit(): Promise<void> {
-    await this.loadPlayers();
-    await this.loadPublicPlayerListSetting();
-  }
 
   async loadPlayers() {
-    this.players = await this.playerService.getPlayers();
+    const [players, auction] = await Promise.all([
+      this.playerService.getPlayers(),
+      this.auctionService.get()
+    ]);
+    this.paymentEnabled = auction?.registrationPaymentEnabled === true;
+    const auctionId = auction?.activeAuctionId || auction?.id || '';
+    this.players = await Promise.all(players.map(async (player) => {
+      if (player.paymentStatus !== 'Verified' || !player.paymentId || Number(player.paymentAmount || 0) > 0 || !auctionId) {
+        return player;
+      }
+      try {
+        const paymentAmount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId);
+        const updatedPlayer = { ...player, auctionId, paymentAmount };
+        await this.playerService.updatePlayer(updatedPlayer);
+        return updatedPlayer;
+      } catch (error) {
+        console.error(`Unable to sync payment ${player.paymentId}:`, error);
+        return player;
+      }
+    }));
+  }
+
+  paymentAmountLabel(player: Player): string {
+    if (player.paymentStatus !== 'Verified') return '-';
+    const amount = Number(player.paymentAmount || 0);
+    return amount > 0 ? `₹${amount}` : 'Paid — syncing amount';
+  }
+
+  get paidPlayersCount(): number {
+    return this.players.filter((player) => player.paymentStatus === 'Verified' && !!player.paymentId).length;
+  }
+
+  get totalPaidAmount(): number {
+    return this.players
+      .filter((player) => player.paymentStatus === 'Verified' && !!player.paymentId)
+      .reduce((total, player) => total + Number(player.paymentAmount || 0), 0);
+  }
+
+  get pendingPaymentPlayersCount(): number {
+    return this.players.filter((player) => player.paymentRequired && player.paymentStatus !== 'Verified').length;
   }
 
   async deletePlayer(id: string) {
@@ -200,6 +248,38 @@ get categories(): string[] {
     link.remove();
   }
 
+  private getExportData() {
+    return this.players.map(player => ({
+      'First Name': player.firstName,
+      'Last Name': player.lastName,
+      'Mobile': player.mobile,
+      'Jersey Number': player.jerseyNumber,
+      'Player Type': player.playerType,
+      'T-Shirt Size': player.tshirtSize,
+      'Trouser Size': player.trouserSize,
+      'Base Bid': player.baseBid,
+      'Photo': player.photo,
+      'Note': player.note,
+      'Status': player.status,
+      'Payment Status': player.paymentStatus || 'Not paid',
+      'Payment Amount': player.paymentStatus === 'Verified' ? Number(player.paymentAmount || 0) : 0
+    }));
+  }
+
+  exportCsv(): void {
+    const rows = this.getExportData();
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const csv = XLSX.utils.sheet_to_csv(worksheet) + [
+      '',
+      'Payment Summary,Value',
+      `Total Players,${this.players.length}`,
+      `Paid Players,${this.paidPlayersCount}`,
+      `Pending Payments,${this.pendingPaymentPlayersCount}`,
+      `Total Collected,${this.totalPaidAmount}`
+    ].join('\n');
+    this.downloadFile(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'Players.csv');
+  }
+
   importExcel(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -308,5 +388,15 @@ markPhotoBroken(url: string): void {
     }
   }
 
+  private downloadFile(blob: Blob, fileName: string): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
 
 }

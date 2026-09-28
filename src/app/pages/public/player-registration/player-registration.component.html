@@ -17,25 +17,33 @@
     </div>
 
     <form *ngIf="!loading && registrationEnabled && !submitted" [formGroup]="form" (ngSubmit)="submit()">
-      <p class="required-fields-hint">Fields marked <span class="required-marker" aria-hidden="true">*</span> are required.</p>
       <div class="photo-row">
-        <div class="photo-loader" *ngIf="uploadingPhoto">
-          <div class="spinner" aria-label="Uploading"></div>
-          <div class="loader-text">Uploading photo...</div>
+        <div class="photo-visual">
+          <div class="photo-loader" *ngIf="uploadingPhoto">
+            <div class="spinner" aria-label="Uploading"></div>
+            <div class="loader-text">Uploading...</div>
+          </div>
+
+          <img *ngIf="photoPreview && !uploadingPhoto" [src]="photoPreview" alt="Player photo">
+          <div *ngIf="!photoPreview && !uploadingPhoto" class="photo-placeholder">Photo</div>
         </div>
 
-        <img *ngIf="photoPreview && !uploadingPhoto" [src]="photoPreview" alt="Player photo">
-        <div *ngIf="!photoPreview && !uploadingPhoto" class="photo-placeholder">Photo</div>
+        <div class="photo-upload-copy">
+          <span class="field-label">Player Photo <span class="required-marker" aria-hidden="true">*</span></span>
+          <small>Upload a clear, recent profile photo.</small>
+          <input id="player-registration-photo" aria-required="true" aria-describedby="player-registration-photo-error" [class.is-invalid]="form.controls.photo.invalid && form.controls.photo.touched" [attr.aria-invalid]="form.controls.photo.invalid && form.controls.photo.touched" (blur)="form.controls.photo.markAsTouched()"
+            type="file"
+            accept="image/*"
+            [disabled]="saving || uploadingPhoto"
+            (change)="onPhotoChange($event)"
+          />
+          <app-field-error [control]="form.controls.photo" label="Photo" fieldId="player-registration-photo" />
+        </div>
+      </div>
 
-        <label for="player-registration-photo">Photo <span class="required-marker" aria-hidden="true">*</span></label>
-        <input id="player-registration-photo" aria-required="true" aria-describedby="player-registration-photo-error" [class.is-invalid]="form.controls.photo.invalid && form.controls.photo.touched" [attr.aria-invalid]="form.controls.photo.invalid && form.controls.photo.touched" (blur)="form.controls.photo.markAsTouched()"
-          type="file"
-          accept="image/*"
-          [disabled]="saving || uploadingPhoto"
-          (change)="onPhotoChange($event)"
-        />
-        <app-field-error [control]="form.controls.photo" label="Photo" fieldId="player-registration-photo" />
         <app-image-cropper *ngIf="cropFile" [file]="cropFile" (cropped)="uploadCroppedPhoto($event)" (cancelled)="cropFile = null" />
+      <div class="form-section-heading">
+        <div><h2>Player details</h2><p>Fill in the information below to complete your registration.</p></div>
       </div>
 
       <div class="form-grid">
@@ -129,8 +137,21 @@
           <textarea rows="3" formControlName="note"></textarea>
       </label>
 
-      <button type="submit" [disabled]="saving || uploadingPhoto">
-        {{uploadingPhoto ? 'Uploading photo...' : (saving ? 'Submitting...' : 'Submit Registration')}}
+      <section *ngIf="paymentRequired" class="payment-section">
+        <h2>Registration Payment</h2>
+        <p>Pay securely using UPI, card, net banking, or wallet. Your registration can only be submitted after a verified payment.</p>
+        <p *ngIf="registrationPaymentAmount < 1" class="payment-error">Registration payment is not configured. Please contact the organiser.</p>
+        <div *ngIf="registrationPaymentAmount >= 1" class="payment-action">
+          <strong>Amount: ₹{{registrationPaymentAmount}}</strong>
+          <span *ngIf="form.value.paymentVerified" class="payment-success">Payment verified</span>
+          <button *ngIf="!form.value.paymentVerified" type="button" (click)="payNow()" [disabled]="paying || checkingMobile || uploadingPhoto">
+            {{checkingMobile ? 'Checking mobile...' : (paying ? 'Opening payment...' : 'Pay Now ₹' + registrationPaymentAmount)}}
+          </button>
+        </div>
+      </section>
+
+      <button *ngIf="!paymentRequired" type="submit" [disabled]="saving || uploadingPhoto || paying">
+        {{uploadingPhoto ? 'Uploading...' : (saving ? 'Submitting...' : 'Submit Registration')}}
       </button>
     </form>
   </div>

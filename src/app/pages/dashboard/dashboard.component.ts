@@ -13,6 +13,8 @@ import { PlayerCategoryService } from '../../core/services/player-category.servi
 import { PlayerCategory } from '../../core/models/player-category';
 import { ImagePreviewService } from '../../shared/image-preview/image-preview.service';
 import { MessageService } from '../../core/services/message.service';
+import { AuctionSettings } from '../../core/models/auction-settings';
+import { PaymentService } from '../../core/services/payment.service';
 
 type DashboardList = 'players' | 'teams' | 'available' | 'sold' | 'unsold';
 
@@ -37,6 +39,8 @@ export class DashboardComponent implements OnInit {
   categories: PlayerCategory[] = [];
   playerFilter = '';
   teamFilter = '';
+  activeAuction: AuctionSettings | null = null;
+  paymentSummaryLoading = false;
 
   constructor(
     private playerService: PlayerService,
@@ -46,7 +50,8 @@ export class DashboardComponent implements OnInit {
     private route: ActivatedRoute,
     private categoryService: PlayerCategoryService,
     private imagePreview: ImagePreviewService,
-    private message: MessageService
+    private message: MessageService,
+    private paymentService: PaymentService
   ) { }
 
   async ngOnInit(): Promise<void> {
@@ -58,13 +63,15 @@ export class DashboardComponent implements OnInit {
     this.loading = true;
 
     try {
-      const [players, teams, soldPlayers] = await Promise.all([
+      const [players, teams, soldPlayers, auction] = await Promise.all([
         this.playerService.getPlayers(),
         this.teamService.getTeams(),
-        this.auctionService.getSoldPlayers()
+        this.auctionService.getSoldPlayers(),
+        this.auctionService.get()
       ]);
 
-      this.players = players;
+      this.activeAuction = auction;
+      this.players = await this.syncPaymentAmounts(players, auction?.activeAuctionId || auction?.id || '');
       this.teams = teams;
       this.soldPlayers = soldPlayers;
       this.availablePlayers = players.filter((player) => this.isPlayerStatus(player, 'Available'));
@@ -277,7 +284,6 @@ export class DashboardComponent implements OnInit {
   get playerStatuses(): string[] {
     return Array.from(new Set(this.players.map((player) => player.status).filter(Boolean))).sort();
   }
-
   get showPlayerTypeFilter(): boolean {
     return this.activeList !== 'teams';
   }
@@ -360,6 +366,27 @@ export class DashboardComponent implements OnInit {
       this.unsoldPlayers = players.filter((player) => player.status === 'Unsold');
     } finally {
       this.loading = false;
+    }
+  }
+
+  private async syncPaymentAmounts(players: Player[], auctionId: string): Promise<Player[]> {
+    if (!auctionId) return players;
+    this.paymentSummaryLoading = true;
+    try {
+      return await Promise.all(players.map(async (player) => {
+        if (player.paymentStatus !== 'Verified' || !player.paymentId || Number(player.paymentAmount || 0) > 0) return player;
+        try {
+          const paymentAmount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId);
+          const updatedPlayer = { ...player, auctionId, paymentAmount };
+          await this.playerService.updatePlayer(updatedPlayer);
+          return updatedPlayer;
+        } catch (error) {
+          console.error(`Unable to sync payment ${player.paymentId}:`, error);
+          return player;
+        }
+      }));
+    } finally {
+      this.paymentSummaryLoading = false;
     }
   }
 

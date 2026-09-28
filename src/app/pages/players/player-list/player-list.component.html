@@ -47,6 +47,38 @@
 
 </div>
 
+<section *ngIf="paymentEnabled" class="payment-summary" aria-label="Payment summary">
+    <div class="payment-summary-heading">
+        <div>
+            <span>REGISTRATION PAYMENTS</span>
+            <h3>Payment Overview</h3>
+        </div>
+        <div class="payment-summary-actions">
+            <small>Updated from verified payments</small>
+            <button type="button" class="payment-csv-button" (click)="exportCsv()" title="Download payment CSV" aria-label="Download payment CSV">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 17v3h14v-3" /></svg>
+            </button>
+        </div>
+    </div>
+    <div class="payment-summary-cards">
+        <article class="payment-card">
+            <span>Paid Players</span>
+            <strong>{{ paidPlayersCount }}</strong>
+            <small>successful registrations</small>
+        </article>
+        <article class="payment-card">
+            <span>Pending Payments</span>
+            <strong>{{ pendingPaymentPlayersCount }}</strong>
+            <small>registration payment due</small>
+        </article>
+        <article class="payment-card total-collected">
+            <span>Total Collected</span>
+            <strong>{{ totalPaidAmount | currency:'INR':'symbol':'1.0-0' }}</strong>
+            <small>verified payment amount</small>
+        </article>
+    </div>
+</section>
+
 <div class="player-filters">
     <input type="search" class="form-control" [(ngModel)]="playerFilter" placeholder="Search players">
 </div>
@@ -95,6 +127,8 @@
     <th>Base Bid</th>
 
     <th>Mobile</th>
+
+    <th *ngIf="paymentEnabled">Payment</th>
 
     <th>Jersey No.</th>
 
@@ -150,6 +184,8 @@
 
     <td>{{player.mobile}}</td>
 
+    <td *ngIf="paymentEnabled">{{paymentAmountLabel(player)}}</td>
+
     <td>{{player.jerseyNumber || '-'}}</td>
 
     <td>{{player.status}}</td>
@@ -193,6 +229,7 @@
             <span>Jersey No. <strong>{{player.jerseyNumber || '-'}}</strong></span>
             <span>Category <strong>{{player.categoryName || 'Regular'}}</strong></span>
             <span>Base Bid <strong>{{player.baseBid}}</strong></span>
+            <span *ngIf="paymentEnabled">Payment <strong>{{paymentAmountLabel(player)}}</strong></span>
             <span>Status <strong>{{player.status}}</strong></span>
             <div class="accordion-actions">
                 <a [routerLink]="['/players/edit', player.id]" class="btn btn-warning btn-sm">Edit</a>

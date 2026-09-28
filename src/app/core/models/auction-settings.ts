@@ -26,6 +26,10 @@ export interface AuctionSettings {
 
   registrationLinkEnabled?: boolean;
 
+  registrationPaymentEnabled?: boolean;
+
+  registrationPaymentAmount?: number;
+
   publicLiveViewEnabled?: boolean;
 
   publicPlayerListEnabled?: boolean;

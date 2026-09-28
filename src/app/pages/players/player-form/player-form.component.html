@@ -29,7 +29,7 @@
 
                     <div class="col-md-12 mb-3">
                         <label for="player-form-photo">Photo <span class="required-marker" aria-hidden="true">*</span></label>
-                        <img *ngIf="form.value.photo" [src]="form.value.photo" width="120" class="rounded-circle mb-3">
+                        <img *ngIf="form.value.photo" [src]="form.value.photo" alt="Selected player photo" class="player-photo-preview mb-3">
 
                         <input id="player-form-photo" aria-required="true" aria-describedby="player-form-photo-error" [class.is-invalid]="form.controls.photo.invalid && form.controls.photo.touched" [attr.aria-invalid]="form.controls.photo.invalid && form.controls.photo.touched" (blur)="form.controls.photo.markAsTouched()" type="file" accept="image/*" class="form-control" [disabled]="uploadingPhoto || saving" (change)="onPhotoChange($event)">
                         <app-field-error [control]="form.controls.photo" label="Photo" fieldId="player-form-photo" />
