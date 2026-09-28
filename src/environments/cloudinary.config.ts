@@ -1,4 +1,4 @@
 export const cloudinaryConfig = {
-  cloudName: 'xvluubso',
+  cloudName: 'qgksrok6',
   uploadPreset: 'cricketAuction'
 };
