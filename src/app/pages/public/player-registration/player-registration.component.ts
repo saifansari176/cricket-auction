@@ -6,6 +6,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuctionSettings } from '../../../core/models/auction-settings';
+import { PlayerFormField } from '../../../core/models/auction-settings';
+import { isPlayerFormFieldVisible } from '../../../core/models/player-form-fields';
 import { Player } from '../../../core/models/player';
 import { AuctionService } from '../../../core/services/auction.service';
 import { PlayerService } from '../../../core/services/player.service';
@@ -77,7 +79,10 @@ export class PlayerRegistrationComponent implements OnDestroy {
         : await this.auctionService.get();
 
       this.auction = auction;
-      this.categories = await this.categoryService.getCategories(auction?.activeAuctionId || auction?.id);
+      this.configureFieldValidators();
+      this.categories = this.isFieldVisible('category')
+        ? await this.categoryService.getCategories(auction?.activeAuctionId || auction?.id)
+        : [];
       this.registrationEnabled = auction?.registrationLinkEnabled === true;
     } finally {
       this.loading = false;
@@ -201,12 +206,16 @@ export class PlayerRegistrationComponent implements OnDestroy {
     return Number(this.auction?.registrationPaymentAmount || 0);
   }
 
+  isFieldVisible(field: PlayerFormField): boolean {
+    return isPlayerFormFieldVisible(this.auction, 'registration', field);
+  }
+
   async payNow(): Promise<void> {
     if (this.paying || this.checkingMobile || this.form.value.paymentVerified) return;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.message.warning('Please complete your registration details and upload your photo before payment.');
+      this.message.warning('Please complete all required registration details before payment.');
       return;
     }
 
@@ -272,5 +281,21 @@ export class PlayerRegistrationComponent implements OnDestroy {
 
   private getSelectedCategory(): PlayerCategory | undefined {
     return this.categories.find((category) => category.id === this.form.value.categoryId);
+  }
+
+  private configureFieldValidators(): void {
+    const validators = {
+      photo: [Validators.required],
+      lastName: [Validators.required, nonBlank],
+      jerseyNumber: [Validators.required, Validators.pattern(/^[0-9]{1,3}$/)],
+      playerType: [Validators.required],
+      tshirtSize: [Validators.required]
+    } as const;
+
+    for (const field of Object.keys(validators) as Array<keyof typeof validators>) {
+      const control = this.form.controls[field];
+      control.setValidators(this.isFieldVisible(field) ? [...validators[field]] : []);
+      control.updateValueAndValidity({ emitEvent: false });
+    }
   }
 }

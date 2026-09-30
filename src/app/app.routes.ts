@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
-import { adminGuard, auctionSelectionGuard, authGuard, guestGuard } from './core/guards/auth.guard';
+import { adminGuard, auctionOwnerGuard, auctionSelectionGuard, authGuard, guestGuard, landingGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
+    canActivate: [landingGuard],
     loadComponent: () =>
       import('./pages/public/home/home.component').then((m) => m.HomeComponent),
   },
@@ -125,7 +126,7 @@ export const routes: Routes = [
 
   {
     path: 'settings',
-    canActivate: [authGuard],
+    canActivate: [authGuard, auctionSelectionGuard, auctionOwnerGuard],
     loadComponent: () =>
       import('./pages/settings/settings.component').then((m) => m.SettingsComponent),
   },

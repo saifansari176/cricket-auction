@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AuctionSettings } from '../../core/models/auction-settings';
+import { AppUser } from '../../core/models/app-user';
 import { AuthService } from '../../core/services/auth.service';
 import { AuctionService } from '../../core/services/auction.service';
 
@@ -51,6 +52,10 @@ export class HeaderComponent implements OnInit {
 
   startNormalAuction(): void {
     this.auctionService.startCombinedAuction();
+  }
+
+  canManageSettings(user: AppUser | null): boolean {
+    return this.auctionService.canManageAuction(this.currentAuction, user);
   }
 
   toggleMenu(): void {

@@ -27,7 +27,7 @@
 
                 <div class="row">
 
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-12 mb-3" *ngIf="isFieldVisible('photo')">
                         <label for="player-form-photo">Photo <span class="required-marker" aria-hidden="true">*</span></label>
                         <img *ngIf="form.value.photo" [src]="form.value.photo" alt="Selected player photo" class="player-photo-preview mb-3">
 
@@ -44,7 +44,7 @@
                         <app-field-error [control]="form.controls.firstName" label="First Name" fieldId="player-form-firstName" />
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('lastName')">
 
                         <label for="player-form-lastName">Last Name <span class="required-marker" aria-hidden="true">*</span></label>
 
@@ -52,7 +52,7 @@
                         <app-field-error [control]="form.controls.lastName" label="Last Name" fieldId="player-form-lastName" />
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('category')">
                         <label>Category</label>
                         <select class="form-select" formControlName="categoryId" (change)="onCategoryChange()">
                             <option value="" disabled>Select Category</option>
@@ -60,7 +60,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('jerseyNumber')">
 
                         <label for="player-form-jerseyNumber">Jersey Number <span class="required-marker" aria-hidden="true">*</span></label>
 
@@ -69,7 +69,7 @@
                         <app-field-error [control]="form.controls.jerseyNumber" label="Jersey Number" fieldId="player-form-jerseyNumber" patternMessage="Jersey number must contain 1 to 3 digits." />
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('playerType')">
 
                         <label for="player-form-playerType">Player Type <span class="required-marker" aria-hidden="true">*</span></label>
 
@@ -89,7 +89,7 @@
                         <app-field-error [control]="form.controls.playerType" label="Player Type" fieldId="player-form-playerType" />
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('currentTeam')">
                         <label>Current Team</label>
                         <input class="form-control" formControlName="currentTeam" placeholder="Enter current team name">
                     </div>
@@ -103,7 +103,7 @@
                         <app-field-error [control]="form.controls.mobile" label="Mobile Number" fieldId="player-form-mobile" patternMessage="Enter a valid 10-digit mobile number." />
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('tshirtSize')">
 
                         <label for="player-form-tshirtSize">T-Shirt Size <span class="required-marker" aria-hidden="true">*</span></label>
 
@@ -129,7 +129,7 @@
                         <app-field-error [control]="form.controls.tshirtSize" label="T-Shirt Size" fieldId="player-form-tshirtSize" />
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('trouserSize')">
 
                         <label>Trouser Size</label>
 
@@ -163,7 +163,7 @@
 
                     </div>
 
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-6 mb-3" *ngIf="isFieldVisible('baseBid')">
 
                         <label>Base Bid</label>
 
@@ -187,7 +187,7 @@
 
                     </div>
 
-                    <div class="col-md-12 mb-3">
+                    <div class="col-md-12 mb-3" *ngIf="isFieldVisible('note')">
 
                         <label>Note</label>
 

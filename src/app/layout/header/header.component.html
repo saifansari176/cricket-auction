@@ -40,8 +40,6 @@
                 <a routerLink="/reports" routerLinkActive="active">Reports</a>
             </div>
         </div>
-
-        <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active">Users</a>
     </nav>
 
     <div class="user profile-menu" *ngIf="currentUser$ | async as user" [class.open]="profileOpen" (focusout)="closeProfileOnFocusOut($event)">
@@ -57,6 +55,8 @@
         </button>
 
         <div class="profile-dropdown" *ngIf="profileOpen" role="menu">
+            <a *ngIf="user.role === 'admin'" routerLink="/users" role="menuitem" (click)="closeProfile()">User Control</a>
+            <a *ngIf="canManageSettings(user)" routerLink="/settings" role="menuitem" (click)="closeProfile()">Form Settings</a>
             <a routerLink="/about-us" role="menuitem" (click)="closeProfile()">About Us</a>
             <button type="button" class="logout-btn" role="menuitem" (click)="logout()">Logout</button>
         </div>
@@ -80,9 +80,6 @@
 
     <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
     <a routerLink="/auction-settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Auction Settings</a>
-    <a routerLink="/about-us" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">About Us</a>
-    <a *ngIf="(currentUser$ | async)?.role === 'admin'" routerLink="/users" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">User Control</a>
-
     <div class="menu-accordion" (focusout)="closeSectionOnFocusOut($event, 'players')">
     <button type="button" class="accordion-title" (click)="toggleSection('players')">
         Players
@@ -117,24 +114,30 @@
         <a routerLink="/auction" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="startNormalAuction()">Live Auction</a>
         <a routerLink="/auction-settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Auction Management</a>
         <a routerLink="/reports" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Reports</a>
-        <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Settings</a>
     </div>
 
     </div>
 
-    <div class="menu-user" *ngIf="currentUser$ | async as user">
-        <div class="account-chip">
+    <div class="menu-user menu-accordion" *ngIf="currentUser$ | async as user"
+        (focusout)="closeSectionOnFocusOut($event, 'profile')">
+        <button type="button" class="account-chip mobile-profile-trigger" (click)="toggleSection('profile')"
+            [attr.aria-expanded]="openSection === 'profile'">
             <span class="avatar">{{(user.displayName || user.email || 'U').charAt(0)}}</span>
             <span class="account-text">
                 <strong>{{user.displayName || user.email}}</strong>
                 <small *ngIf="user.role === 'admin'">{{user.role}}</small>
             </span>
-        </div>
-
-        <a routerLink="/about-us" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">About Us</a>
-
-        <button type="button" class="logout-btn" (click)="logout(); closeMenu()">
-            Logout
+            <span class="mobile-profile-chevron" aria-hidden="true">{{openSection === 'profile' ? '−' : '+'}}</span>
         </button>
+
+        <div class="accordion-body" *ngIf="openSection === 'profile'">
+            <a routerLink="/about-us" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">About Us</a>
+            <a *ngIf="user.role === 'admin'" routerLink="/users" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">User Control</a>
+            <a *ngIf="canManageSettings(user)" routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Form Settings</a>
+
+            <button type="button" class="logout-btn" (click)="logout(); closeMenu()">
+                Logout
+            </button>
+        </div>
     </div>
 </aside>

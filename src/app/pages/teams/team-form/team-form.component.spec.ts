@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { TeamFormComponent } from './team-form.component';
 
@@ -8,7 +9,8 @@ describe('TeamFormComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TeamFormComponent]
+      imports: [TeamFormComponent],
+      providers: [provideRouter([])]
     })
     .compileComponents();
 

@@ -1,1 +1,46 @@
-<p>settings works!</p>
+<main class="settings-page">
+  <header class="settings-header">
+    <div>
+      <span class="eyebrow">Auction settings</span>
+      <h1>Player form fields</h1>
+      <p>Choose which optional fields appear for {{ auctionName || 'this auction' }}.</p>
+    </div>
+    <button type="button" (click)="save()" [disabled]="loading || saving">
+      {{ saving ? 'Saving...' : 'Save settings' }}
+    </button>
+  </header>
+
+  <div *ngIf="loading" class="settings-message">Loading settings...</div>
+
+  <section *ngIf="!loading" class="core-fields">
+    <strong>Always visible</strong>
+    <span>First name and mobile number are required for player identity and duplicate prevention.</span>
+  </section>
+
+  <div *ngIf="!loading" class="settings-grid">
+    <section class="settings-card">
+      <div class="card-heading">
+        <div><h2>Add Player</h2><p>Form used by the organizer.</p></div>
+      </div>
+
+      <label *ngFor="let field of fields" class="field-toggle">
+        <span><strong>{{ field.label }}</strong><small>{{ field.description }}</small></span>
+        <input type="checkbox" [(ngModel)]="addPlayerFields[field.key]" [attr.aria-label]="'Show ' + field.label + ' on Add Player'">
+      </label>
+    </section>
+
+    <section class="settings-card">
+      <div class="card-heading">
+        <div><h2>Public Registration</h2><p>Form opened from the shared registration link.</p></div>
+      </div>
+
+      <label *ngFor="let field of fields" class="field-toggle" [class.not-applicable]="!field.registration">
+        <span><strong>{{ field.label }}</strong><small>{{ field.registration ? field.description : 'Not shown on the public form.' }}</small></span>
+        <input *ngIf="field.registration" type="checkbox" [(ngModel)]="registrationFields[field.key]" [attr.aria-label]="'Show ' + field.label + ' on Public Registration'">
+      </label>
+    </section>
+     <button type="button" class="save-settings-button" (click)="save()" [disabled]="loading || saving">
+      {{ saving ? 'Saving...' : 'Save settings' }}
+    </button>
+  </div>
+</main>

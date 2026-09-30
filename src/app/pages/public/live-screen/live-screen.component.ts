@@ -49,7 +49,7 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
     if (this.resultAnimationTimer) clearTimeout(this.resultAnimationTimer);
   }
 
-  async load(showLoader = true, resultAction?: LiveScreenAction): Promise<void> {
+  async load(showLoader = true, resultAction?: LiveScreenAction, refreshMutableData = false): Promise<void> {
     if (!this.auctionId) {
       this.notFound = true;
       this.loading = false;
@@ -59,7 +59,7 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
     if (showLoader) this.loading = true;
 
     try {
-      const request = () => this.auctionService.getPublicTournament(this.auctionId);
+      const request = () => this.auctionService.getPublicTournament(this.auctionId, refreshMutableData);
       const data = showLoader
         ? await request()
         : await this.loadingService.withoutLoader(request);
@@ -137,9 +137,12 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
       && !this.players.some((player) => player.id === state.currentPlayerId);
     const needsTeamRefresh = !!state.highestTeamId
       && !this.teams.some((team) => team.id === state.highestTeamId);
+    const needsDataRefresh = state.lastAction === 'sold'
+      || state.lastAction === 'unsold'
+      || state.lastAction === 'undo';
 
-    if (needsPlayerRefresh || needsTeamRefresh) {
-      await this.load(false, state.lastAction);
+    if (needsPlayerRefresh || needsTeamRefresh || needsDataRefresh) {
+      await this.load(false, state.lastAction, true);
       return;
     }
 

@@ -96,7 +96,9 @@
 
   <div
     class="teams-grid"
+    aria-label="Teams available to bid"
     [style.--team-count]="teams.length || 1"
+    [style.--team-columns]="desktopTeamColumns"
     [class.compact-teams]="teams.length > 10"
     [class.dense-teams]="teams.length > 14">
     <div

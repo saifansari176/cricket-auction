@@ -38,10 +38,27 @@ export const adminGuard: CanActivateFn = async (_route, state) => {
 
 export const guestGuard: CanActivateFn = async () => {
   const authService = inject(AuthService);
+  const auctionService = inject(AuctionService);
   const router = inject(Router);
   const user = await authService.waitForUser();
 
-  return user?.active ? router.createUrlTree(['/auction-settings']) : true;
+  if (!user?.active) return true;
+
+  const activeAuctionId = await auctionService.getActiveAuctionId();
+  return router.createUrlTree([activeAuctionId ? '/dashboard' : '/auction-settings']);
+};
+
+/** Send a restored signed-in session to its selected auction dashboard. */
+export const landingGuard: CanActivateFn = async () => {
+  const authService = inject(AuthService);
+  const auctionService = inject(AuctionService);
+  const router = inject(Router);
+  const user = await authService.waitForUser();
+
+  if (!user?.active) return true;
+
+  const activeAuctionId = await auctionService.getActiveAuctionId();
+  return router.createUrlTree([activeAuctionId ? '/dashboard' : '/auction-settings']);
 };
 
 export const auctionSelectionGuard: CanActivateFn = async () => {
@@ -52,4 +69,16 @@ export const auctionSelectionGuard: CanActivateFn = async () => {
   return activeAuctionId ? true : router.createUrlTree(['/auction-settings'], {
     queryParams: { selection: 'required' }
   });
+};
+
+export const auctionOwnerGuard: CanActivateFn = async () => {
+  const authService = inject(AuthService);
+  const auctionService = inject(AuctionService);
+  const router = inject(Router);
+  const user = await authService.waitForUser();
+  const auction = await auctionService.get();
+
+  return auctionService.canManageAuction(auction, user)
+    ? true
+    : router.createUrlTree(['/dashboard']);
 };

@@ -36,6 +36,7 @@ export class AuthService {
 
   constructor(private firebase: FirebaseService, private loading: LoadingService) {
     onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) this.firebase.clearReadCache();
       const appUser = firebaseUser ? await this.loadOrCreateProfile(firebaseUser) : null;
 
       this.currentUser$.next(appUser);

@@ -58,7 +58,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     if (this.resultAnimationTimer) clearTimeout(this.resultAnimationTimer);
   }
 
-  async load(showLoader = true): Promise<void> {
+  async load(showLoader = true, refreshMutableData = false): Promise<void> {
     if (!this.auctionId) {
       this.notFound = true;
       this.loading = false;
@@ -67,7 +67,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     }
     if (showLoader) this.loading = true;
     try {
-      const data = await this.auctionService.getPublicTournament(this.auctionId);
+      const data = await this.auctionService.getPublicTournament(this.auctionId, refreshMutableData);
       this.auction = data.auction;
       this.teams = data.teams;
       this.players = data.players;
@@ -116,7 +116,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
       || state.lastAction === 'undo';
 
     if (needsPlayerRefresh || needsTeamRefresh || needsDataRefresh) {
-      await this.load(false);
+      await this.load(false, true);
       return;
     }
 

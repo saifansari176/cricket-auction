@@ -8,6 +8,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { AuctionService } from '../../../core/services/auction.service';
 import { PublicHeaderComponent } from '../../../shared/public-header/public-header.component';
 
 @Component({
@@ -21,6 +22,7 @@ export class LoginComponent {
   @ViewChild('recaptchaContainer') recaptchaContainer?: ElementRef<HTMLElement>;
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private auctionService = inject(AuctionService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -173,7 +175,7 @@ export class LoginComponent {
           this.form.value.password || ''
         );
 
-        await this.router.navigateByUrl('/auction-settings');
+        await this.navigateAfterLogin();
       }
     } catch (error: unknown) {
       this.errorMessage = this.getLoginErrorMessage(this.getErrorCode(error), this.getErrorMessage(error));
@@ -228,11 +230,16 @@ export class LoginComponent {
     this.errorMessage = '';
     try {
       await login();
-      await this.router.navigateByUrl('/auction-settings');
+      await this.navigateAfterLogin();
     } catch (error: unknown) {
       this.errorMessage = this.getLoginErrorMessage(this.getErrorCode(error), this.getErrorMessage(error));
     } finally {
       this.loading = false;
     }
+  }
+
+  private async navigateAfterLogin(): Promise<void> {
+    const activeAuctionId = await this.auctionService.getActiveAuctionId();
+    await this.router.navigateByUrl(activeAuctionId ? '/dashboard' : '/auction-settings');
   }
 }

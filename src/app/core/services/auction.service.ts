@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Unsubscribe } from 'firebase/firestore';
-import { AuctionSettings } from '../models/auction-settings';
+import { AuctionSettings, PlayerFormFieldSettings } from '../models/auction-settings';
 import { AuctionBid } from '../models/bid';
 import { Player } from '../models/player';
 import { Team } from '../models/team';
@@ -212,7 +212,7 @@ export class AuctionService {
   }
 
   /** Read-only data used by the public tournament watch link. */
-  async getPublicTournament(auctionId: string): Promise<{
+  async getPublicTournament(auctionId: string, refreshMutableData = false): Promise<{
     auction: AuctionSettings | null;
     teams: Team[];
     players: Player[];
@@ -221,9 +221,9 @@ export class AuctionService {
   }> {
     const [auction, teams, players, bids, liveState] = await Promise.all([
       this.getAuctionById(auctionId),
-      this.firebase.getAll<Team>(this.auctionCollection(auctionId, 'teams')),
-      this.firebase.getAll<Player>(this.auctionCollection(auctionId, 'players')),
-      this.firebase.getAll<AuctionBid>(this.auctionCollection(auctionId, 'bids')),
+      this.firebase.getAll<Team>(this.auctionCollection(auctionId, 'teams'), refreshMutableData),
+      this.firebase.getAll<Player>(this.auctionCollection(auctionId, 'players'), refreshMutableData),
+      this.firebase.getAll<AuctionBid>(this.auctionCollection(auctionId, 'bids'), refreshMutableData),
       this.firebase.getById<LiveAuctionState>(this.auctionCollection(auctionId, 'liveState'), 'current')
     ]);
     return { auction, teams, players, bids, liveState };
@@ -281,6 +281,31 @@ export class AuctionService {
       playerLimit,
       updatedAt: new Date().toISOString()
     });
+  }
+
+  canManageAuction(auction: AuctionSettings | null, user = this.authService.currentUser$.value): boolean {
+    if (!auction || !user?.active) return false;
+    return this.authService.isAdmin(user)
+      || auction.createdBy === user.uid
+      || (!!auction.createdByEmail && auction.createdByEmail === user.email);
+  }
+
+  async setPlayerFormFields(auctionId: string, settings: PlayerFormFieldSettings): Promise<void> {
+    const user = await this.authService.waitForUser();
+    const auction = await this.getAuctionById(auctionId);
+    if (!this.canManageAuction(auction, user)) {
+      throw new Error('You do not have permission to change this auction.');
+    }
+
+    await this.firebase.update(this.auctionsCollection, auctionId, {
+      playerFormFields: settings,
+      updatedAt: new Date().toISOString()
+    });
+
+    const activeAuction = this.activeAuction$.value;
+    if (activeAuction && (activeAuction.id === auctionId || activeAuction.activeAuctionId === auctionId)) {
+      this.activeAuction$.next({ ...activeAuction, playerFormFields: settings });
+    }
   }
   
   async saveBid(bid: AuctionBid): Promise<void> {
@@ -528,21 +553,26 @@ export class AuctionService {
     return slug || 'cricket-auction';
   }
 
-  private selectionPath(): string {
-    const uid = this.authService.currentUser$.value?.uid || 'anonymous';
+  private selectionPath(userId?: string): string {
+    const uid = userId || this.authService.currentUser$.value?.uid || 'anonymous';
     return `users/${uid}/${this.selectionCollection}`;
   }
 
   private async getSelection(): Promise<{ activeAuctionId?: string } | null> {
-    const selection = await this.firebase.getById<{ activeAuctionId?: string }>(this.selectionPath(), 'current');
+    // Guards can run in parallel during the first navigation. Wait until
+    // Firebase Auth restores the user before building the user-scoped path.
+    const user = await this.authService.waitForUser();
+    if (!user?.uid) return null;
+
+    const selectionPath = this.selectionPath(user.uid);
+    const selection = await this.firebase.getById<{ activeAuctionId?: string }>(selectionPath, 'current');
     if (selection?.activeAuctionId) return selection;
 
     // Preserve the active auction chosen before the new layout was introduced.
-    const user = await this.authService.waitForUser();
-    const legacyKey = user?.uid ? `current_${user.uid}` : 'current';
+    const legacyKey = `current_${user.uid}`;
     const legacy = await this.firebase.getById<AuctionSettings>(this.legacySettingsCollection, legacyKey);
     if (legacy?.activeAuctionId) {
-      await this.firebase.set(this.selectionPath(), 'current', { activeAuctionId: legacy.activeAuctionId });
+      await this.firebase.set(selectionPath, 'current', { activeAuctionId: legacy.activeAuctionId });
       return { activeAuctionId: legacy.activeAuctionId };
     }
     return null;

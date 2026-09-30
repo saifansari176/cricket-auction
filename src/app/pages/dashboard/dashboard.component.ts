@@ -422,7 +422,7 @@ export class DashboardComponent implements OnInit {
     const type = this.normalizedPlayerTypeFilter;
     if (!type) return true;
 
-    return this.players.find((player) => player.id === playerId)?.playerType.toLowerCase() === type;
+    return String(this.players.find((player) => player.id === playerId)?.playerType || '').toLowerCase() === type;
   }
 
   startAuction(player: Player): void {

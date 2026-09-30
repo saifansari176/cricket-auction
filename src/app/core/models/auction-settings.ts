@@ -1,3 +1,22 @@
+export type PlayerFormField =
+  | 'photo'
+  | 'lastName'
+  | 'jerseyNumber'
+  | 'playerType'
+  | 'currentTeam'
+  | 'category'
+  | 'tshirtSize'
+  | 'trouserSize'
+  | 'note'
+  | 'baseBid';
+
+export type PlayerFormFieldVisibility = Partial<Record<PlayerFormField, boolean>>;
+
+export interface PlayerFormFieldSettings {
+  addPlayer?: PlayerFormFieldVisibility;
+  registration?: PlayerFormFieldVisibility;
+}
+
 export interface AuctionSettings {
 
   id?: string;
@@ -49,5 +68,7 @@ export interface AuctionSettings {
   createdBy?: string;
 
   createdByEmail?: string;
+
+  playerFormFields?: PlayerFormFieldSettings;
 
 }

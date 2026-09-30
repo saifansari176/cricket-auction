@@ -124,7 +124,7 @@ export class ReportsComponent implements OnInit {
     const type = this.playerTypeFilter.trim().toLowerCase();
     if (!type) return true;
 
-    return this.players.find((player) => player.id === playerId)?.playerType.toLowerCase() === type;
+    return String(this.players.find((player) => player.id === playerId)?.playerType || '').toLowerCase() === type;
   }
 
   downloadTableData(): void {

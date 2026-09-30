@@ -518,6 +518,27 @@
         margin-bottom: 8px;
     }
 
+    .mobile-profile-trigger {
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        color: #e2e8f0;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .mobile-profile-trigger .account-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mobile-profile-chevron {
+        margin-left: auto;
+        color: #e2e8f0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
     .menu-user .account-text strong,
     .menu-user .account-text small,
     .menu-user .registration-toggle {

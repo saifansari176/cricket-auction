@@ -17,7 +17,7 @@
     </div>
 
     <form *ngIf="!loading && registrationEnabled && !submitted" [formGroup]="form" (ngSubmit)="submit()">
-      <div class="photo-row">
+      <div class="photo-row" *ngIf="isFieldVisible('photo')">
         <div class="photo-visual">
           <div class="photo-loader" *ngIf="uploadingPhoto">
             <div class="spinner" aria-label="Uploading"></div>
@@ -41,7 +41,7 @@
         </div>
       </div>
 
-        <app-image-cropper *ngIf="cropFile" [file]="cropFile" (cropped)="uploadCroppedPhoto($event)" (cancelled)="cropFile = null" />
+        <app-image-cropper *ngIf="cropFile && isFieldVisible('photo')" [file]="cropFile" (cropped)="uploadCroppedPhoto($event)" (cancelled)="cropFile = null" />
       <div class="form-section-heading">
         <div><h2>Player details</h2><p>Fill in the information below to complete your registration.</p></div>
       </div>
@@ -53,7 +53,7 @@
           <app-field-error [control]="form.controls.firstName" label="First Name" fieldId="player-registration-firstName" />
         </label>
 
-        <label for="player-registration-lastName">
+        <label *ngIf="isFieldVisible('lastName')" for="player-registration-lastName">
           <span class="field-label">Last Name <span class="required-marker" aria-hidden="true">*</span></span>
           <input id="player-registration-lastName" aria-describedby="player-registration-lastName-error" [class.is-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched" [attr.aria-invalid]="form.controls.lastName.invalid && form.controls.lastName.touched" aria-required="true" formControlName="lastName">
           <app-field-error [control]="form.controls.lastName" label="Last Name" fieldId="player-registration-lastName" />
@@ -65,13 +65,13 @@
           <app-field-error [control]="form.controls.mobile" label="Mobile Number" fieldId="player-registration-mobile" patternMessage="Enter a valid 10-digit mobile number." />
         </label>
 
-        <label for="player-registration-jerseyNumber">
+        <label *ngIf="isFieldVisible('jerseyNumber')" for="player-registration-jerseyNumber">
           <span class="field-label">Jersey Number <span class="required-marker" aria-hidden="true">*</span></span>
           <input id="player-registration-jerseyNumber" aria-describedby="player-registration-jerseyNumber-error" [class.is-invalid]="form.controls.jerseyNumber.invalid && form.controls.jerseyNumber.touched" [attr.aria-invalid]="form.controls.jerseyNumber.invalid && form.controls.jerseyNumber.touched" aria-required="true" type="tel" maxlength="3" formControlName="jerseyNumber" (keypress)="allowOnlyNumbers($event)">
           <app-field-error [control]="form.controls.jerseyNumber" label="Jersey Number" fieldId="player-registration-jerseyNumber" patternMessage="Jersey number must contain 1 to 3 digits." />
         </label>
 
-        <label for="player-registration-playerType">
+        <label *ngIf="isFieldVisible('playerType')" for="player-registration-playerType">
           <span class="field-label">Player Type <span class="required-marker" aria-hidden="true">*</span></span>
           <select id="player-registration-playerType" aria-describedby="player-registration-playerType-error" [class.is-invalid]="form.controls.playerType.invalid && form.controls.playerType.touched" [attr.aria-invalid]="form.controls.playerType.invalid && form.controls.playerType.touched" aria-required="true" formControlName="playerType">
             <option value="">Select</option>
@@ -83,12 +83,12 @@
           <app-field-error [control]="form.controls.playerType" label="Player Type" fieldId="player-registration-playerType" />
         </label>
 
-        <label>
+        <label *ngIf="isFieldVisible('currentTeam')">
           <span class="field-label">Current Team</span>
           <input formControlName="currentTeam" placeholder="Enter current team name">
         </label>
 
-        <label>
+        <label *ngIf="isFieldVisible('category')">
           <span class="field-label">Category</span>
           <select formControlName="categoryId">
             <option value="" disabled>Select Category</option>
@@ -96,7 +96,7 @@
           </select>
         </label>
 
-        <label for="player-registration-tshirtSize">
+        <label *ngIf="isFieldVisible('tshirtSize')" for="player-registration-tshirtSize">
           <span class="field-label">T-Shirt Size <span class="required-marker" aria-hidden="true">*</span></span>
           <select id="player-registration-tshirtSize" aria-describedby="player-registration-tshirtSize-error" [class.is-invalid]="form.controls.tshirtSize.invalid && form.controls.tshirtSize.touched" [attr.aria-invalid]="form.controls.tshirtSize.invalid && form.controls.tshirtSize.touched" aria-required="true" formControlName="tshirtSize">
             <option value="">Select</option>
@@ -111,7 +111,7 @@
           <app-field-error [control]="form.controls.tshirtSize" label="T-Shirt Size" fieldId="player-registration-tshirtSize" />
         </label>
 
-        <label>
+        <label *ngIf="isFieldVisible('trouserSize')">
           <span class="field-label">Trouser Size</span>
           <select formControlName="trouserSize">
             <option value="">Select</option>
@@ -132,7 +132,7 @@
 
       </div>
 
-      <label>
+      <label *ngIf="isFieldVisible('note')">
           <span class="field-label">Note</span>
           <textarea rows="3" formControlName="note"></textarea>
       </label>

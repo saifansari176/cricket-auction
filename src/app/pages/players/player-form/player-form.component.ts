@@ -19,6 +19,8 @@ import { AuctionService } from '../../../core/services/auction.service';
 import { StorageService } from '../../../core/services/storage.service';
 import { Player } from '../../../core/models/player';
 import { AuctionSettings } from '../../../core/models/auction-settings';
+import { PlayerFormField } from '../../../core/models/auction-settings';
+import { isPlayerFormFieldVisible } from '../../../core/models/player-form-fields';
 import { MessageService } from '../../../core/services/message.service';
 import { PlayerCategory } from '../../../core/models/player-category';
 import { PlayerCategoryService } from '../../../core/services/player-category.service';
@@ -101,7 +103,10 @@ export class PlayerFormComponent {
   async ngOnInit() {
 
     this.auction = await this.auctionService.get();
-    this.categories = await this.categoryService.getCategories(this.auction?.activeAuctionId || this.auction?.id);
+    this.configureFieldValidators();
+    this.categories = this.isFieldVisible('category')
+      ? await this.categoryService.getCategories(this.auction?.activeAuctionId || this.auction?.id)
+      : [];
     this.form.patchValue({ baseBid: this.getAuctionBaseBid() });
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -328,6 +333,26 @@ export class PlayerFormComponent {
   onCategoryChange(): void {
     const category = this.getSelectedCategory();
     this.form.patchValue({ baseBid: category ? category.basePrice : this.getAuctionBaseBid() });
+  }
+
+  isFieldVisible(field: PlayerFormField): boolean {
+    return isPlayerFormFieldVisible(this.auction, 'addPlayer', field);
+  }
+
+  private configureFieldValidators(): void {
+    const validators = {
+      photo: [Validators.required],
+      lastName: [Validators.required, nonBlank],
+      jerseyNumber: [Validators.required, Validators.pattern(/^[0-9]{1,3}$/)],
+      playerType: [Validators.required],
+      tshirtSize: [Validators.required]
+    } as const;
+
+    for (const field of Object.keys(validators) as Array<keyof typeof validators>) {
+      const control = this.form.controls[field];
+      control.setValidators(this.isFieldVisible(field) ? [...validators[field]] : []);
+      control.updateValueAndValidity({ emitEvent: false });
+    }
   }
 
   private getSelectedCategory(): PlayerCategory | undefined {

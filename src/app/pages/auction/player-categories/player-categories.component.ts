@@ -77,7 +77,7 @@ export class PlayerCategoriesComponent {
       return isEligibleForCategory
         && !player.categoryId
         && matchesSearch
-        && (!type || player.playerType.toLowerCase() === type)
+        && (!type || String(player.playerType || '').toLowerCase() === type)
         && (!status || player.status.toLowerCase() === status);
     });
   }

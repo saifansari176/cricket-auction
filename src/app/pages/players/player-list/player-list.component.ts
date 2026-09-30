@@ -158,7 +158,7 @@ get categories(): string[] {
     const category = this.categoryFilter.trim().toLowerCase();
 
     return this.players.filter((player) => {
-      const matchesType = !type || player.playerType.toLowerCase() === type;
+      const matchesType = !type || String(player.playerType || '').toLowerCase() === type;
       const matchesStatus = !status || player.status.toLowerCase() === status;
       const matchesCategory = !category
         || (category === '__regular__' && !player.categoryName)
