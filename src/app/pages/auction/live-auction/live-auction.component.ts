@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AuctionSettings } from '../../../core/models/auction-settings';
 import { Player } from '../../../core/models/player';
 import { Team } from '../../../core/models/team';
-import { AuctionService, LiveScreenAction } from '../../../core/services/auction.service';
+import { AuctionService, LiveAuctionResultEvent, LiveScreenAction } from '../../../core/services/auction.service';
 import { MessageService } from '../../../core/services/message.service';
 import { LoadingService } from '../../../core/services/loading.service';
 import { PlayerService } from '../../../core/services/player.service';
@@ -36,6 +36,8 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
   showSoldAnimation = false;
   soldToTeamName = '';
   actionInProgress = false;
+  private lastResultEvent: LiveAuctionResultEvent | undefined;
+  private resultEventSequence = 0;
 
   constructor(
     private playerService: PlayerService,
@@ -249,6 +251,7 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
         await this.teamService.updateTeamPoints(this.highestTeam!.id!, this.currentBid);
         this.updateSoldTeamOnScreen(this.highestTeam!.id!, this.currentBid);
         this.actionHistory.push({ type: 'sold', playerId: soldPlayerId });
+        this.lastResultEvent = this.createResultEvent('sold', this.currentBid, this.highestTeam!.teamName);
         await this.loadTeams();
         await this.loadNextPlayer('sold');
 
@@ -276,6 +279,7 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
       await this.loadingService.withoutLoader(async () => {
         await this.playerService.markUnsold(this.currentPlayer!.id!);
         this.actionHistory.push({ type: 'unsold', playerId: unsoldPlayerId });
+        this.lastResultEvent = this.createResultEvent('unsold', this.currentBid, '');
         await this.loadNextPlayer('unsold');
       });
     } finally {
@@ -333,9 +337,22 @@ await this.auctionService.saveBid({ playerId: this.currentPlayer!.id!, playerNam
       currentPlayerId: this.currentPlayer?.id || '',
       currentBid: this.currentBid,
       highestTeamId: this.highestTeam?.id || '',
+      ...(this.lastResultEvent ? { resultEvent: this.lastResultEvent } : {}),
       status: this.currentPlayer ? 'live' : 'completed',
       lastAction: action
     }, this.auction.activeAuctionId || this.auction.id);
+  }
+
+  private createResultEvent(action: 'sold' | 'unsold', bidAmount: number, teamName: string): LiveAuctionResultEvent {
+    const eventNumber = ++this.resultEventSequence;
+    return {
+      id: `${Date.now().toString(36)}-${eventNumber.toString(36)}`,
+      action,
+      playerName: this.playerName,
+      playerPhoto: this.currentPlayer?.photo || '',
+      teamName,
+      bidAmount
+    };
   }
 
   private getMaxAllowedBid(team: Team): number {

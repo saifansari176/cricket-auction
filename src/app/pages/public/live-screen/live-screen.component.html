@@ -57,8 +57,8 @@
           </span>
 
           <div>
-            <small>PLAYERS</small>
-            <strong>{{ players.length }}</strong>
+             <small>AVAILABLE</small>
+            <strong>{{ availablePlayerCount }}</strong>
           </div>
         </div>
 
@@ -71,9 +71,9 @@
           </span>
 
           <div>
-            <small>TEAMS</small>
+            <small>TOTAL</small>
             <strong>
-              {{ teams.length | number:'2.0-0' }}
+              {{ players.length | number:'2.0-0' }}
             </strong>
           </div>
         </div>

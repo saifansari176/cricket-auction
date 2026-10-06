@@ -183,13 +183,14 @@
 }
 
 .share-modal {
-  width: min(100%, 600px);
+  width: min(100%, 760px);
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 20px 45px rgba(15, 23, 42, .2);
   padding: 20px;
   max-height: calc(100dvh - 32px);
-  overflow-y: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .share-modal-header,
@@ -348,24 +349,30 @@
 
 
 .share-modal-actions {
-  justify-content: flex-end;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-content: stretch;
   margin-top: 20px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .share-action {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
   gap: 9px;
-  min-width: 0;
-  flex: 1 1 0;
+  width: 100%;
   padding: 9px 12px;
   border: 1px solid;
   border-radius: 9px;
   background: #fff;
   text-align: left;
-  white-space: nowrap;
+  white-space: normal;
   transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.share-action > span:last-child {
+  min-width: 0;
 }
 
 .share-action:hover {
@@ -386,7 +393,9 @@
 .share-action b,
 .share-action small {
   display: block;
+  overflow: hidden;
   line-height: 1.2;
+  text-overflow: ellipsis;
 }
 
 .share-action small {
@@ -418,10 +427,30 @@
   color: #d9f3ff;
 }
 
+/* Brand the telecast overlay action with a YouTube-style broadcast red. */
+.share-modal-actions > .share-action:last-child {
+  border-color: #e53935;
+  background: linear-gradient(135deg, #ff3b30, #cc0000);
+  color: #fff;
+}
+
+.share-modal-actions > .share-action:last-child .share-action-icon {
+  background: rgb(255 255 255 / 20%);
+}
+
+.share-modal-actions > .share-action:last-child small {
+  color: #ffe4e2;
+}
+
 @media (max-width: 575px) {
+  .share-modal-backdrop {
+    padding: 10px;
+  }
+
   .share-modal {
     width: 100%;
     padding: 16px;
+    border-radius: 10px;
   }
 
   .share-modal-actions {

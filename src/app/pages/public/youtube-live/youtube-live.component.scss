@@ -1,0 +1,704 @@
+﻿:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: #f5ffff;
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.overlay-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+.broadcast-overlay {
+  position: absolute;
+  right: 0;
+  bottom: 25px;
+  left: 0;
+  height: clamp(270px, 85vh, 440px);
+  overflow: hidden;
+}
+
+.player-card,
+.team-summary {
+  position: absolute;
+  bottom: 7px;
+  overflow: hidden;
+  border: 2px solid #e9be54;
+  background: #071a3c;
+  box-shadow: 0 0 9px #ffc107b5, inset 0 0 0 1px rgb(164 255 250 / 12%);
+}
+
+.player-card {
+  left: 4.1%;
+  z-index: 2;
+  display: flex;
+  width: 30.2%;
+  height: clamp(112px, 12vh, 132px);
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 5px 5px;
+  text-align: center;
+}
+
+.player-card h1 {
+  display: grid;
+  min-height: 34px;
+  margin: 0 -5px 3px;
+  padding: 3px 10px;
+  place-items: center;
+  overflow: hidden;
+  background: #e9be54;
+  color: #06172a;
+  font-size: clamp(16px, 2vw, 25px);
+  font-weight: 500;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.player-meta {
+  display: grid;
+  min-height: 32px;
+  align-content: center;
+  gap: 3px;
+  overflow: hidden;
+  color: #f2ffff;
+  font-size: clamp(9px, 0.8vw, 12px);
+  font-weight: 700;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  text-transform: capitalize;
+}
+
+.player-meta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.base-price {
+  display: flex;
+  min-height: 31px;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+  color: #e9be54d9;
+  font-size: clamp(13px, 1.5vw, 20px);
+  line-height: 1;
+  text-align: left;
+}
+
+.base-price span {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.base-price strong {
+  overflow: hidden;
+  color: #e9be54;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portrait-stage {
+  position: absolute;
+  bottom: clamp(80px, 12vh, 125px);
+  left: 50%;
+  z-index: 3;
+  width: clamp(124px, 11vw, 200px);
+  height: clamp(150px, 23vh, 190px);
+  transform: translateX(-50%);
+  background: transparent;
+}
+
+.portrait-stage::before {
+  position: absolute;
+  inset: 24% -10% 0;
+  background: #e9be54;
+  clip-path: polygon(12% 18%, 50% 0, 88% 18%, 88% 100%, 12% 100%);
+  content: '';
+  pointer-events: none;
+}
+
+.portrait-frame {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  width: 82%;
+  height: 100%;
+  overflow: hidden;
+  transform: translateX(-50%);
+  border: 4px solid #efcd78;
+  background: #f7ffff;
+  box-shadow: 0 0 14px #ffc107b5;
+}
+
+.portrait-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  transform: scale(1.3);
+}
+
+.portrait-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: #f7ffff;
+  color: #071a3c;
+  font-size: clamp(42px, 6vw, 76px);
+  font-weight: 800;
+}
+
+.current-bid-card {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  width: clamp(250px, 22.5vw, 360px);
+  height: clamp(80px, 14vh, 110px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 3px 10px 0;
+  transform: translateX(-50%);
+  border: 2px solid #e9be54 ;
+  background: #e9be54 ;
+  box-shadow: 0 0 12px #ffc107b5;
+  color: #082044;
+  text-align: center;
+}
+
+.bid-label {
+  font-size: clamp(17px, 2vw, 28px);
+  font-weight: 400;
+  letter-spacing: 0.015em;
+  line-height: 1.05;
+  white-space: nowrap;
+}
+
+.bid-amount {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(22px, 2.7vw, 38px);
+  font-weight: 800;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bidding-team {
+  display: block;
+  width: calc(100% + 20px);
+  margin: auto -10px 0;
+  padding: 4px 8px 5px;
+  overflow: hidden;
+  background: #071a3c;
+  color: #e9be54;
+  font-size: clamp(9px, 0.8vw, 12px);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.team-summary {
+  right: 4.1%;
+  z-index: 2;
+  display: flex;
+  width: 30.2%;
+  height: clamp(122px, 17vh, 142px);
+  flex-direction: column;
+  border-color: #e9be54 ;
+  background: #06183a;
+}
+
+.summary-header,
+.team-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px minmax(52px, 0.6fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-header {
+  min-height: 22px;
+  padding: 2px 7px;
+  border-bottom: 1px solid #e9be54;
+  background: #092444;
+  color: #e9be54d9;
+  font-size: clamp(10px, 1.05vw, 14px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.summary-header span:nth-child(n + 2) {
+  text-align: center;
+}
+
+.team-rows {
+  flex: 1;
+  overflow: hidden;
+}
+
+.team-row {
+  min-height: 24px;
+  padding: 2px 7px;
+  border-bottom: 1px solid rgb(74 189 202 / 24%);
+  background: rgb(10 38 62 / 86%);
+  color: #fff;
+  font-size: clamp(9px, 0.9vw, 13px);
+  font-weight: 700;
+}
+
+.team-row:nth-child(even) {
+  background: rgb(7 29 51 / 94%);
+}
+
+.team-name {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.team-name img {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  object-fit: contain;
+}
+
+.team-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.team-player-count,
+.team-row strong {
+  text-align: center;
+}
+
+.summary-empty {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  place-items: center;
+  padding: 5px 12px;
+}
+
+.summary-empty img {
+  display: block;
+  max-width: 64%;
+  max-height: 58px;
+  object-fit: contain;
+}
+
+.result-announcement {
+  position: absolute;
+  bottom: 165px;
+  left: 50%;
+  z-index: 6;
+  display: grid;
+  min-width: min(58%, 410px);
+  max-width: 86%;
+  justify-items: center;
+  gap: 4px;
+  padding: 10px 28px 12px;
+  transform: translateX(-50%);
+  clip-path: polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%);
+  background: linear-gradient(105deg, #087b89, #21d6cf 48%, #087b89);
+  filter: drop-shadow(0 0 7px rgb(82 255 249 / 90%)) drop-shadow(0 8px 18px rgb(0 0 0 / 60%));
+  color: #fff;
+  text-align: center;
+  animation: result-reveal 4.3s cubic-bezier(.18, .75, .24, 1) both;
+}
+
+.result-announcement.sold {
+  background: linear-gradient(105deg, #087e5a, #37e6a4 48%, #087e5a);
+  filter: drop-shadow(0 0 8px rgb(59 255 187 / 86%)) drop-shadow(0 8px 18px rgb(0 0 0 / 60%));
+}
+
+.result-announcement.unsold {
+  background: linear-gradient(105deg, #9a351e, #ff7c43 48%, #9a351e);
+  filter: drop-shadow(0 0 8px rgb(255 132 73 / 86%)) drop-shadow(0 8px 18px rgb(0 0 0 / 60%));
+}
+
+.result-status {
+  font-size: clamp(17px, 2vw, 28px);
+  font-weight: 950;
+  letter-spacing: .18em;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgb(0 0 0 / 52%);
+}
+
+.result-player {
+  overflow: hidden;
+  max-width: 100%;
+  font-size: clamp(12px, 1.15vw, 16px);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.result-detail {
+  overflow: hidden;
+  max-width: 100%;
+  color: #eafffd;
+  font-size: clamp(9px, .82vw, 12px);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.state-screen {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: transparent;
+  color: #fff;
+  font: 600 20px Arial, sans-serif;
+  text-shadow: 0 1px 5px #000;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes result-reveal {
+  0% { opacity: 0; transform: translate(-50%, 26px) scale(.72); }
+  12%, 72% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  86%, 100% { opacity: 0; transform: translate(-50%, -10px) scale(.96); }
+}
+
+@media (max-width: 760px) {
+  .broadcast-overlay {
+    height: clamp(270px, 85vh, 440px);
+  }
+
+  .player-card {
+    left: 2%;
+    width: 30.2%;
+    height: 112px;
+    bottom: 7px;
+  }
+
+  .player-card h1 {
+    min-height: 30px;
+    font-size: clamp(11px, 3.5vw, 19px);
+  }
+
+  .base-price {
+    font-size: clamp(10px, 2.8vw, 15px);
+  }
+
+  .team-summary {
+    right: 2%;
+    width: 30.2%;
+    height: 122px;
+    bottom: 7px;
+  }
+
+  .portrait-stage {
+    bottom: clamp(80px, 12vh, 125px);
+    width: clamp(80px, 11vw, 155px);
+    height: clamp(120px, 23vh, 190px);
+  }
+
+  .current-bid-card {
+    bottom: 4px;
+    width: clamp(150px, 22.5vw, 360px);
+    height: 88px;
+  }
+
+  .bid-label {
+    font-size: clamp(14px, 4vw, 22px);
+  }
+
+  .bid-amount {
+    font-size: clamp(18px, 5.4vw, 30px);
+  }
+
+  .result-announcement {
+    bottom: 153px;
+    min-width: min(80%, 360px);
+  }
+}
+
+/* Keep the landscape broadcast strip intact on phones held upright. The
+   portrait itself sits above the three information panels instead of forcing
+   the overlay to grow vertically. */
+@media (max-width: 600px) and (orientation: portrait) {
+  .broadcast-overlay {
+    bottom: 12px;
+    height: min(300px, 42vh);
+  }
+
+  .player-card,
+  .team-summary {
+    bottom: 4px;
+    width: 24%;
+    height: 88px;
+  }
+
+  .player-card {
+    left: 2.5%;
+    padding: 0 3px 4px;
+  }
+
+  .player-card h1 {
+    min-height: 24px;
+    margin-right: -3px;
+    margin-left: -3px;
+    padding: 2px 3px;
+    font-size: clamp(10px, 2.7vw, 14px);
+  }
+
+  .player-meta {
+    min-height: 26px;
+    gap: 2px;
+    font-size: clamp(8px, 2vw, 10px);
+  }
+
+  .base-price {
+    min-height: 24px;
+    gap: 3px;
+    font-size: clamp(8px, 2.1vw, 11px);
+  }
+
+  .team-summary {
+    right: 2.5%;
+    height: 92px;
+  }
+
+  .summary-header,
+  .team-row {
+    grid-template-columns: minmax(0, 1fr) 24px minmax(32px, .6fr);
+    gap: 2px;
+    padding-right: 3px;
+    padding-left: 3px;
+  }
+
+  .summary-header {
+    min-height: 18px;
+    font-size: clamp(8px, 2vw, 10px);
+  }
+
+  .team-row {
+    min-height: 18px;
+    font-size: clamp(7px, 1.8vw, 9px);
+  }
+
+  .team-name {
+    gap: 2px;
+  }
+
+  .team-name img {
+    width: 12px;
+    height: 12px;
+    flex-basis: 12px;
+  }
+
+  .portrait-stage {
+    bottom: 78px;
+    width: clamp(64px, 15vw, 100px);
+    height: clamp(108px, 22vh, 148px);
+  }
+
+  .current-bid-card {
+    bottom: 4px;
+    width: 27%;
+    height: 66px;
+    padding: 3px 4px 0;
+  }
+
+  .bid-label {
+    font-size: clamp(11px, 3vw, 15px);
+  }
+
+  .bid-amount {
+    font-size: clamp(16px, 4vw, 21px);
+  }
+
+  .bidding-team {
+    width: calc(100% + 8px);
+    margin-right: -4px;
+    margin-left: -4px;
+    padding: 3px 2px;
+    font-size: clamp(7px, 1.8vw, 9px);
+  }
+
+  .result-announcement {
+    bottom: 172px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-announcement {
+    animation-duration: .01ms;
+  }
+}
+
+/* Broadcast finish: clearer surfaces and restrained gold highlights that stay
+   readable over either a bright or dark video feed. */
+.player-card,
+.team-summary {
+  border: 1px solid rgb(255 226 151 / 88%);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgb(10 32 67 / 96%), rgb(3 15 38 / 98%));
+  box-shadow: 0 8px 24px rgb(0 0 0 / 38%), 0 0 14px rgb(255 193 7 / 28%), inset 0 1px rgb(255 255 255 / 12%);
+  backdrop-filter: blur(8px);
+}
+
+.player-card h1 {
+  min-height: 36px;
+  border-radius: 7px 7px 2px 2px;
+  background: linear-gradient(105deg, #f5d981, #e9be54 58%, #dba837);
+  font-weight: 800;
+  letter-spacing: .025em;
+  text-shadow: 0 1px rgb(255 255 255 / 40%);
+}
+
+.player-meta {
+  color: #e5f3ff;
+  font-weight: 600;
+  text-shadow: 0 1px 3px #000;
+}
+
+.base-price {
+  padding-top: 5px;
+  border-top: 1px solid rgb(233 190 84 / 38%);
+  color: #f0d483;
+  font-weight: 700;
+}
+
+.base-price strong {
+  color: #fff0b2;
+  text-shadow: 0 0 10px rgb(255 198 65 / 30%);
+}
+
+.portrait-stage::before {
+  inset: 25% -13% -2px;
+  background: linear-gradient(180deg, #f8dc8c, #d99c28);
+  filter: drop-shadow(0 0 12px rgb(255 193 7 / 35%));
+}
+
+.portrait-frame {
+  border: 3px solid #ffe6a0;
+  border-radius: 12px 12px 5px 5px;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 40%), 0 0 18px rgb(255 193 7 / 46%), inset 0 0 0 1px rgb(255 255 255 / 35%);
+}
+
+.portrait-frame img {
+  transform: scale(1.12);
+}
+
+.current-bid-card {
+  overflow: hidden;
+  border: 1px solid #ffedb8;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #ffe28a, #e9be54 60%, #d9a637);
+  box-shadow: 0 10px 26px rgb(0 0 0 / 36%), 0 0 20px rgb(255 193 7 / 36%), inset 0 1px rgb(255 255 255 / 70%);
+}
+
+.bid-label {
+  color: #26334b;
+  font-size: clamp(13px, 1.55vw, 21px);
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+
+.bid-amount {
+  color: #061b3d;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px rgb(255 255 255 / 36%);
+}
+
+.bidding-team {
+  background: linear-gradient(90deg, #06172f, #102d50, #06172f);
+  color: #ffe28a;
+  letter-spacing: .08em;
+}
+
+.summary-header {
+  border-bottom-color: rgb(233 190 84 / 72%);
+  background: linear-gradient(90deg, #102f52, #0a2141);
+  color: #ffe28a;
+  letter-spacing: .035em;
+}
+
+.team-row {
+  border-bottom-color: rgb(255 255 255 / 8%);
+  font-variant-numeric: tabular-nums;
+}
+
+.team-row strong {
+  color: #ffe28a;
+  text-shadow: 0 0 8px rgb(255 193 7 / 24%);
+}
+
+.team-name img {
+  border-radius: 50%;
+  background: rgb(255 255 255 / 10%);
+}
+
+.result-announcement {
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 14px;
+  clip-path: none;
+  box-shadow: 0 14px 38px rgb(0 0 0 / 48%);
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .player-card,
+  .team-summary {
+    border-radius: 7px;
+  }
+
+  .player-card h1 {
+    min-height: 24px;
+    border-radius: 4px 4px 1px 1px;
+  }
+
+  .portrait-frame {
+    border-radius: 8px 8px 3px 3px;
+  }
+
+  .current-bid-card {
+    border-radius: 7px;
+  }
+}

@@ -113,6 +113,14 @@ export class SeoService {
       };
     }
 
+    if (path.startsWith('/youtube-live/') || path.startsWith('/auction-overlay/')) {
+      return {
+        title: 'Live Auction Telecast Overlay | Cricbids',
+        description: 'Live player, bid, and team details for cricket auction telecasts.',
+        indexable: false
+      };
+    }
+
     if (path.startsWith('/player-list/')) {
       return {
         title: 'Available Cricket Players | Cricbids',

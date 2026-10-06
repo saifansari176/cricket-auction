@@ -91,6 +91,10 @@ export class LiveScreenComponent implements OnInit, OnDestroy {
     return this.auction?.publicLiveViewEnabled !== false;
   }
 
+  get availablePlayerCount(): number {
+    return this.players.filter((player) => player.status === 'Available').length;
+  }
+
   get currentPlayer(): Player | undefined {
     return this.players.find((player) => player.id === this.liveState?.currentPlayerId);
   }

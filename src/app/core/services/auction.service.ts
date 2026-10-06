@@ -12,9 +12,19 @@ export interface LiveAuctionState {
   currentPlayerId?: string;
   currentBid?: number;
   highestTeamId?: string;
+  resultEvent?: LiveAuctionResultEvent;
   status?: 'live' | 'completed';
   lastAction?: LiveScreenAction;
   updatedAt?: string;
+}
+
+export interface LiveAuctionResultEvent {
+  id: string;
+  action: 'sold' | 'unsold';
+  playerName: string;
+  playerPhoto: string;
+  teamName: string;
+  bidAmount: number;
 }
 
 export type LiveScreenAction = 'bid' | 'load' | 'sold' | 'unsold' | 'undo';

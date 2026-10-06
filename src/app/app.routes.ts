@@ -147,6 +147,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/public/live-screen/live-screen.component').then((m) => m.LiveScreenComponent),
   },
+  {
+    path: 'auction-overlay/:auctionId',
+    loadComponent: () =>
+      import('./pages/public/youtube-live/youtube-live.component').then((m) => m.YoutubeLiveComponent),
+  },
 
   {
     path: 'about-us',

@@ -1,0 +1,78 @@
+<main class="overlay-canvas" *ngIf="!loading; else loadingState">
+  <ng-container *ngIf="auction as loadedAuction; else missingState">
+    <section class="broadcast-overlay" aria-live="polite">
+      <section class="player-card" aria-label="Current player">
+        <h1>{{ currentPlayer ? (currentPlayer.firstName + ' ' + currentPlayer.lastName) : 'AUCTION STARTING SOON' }}</h1>
+        <div class="player-meta">
+          <span *ngIf="currentPlayer?.playerType">{{ currentPlayer?.playerType }}</span>
+          <span *ngIf="currentPlayer?.note">{{ currentPlayer?.note }}</span>
+        </div>
+        <div class="base-price">
+          <span>BASE VALUE</span>
+          <strong>{{ formatBidAmount(currentPlayer?.baseBid || 0) }}</strong>
+        </div>
+      </section>
+
+      <div class="portrait-stage" aria-label="Player photo">
+        <div class="portrait-frame">
+          <img
+            *ngIf="currentPlayer?.photo"
+            [src]="currentPlayer?.photo"
+            [alt]="currentPlayer?.firstName + ' ' + currentPlayer?.lastName">
+          <div class="portrait-placeholder" *ngIf="!currentPlayer?.photo">
+            {{ currentPlayer?.firstName?.charAt(0) || 'CB' }}
+          </div>
+        </div>
+      </div>
+
+      <section class="current-bid-card" aria-label="Current bid">
+        <span class="bid-label">CURRENT BID</span>
+        <strong class="bid-amount">{{ formatBidAmount(currentBid) }}</strong>
+        <span class="bidding-team">{{ highestTeam?.teamName || 'NO BIDS YET' }}</span>
+      </section>
+
+      <section class="team-summary" aria-label="Team points summary">
+        <div class="summary-header">
+          <span>Team</span>
+          <span>PL</span>
+          <span>Points</span>
+        </div>
+        <div class="team-rows" *ngIf="teams.length; else noTeams">
+          <div class="team-row" *ngFor="let team of visibleTeams">
+            <span class="team-name">
+              <img *ngIf="team.logo" [src]="team.logo" [alt]="''" />
+              <span>{{ team.teamName }}</span>
+            </span>
+            <span class="team-player-count">{{ team.playersBought || 0 }}</span>
+            <strong>{{ team.remainingPoints || 0 | number:'1.0-0' }}</strong>
+          </div>
+        </div>
+        <ng-template #noTeams>
+          <div class="summary-empty">
+            <img [src]="loadedAuction.logo || '/cricbids-logo.png'" [alt]="loadedAuction.auctionName" />
+          </div>
+        </ng-template>
+      </section>
+
+      <div
+        *ngIf="resultVisible && resultEvent as result"
+        class="result-announcement"
+        [class.sold]="result.action === 'sold'"
+        [class.unsold]="result.action === 'unsold'"
+        role="status"
+        aria-live="assertive">
+        <span class="result-status">{{ result.action === 'sold' ? 'SOLD' : 'UNSOLD' }}</span>
+        <strong class="result-player">{{ result.playerName }}</strong>
+        <span class="result-detail" *ngIf="result.action === 'sold'">
+          {{ result.teamName }} · {{ formatBidAmount(result.bidAmount) }}
+        </span>
+        <span class="result-detail" *ngIf="result.action === 'unsold'">REMAINS IN THE PLAYER POOL</span>
+      </div>
+
+      <span class="sr-only">{{ loadedAuction.auctionName }} live auction telecast overlay</span>
+    </section>
+  </ng-container>
+</main>
+
+<ng-template #loadingState><main class="state-screen">Loading auction overlay…</main></ng-template>
+<ng-template #missingState><main class="state-screen">{{ notFound ? 'Tournament not found' : 'Auction overlay unavailable' }}</main></ng-template>

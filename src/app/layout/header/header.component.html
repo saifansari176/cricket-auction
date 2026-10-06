@@ -1,4 +1,4 @@
-<header class="app-header" *ngIf="!router.url.includes('/watch') && !router.url.includes('/live-screen')">
+<header class="app-header" *ngIf="!router.url.includes('/watch') && !router.url.includes('/live-screen') && !router.url.includes('/youtube-live') && !router.url.includes('/auction-overlay')">
     <div class="brand">
         <button type="button" class="menu-btn" (click)="toggleMenu()" aria-label="Open menu">
             <span></span>
@@ -63,7 +63,7 @@
     </div>
 </header>
 
-<div class="current-auction-bar" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction') && !router.url.includes('/watch') && !router.url.includes('/live-screen')">
+<div class="current-auction-bar" *ngIf="currentAuction?.auctionName && !router.url.includes('/auction') && !router.url.includes('/watch') && !router.url.includes('/live-screen') && !router.url.includes('/youtube-live') && !router.url.includes('/auction-overlay')">
     <strong>{{currentAuction?.auctionName}}</strong>
 </div>
 

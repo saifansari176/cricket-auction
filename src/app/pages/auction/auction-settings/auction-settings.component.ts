@@ -554,6 +554,17 @@ export class AuctionSettingsComponent {
     this.message.info(`Copy live screen link:\n${link}`);
   }
 
+  async copyTelecastOverlayLink(): Promise<void> {
+    if (!this.shareAuction?.id) return;
+    const link = `${window.location.origin}/auction-overlay/${encodeURIComponent(this.shareAuction.id)}`;
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(link);
+      this.message.success('Telecast overlay link copied.');
+      return;
+    }
+    this.message.info(`Copy telecast overlay link:\n${link}`);
+  }
+
   async onLogoChange(event: Event) {
 
     const input = event.target as HTMLInputElement;

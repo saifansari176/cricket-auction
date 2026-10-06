@@ -46,6 +46,9 @@ export class AppComponent implements OnDestroy {
       .subscribe((event) => {
         this.seo.updateForUrl(event.urlAfterRedirects);
         this.analytics.trackPageView(event.urlAfterRedirects);
+        if (isPlatformBrowser(this.platformId)) {
+          this.updateTelecastCanvas(event.urlAfterRedirects);
+        }
       });
 
     if (isPlatformBrowser(this.platformId)) {
@@ -99,6 +102,12 @@ export class AppComponent implements OnDestroy {
     });
   }
 
+  private updateTelecastCanvas(url: string): void {
+    const isTelecastOverlay = /^\/(?:auction-overlay|youtube-live)(?:\/|$)/.test(url);
+    document.documentElement.classList.toggle('telecast-overlay', isTelecastOverlay);
+    document.body.classList.toggle('telecast-overlay', isTelecastOverlay);
+  }
+
   private onPageShow = (event: PageTransitionEvent): void => {
     // Mobile browsers can restore a frozen page from BFCache without restoring
     // Firebase's live connections. A fresh app boot reconnects those services.
@@ -120,7 +129,7 @@ export class AppComponent implements OnDestroy {
   };
 
   get showShell(): boolean {
-    const publicPaths = ['/', '/login', '/player-registration', '/player-list', '/watch', '/live-screen', '/how-it-works', '/past-auctions'];
+    const publicPaths = ['/', '/login', '/player-registration', '/player-list', '/watch', '/live-screen', '/youtube-live', '/auction-overlay', '/how-it-works', '/past-auctions'];
     return !publicPaths.some((path) => path === '/' ? this.router.url === '/' : this.router.url.startsWith(path));
   }
 

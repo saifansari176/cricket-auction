@@ -5,6 +5,8 @@ html { box-sizing: border-box; }
 html, body { height: 100%; }
 body { margin: 0; font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
 body { overflow-x: hidden; }
+html.telecast-overlay,
+body.telecast-overlay { background: transparent !important; }
 img { max-width: 100%; }
 
 .required-marker {
