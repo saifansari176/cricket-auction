@@ -1,6 +1,6 @@
 [
   {
-    "origin": ["http://localhost:4200"],
+    "origin": ["*"],
     "method": ["GET", "POST", "PUT", "HEAD", "DELETE"],
     "responseHeader": ["Content-Type", "x-goog-resumable", "ETag"],
     "maxAgeSeconds": 3600

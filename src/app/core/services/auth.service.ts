@@ -87,13 +87,13 @@ export class AuthService {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(credential.user, { displayName });
 
-      const users = await this.getUsers();
       const now = new Date().toISOString();
       const profile: AppUser = {
         uid: credential.user.uid,
         email,
         displayName,
-        role: users.length === 0 ? 'admin' : 'user',
+        // The server assigns the first account as admin and all later accounts as users.
+        role: 'user',
         active: true,
         createdAt: now,
         updatedAt: now
@@ -188,13 +188,12 @@ export class AuthService {
       };
     }
 
-    const users = await this.getUsers();
     const now = new Date().toISOString();
     const profile: AppUser = {
       uid: firebaseUser.uid,
       email: firebaseUser.email || '',
       displayName: firebaseUser.displayName || firebaseUser.email || 'User',
-      role: users.length === 0 ? 'admin' : 'user',
+      role: 'user',
       active: true,
       createdAt: now,
       updatedAt: now

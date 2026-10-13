@@ -1,22 +1,12 @@
 import { Injectable } from '@angular/core';
 import {
-  getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  collection,
   doc,
-  getDoc,
-  setDoc,
-  runTransaction,
-  query,
-  where,
   onSnapshot,
   Unsubscribe,
   DocumentData
 } from 'firebase/firestore';
 
-import { db } from '../../../firebase.config';
+import { auth, db } from '../../../firebase.config';
 import { LoadingService } from './loading.service';
 
 type FirestorePayload = object & { id?: unknown };
@@ -50,12 +40,7 @@ export class FirebaseService {
     if (forceRefresh) this.invalidateCollection(collectionName);
     const key = this.readKey(collectionName, 'all');
     return this.cachedRead(collectionName, key, () => this.loading.track(async () => {
-      const snapshot = await getDocs(collection(db, collectionName));
-
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as T[];
+      return this.request<T[]>('getAll', { collection: collectionName });
     }));
 
 }
@@ -68,11 +53,7 @@ export class FirebaseService {
     if (forceRefresh) this.invalidateCollection(collectionName);
     const key = this.readKey(collectionName, 'document', id);
     return this.cachedRead(collectionName, key, () => this.loading.track(async () => {
-      const snapshot = await getDoc(doc(db, collectionName, id));
-
-      if (!snapshot.exists()) return null;
-
-      return { id: snapshot.id, ...snapshot.data() } as T;
+      return this.request<T | null>('getById', { collection: collectionName, id });
     }));
 
 }
@@ -91,9 +72,7 @@ export class FirebaseService {
     if (forceRefresh) this.invalidateCollection(collectionName);
     const key = this.readKey(collectionName, 'field', field, JSON.stringify(value));
     return this.cachedRead(collectionName, key, () => this.loading.track(async () => {
-      const snapshot = await getDocs(query(collection(db, collectionName), where(field, '==', value)));
-      const record = snapshot.docs[0];
-      return record ? ({ id: record.id, ...record.data() } as T) : null;
+      return this.request<T | null>('getOneByField', { collection: collectionName, field, value });
     }));
   }
 
@@ -103,10 +82,9 @@ export class FirebaseService {
 
   async add<T extends FirestorePayload>(collectionName: string, data: T) {
     const payload = this.withoutId(data);
-    const result = await this.runWrite(`add:${collectionName}:${this.writeFingerprint(payload)}`, () => this.loading.track(() => addDoc(
-      collection(db, collectionName),
-      payload
-    )));
+    const result = await this.runWrite(`add:${collectionName}:${this.writeFingerprint(payload)}`, () => this.loading.track(() =>
+      this.request<{ id: string }>('add', { collection: collectionName, data: payload })
+    ));
     this.invalidateCollection(collectionName);
     return result;
 
@@ -127,23 +105,10 @@ export class FirebaseService {
     const payload = this.withoutId(data);
 
     const created = await this.loading.track(async () => {
-      const matchingDocuments = await getDocs(
-        query(collection(db, collectionName), where(field, '==', value))
-      );
-
-      if (!matchingDocuments.empty) {
-        return false;
-      }
-
-      return runTransaction(db, async (transaction) => {
-      const document = doc(db, collectionName, id);
-      if ((await transaction.get(document)).exists()) {
-        return false;
-      }
-
-      transaction.set(document, payload);
-      return true;
-      });
+      const result = await this.request<{ created: boolean }>('createIfNoMatchingField', {
+        collection: collectionName, id, field, value, data: payload
+      }, [201, 409]);
+      return result.created;
     });
 
     if (created) this.invalidateCollection(collectionName);
@@ -156,10 +121,9 @@ export class FirebaseService {
 
   async set<T extends FirestorePayload>(collectionName: string, id: string, data: T) {
     const payload = this.withoutId(data);
-    await this.runWrite(`set:${collectionName}:${id}:${this.writeFingerprint(payload)}`, () => this.loading.track(() => setDoc(
-      doc(db, collectionName, id),
-      payload
-    )));
+    await this.runWrite(`set:${collectionName}:${id}:${this.writeFingerprint(payload)}`, () => this.loading.track(() =>
+      this.request<void>('set', { collection: collectionName, id, data: payload })
+    ));
     this.invalidateCollection(collectionName);
 
   }
@@ -170,10 +134,9 @@ export class FirebaseService {
 
   async update<T extends FirestorePayload>(collectionName: string, id: string, data: T) {
     const payload = this.withoutId(data);
-    await this.runWrite(`update:${collectionName}:${id}:${this.writeFingerprint(payload)}`, () => this.loading.track(() => updateDoc(
-      doc(db, collectionName, id),
-      payload
-    )));
+    await this.runWrite(`update:${collectionName}:${id}:${this.writeFingerprint(payload)}`, () => this.loading.track(() =>
+      this.request<void>('update', { collection: collectionName, id, data: payload })
+    ));
     this.invalidateCollection(collectionName);
 
   }
@@ -183,17 +146,17 @@ export class FirebaseService {
   // ==========================
 
   async delete(collectionName: string, id: string) {
-    await this.runWrite(`delete:${collectionName}:${id}`, () => this.loading.track(() => deleteDoc(
-      doc(db, collectionName, id)
-    )));
+    await this.runWrite(`delete:${collectionName}:${id}`, () => this.loading.track(() =>
+      this.request<void>('delete', { collection: collectionName, id })
+    ));
     this.invalidateCollection(collectionName);
 
   }
 
   async deleteCollection(collectionName: string): Promise<void> {
     await this.loading.track(async () => {
-      const snapshot = await getDocs(collection(db, collectionName));
-      await Promise.all(snapshot.docs.map((document) => deleteDoc(document.ref)));
+      const records = await this.request<Array<{ id: string }>>('getAll', { collection: collectionName });
+      await Promise.all(records.map((record) => this.request<void>('delete', { collection: collectionName, id: record.id })));
     });
     this.invalidateCollection(collectionName);
   }
@@ -209,6 +172,11 @@ export class FirebaseService {
     this.inFlightReads.clear();
     this.cacheVersions.clear();
     this.cacheEpoch += 1;
+  }
+
+  /** Calls a purpose-built backend command, used for atomic auction actions. */
+  async post<T>(path: string, body: Record<string, unknown>): Promise<T> {
+    return this.apiRequest<T>(path, body);
   }
 
   private withoutId<T extends FirestorePayload>(data: T): DocumentData {
@@ -294,6 +262,34 @@ export class FirebaseService {
   private clone<T>(value: T): T {
     if (typeof structuredClone === 'function') return structuredClone(value);
     return JSON.parse(JSON.stringify(value)) as T;
+  }
+
+  /** All normal data operations pass through Express, where Admin SDK checks ownership. */
+  private async request<T>(action: string, payload: Record<string, unknown>, allowedStatuses = [200, 201, 204]): Promise<T> {
+    const collectionPath = String(payload['collection'] || '')
+      .split('/')
+      .filter(Boolean)
+      .map(encodeURIComponent)
+      .join('/');
+    return this.apiRequest<T>(`/api/data/${encodeURIComponent(action)}/${collectionPath}`, { action, ...payload }, allowedStatuses);
+  }
+
+  private async apiRequest<T>(path: string, body: Record<string, unknown>, allowedStatuses = [200, 201, 204]): Promise<T> {
+    const token = await auth.currentUser?.getIdToken();
+    const response = await fetch(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(body)
+    });
+    if (!allowedStatuses.includes(response.status)) {
+      const error = await response.json().catch(() => ({})) as { error?: string };
+      throw new Error(error.error || `Data API request failed (${response.status}).`);
+    }
+    if (response.status === 204) return undefined as T;
+    return response.json() as Promise<T>;
   }
 
 }

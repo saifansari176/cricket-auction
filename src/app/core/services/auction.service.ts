@@ -110,6 +110,13 @@ export class AuctionService {
   }
 
    async get(): Promise<AuctionSettings | null> {
+    // Public routes resolve their auction explicitly from the URL. They must
+    // never trigger an authenticated legacy-data migration.
+    const user = await this.authService.waitForUser();
+    if (!user) {
+      this.activeAuction$.next(null);
+      return null;
+    }
 
     await this.migrateLegacyData();
     const selection = await this.getSelection();
@@ -154,6 +161,7 @@ export class AuctionService {
 
   async getAuctions(): Promise<AuctionSettings[]> {
     const user = await this.authService.waitForUser();
+    if (!user) return [];
     const isAdmin = this.authService.isAdmin(user);
 
     await this.migrateLegacyData();
@@ -340,6 +348,19 @@ export class AuctionService {
 
     await this.firebase.add(bidCollection, payload);
 
+  }
+
+  async sellPlayer(playerId: string, teamId: string, bidAmount: number): Promise<void> {
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) throw new Error('Select an auction before recording a sale.');
+    await this.firebase.post(`/api/auctions/${encodeURIComponent(auctionId)}/sales`, {
+      playerId,
+      teamId,
+      bidAmount
+    });
+    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'players'));
+    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'teams'));
+    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'bids'));
   }
 
   async getBids(): Promise<AuctionBid[]> {

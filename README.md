@@ -1,5 +1,15 @@
 # CricketAuction
 
+## Backend and Firebase setup
+
+Player, team, bid, category, and auction data requests are handled by the Express endpoint `POST /api/firestore`. The server verifies the Firebase ID token and uses the Firebase Admin SDK; it must run in Firebase App Hosting, Cloud Run, or another Google environment with a service account. For local SSR, download a service-account key from **Firebase Console → Project settings → Service accounts**, save it as `service-account.json` beside `package.json`, and put `FIREBASE_SERVICE_ACCOUNT_FILE=./service-account.json` in `.env`. The key is ignored by Git.
+
+Images are stored in Firebase Storage under `players/`, `teams/`, and `auction/`. Deploy the database and Storage policies after reviewing them:
+
+```bash
+firebase deploy --only firestore:rules,storage
+```
+
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.26.
 
 ## Development server

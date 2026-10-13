@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    // All application data uses the server API. The browser directly watches
+    // only the small live-state document needed by the public live display.
+    match /auctions/{auctionId} {
+      allow read, write: if false;
+      match /liveState/{document} {
+        allow read: if signedIn() ||
+          get(/databases/$(database)/documents/auctions/$(auctionId)).data.publicLiveViewEnabled != false;
+        allow write: if false;
+      }
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if false;
+      match /preferences/{document} {
+        allow read: if signedIn() && request.auth.uid == userId;
+        allow write: if false;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

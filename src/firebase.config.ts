@@ -12,7 +12,7 @@ export const firebaseConfig = {
   apiKey: "AIzaSyCADznRvZZ9RC-wHDbRlaI1HZ1M86PAgDA",
   authDomain: "saifcricketauction.firebaseapp.com",
   projectId: "saifcricketauction",
-  storageBucket: "saifcricketauction.appspot.com",
+  storageBucket: "saifcricketauction.firebasestorage.app",
   messagingSenderId: "365618757794",
   appId: "1:365618757794:web:67e6d9298ee18a91d397fb",
   measurementId: "G-PGWEKXGD8C"

@@ -1,20 +1,14 @@
 import { Injectable } from '@angular/core';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../../firebase.config';
-import { cloudinaryConfig } from '../../../environments/cloudinary.config';
-import { CloudinaryService } from './cloudinary.service';
 import { LoadingService } from './loading.service';
 
 @Injectable({ providedIn: 'root' })
 export class StorageService {
-  constructor(private cloudinaryService: CloudinaryService, private loading: LoadingService) {}
+  constructor(private loading: LoadingService) {}
 
   async uploadPlayerImage(file: File): Promise<string> {
-    if (!cloudinaryConfig.cloudName || !cloudinaryConfig.uploadPreset) {
-      throw new Error('Cloudinary is not configured for player image upload.');
-    }
-
-    return this.loading.track(() => this.cloudinaryService.uploadFile(file));
+    return this.loading.track(() => this.uploadRemoteFile(file, 'players'));
   }
 
   async uploadTeamLogo(file: File): Promise<string> {
@@ -26,15 +20,11 @@ export class StorageService {
   }
 
   private async uploadRemoteFile(file: File, folder: string): Promise<string> {
-    if (cloudinaryConfig.cloudName && cloudinaryConfig.uploadPreset) {
-      try {
-        return await this.cloudinaryService.uploadFile(file);
-      } catch (error) {
-        console.warn('Cloudinary upload failed, falling back to Firebase Storage', error);
-      }
-    }
+    if (!file.type.startsWith('image/')) throw new Error('Only image files can be uploaded.');
+    if (file.size > 5 * 1024 * 1024) throw new Error('Image files must be 5 MB or smaller.');
 
-    const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
+    const extension = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg';
+    const storageRef = ref(storage, `${folder}/${crypto.randomUUID()}.${extension}`);
     await uploadBytes(storageRef, file);
     return getDownloadURL(storageRef);
   }

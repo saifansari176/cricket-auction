@@ -79,12 +79,28 @@ export class PlayerService {
     const normalizedMobile = mobile.trim();
     if (!auctionId || !normalizedMobile) return false;
 
+    const user = await this.auctionService.authService.waitForUser();
+    if (!user) {
+      const result = await this.firebase.post<{ mobileRegistered: boolean }>(
+        `/api/public/auctions/${encodeURIComponent(auctionId)}/registration-check`,
+        { mobile: normalizedMobile }
+      );
+      return result.mobileRegistered;
+    }
+
     const players = await this.firebase.getAll<Player>(this.auctionCollection(auctionId));
     return players.some((player) => player.mobile.trim() === normalizedMobile);
   }
 
   async canAddPlayer(auctionId?: string): Promise<boolean> {
     const user = await this.auctionService.authService.waitForUser();
+    if (!user && auctionId) {
+      const result = await this.firebase.post<{ canRegister: boolean }>(
+        `/api/public/auctions/${encodeURIComponent(auctionId)}/registration-check`,
+        {}
+      );
+      return result.canRegister;
+    }
     if (this.auctionService.authService.isAdmin(user)) return true;
 
     const selectedAuction = auctionId ? null : await this.auctionService.get();

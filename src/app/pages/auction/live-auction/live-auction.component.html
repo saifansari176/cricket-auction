@@ -121,15 +121,17 @@
         <span class="team-button-main">
           <span class="team-name">{{team.teamName}}</span>
           <span class="team-stats">
-            <span>Left <strong>₹{{team.remainingPoints}}</strong></span>
-            <span>PL<strong>{{(team.playerLimit || auction?.playersPerTeam || 0) - (team.playersBought || 0)}}</strong></span>
+            <span class="team-stat">
+              <small>Point-R</small>
+              <strong>₹{{team.remainingPoints}}</strong>
+            </span>
+            <span class="team-stat team-slots">
+              <small>PL</small>
+              <strong>{{(team.playerLimit || auction?.playersPerTeam || 0) - (team.playersBought || 0)}}</strong>
+            </span>
           </span>
         </span>
 
-        <span class="bid-pill">
-          <span class="bid-label">BID</span>
-          <span class="bid-amount">₹{{nextBid}}</span>
-        </span>
       </button>
     </div>
   </div>
