@@ -205,6 +205,8 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
 };
 
 app.post('/api/data/{*path}', handleFirestoreRequest);
+// Kept temporarily for browsers that still have the prior frontend bundle cached.
+app.post('/api/firestore', handleFirestoreRequest);
 
 /** Supplies only the duplicate/limit checks needed by the anonymous registration form. */
 app.post('/api/public/auctions/:auctionId/registration-check', async (req, res) => {
