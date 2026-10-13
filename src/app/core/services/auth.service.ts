@@ -36,14 +36,18 @@ export class AuthService {
 
   constructor(private firebase: FirebaseService, private loading: LoadingService) {
     onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) this.firebase.clearReadCache();
-      const appUser = firebaseUser ? await this.loadOrCreateProfile(firebaseUser) : null;
-
-      this.currentUser$.next(appUser);
-
-      if (!this.ready) {
-        this.ready = true;
-        this.readyResolver();
+      try {
+        if (!firebaseUser) this.firebase.clearReadCache();
+        const appUser = firebaseUser ? await this.loadOrCreateProfile(firebaseUser) : null;
+        this.currentUser$.next(appUser);
+      } catch (error) {
+        console.error('Unable to load the signed-in user profile.', error);
+        this.currentUser$.next(null);
+      } finally {
+        if (!this.ready) {
+          this.ready = true;
+          this.readyResolver();
+        }
       }
     });
   }
