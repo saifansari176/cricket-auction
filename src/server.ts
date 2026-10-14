@@ -92,6 +92,8 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
   }
   if (!user) throw new Error('Authentication is required.');
 
+  if (body.collection === 'auctions' && body.action === 'getAll') return user;
+
   const profile = await firestore.doc(`users/${user.uid}`).get();
   const isAdmin = profile.data()?.['role'] === 'admin';
   if (isAdmin) return user;
@@ -144,7 +146,13 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
 
     switch (body.action) {
       case 'getAll': {
-        const snapshot = await records.get();
+        const profile = user && body.collection === 'auctions'
+          ? await firestore.doc(`users/${user.uid}`).get()
+          : null;
+        const isAdmin = profile?.data()?.['role'] === 'admin';
+        const snapshot = user && body.collection === 'auctions' && !isAdmin
+          ? await records.where('createdBy', '==', user.uid).get()
+          : await records.get();
         res.json(snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() })));
         return;
       }
