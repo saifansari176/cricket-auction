@@ -452,7 +452,3 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
  * Request handler used by the Angular CLI (for dev-server and during build) or Firebase Cloud Functions.
  */
 export const reqHandler = createNodeRequestHandler(app);
-
-// Vercel's catch-all API function imports this Express instance so every
-// /api/* request uses the same authenticated handlers as the SSR server.
-export default app;
