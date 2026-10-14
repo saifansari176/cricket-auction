@@ -1,0 +1,8 @@
+# Firebase App Hosting builds the Angular browser/server bundles, then runs
+# the existing Express SSR server for both pages and /api/* routes.
+runConfig:
+  minInstances: 0
+
+scripts:
+  buildCommand: npm run build
+  runCommand: node dist/cricket-auction/server/server.mjs
