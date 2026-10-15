@@ -8,6 +8,10 @@
 
 </div>
 
+<div *ngIf="!initialPageReady" class="startup-cover" role="status" aria-live="polite" aria-label="Loading Cricbids">
+    <div class="startup-spinner"><img src="/loader.png" alt=""></div>
+</div>
+
 <app-message-modal></app-message-modal>
 <app-loader></app-loader>
 <app-image-preview></app-image-preview>

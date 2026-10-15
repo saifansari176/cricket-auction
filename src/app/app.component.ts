@@ -31,6 +31,9 @@ export class AppComponent implements OnDestroy {
   private readonly dataPreloadSubscriptions = new Subscription();
   private hiddenAt = 0;
   private readonly resumeReloadDelay = 2 * 60 * 1000;
+  private authReady = false;
+  private initialNavigationComplete = false;
+  initialPageReady = false;
 
   constructor(
     private router: Router,
@@ -44,6 +47,8 @@ export class AppComponent implements OnDestroy {
     this.navigationSubscription = this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe((event) => {
+        this.initialNavigationComplete = true;
+        this.finishInitialLoad();
         this.seo.updateForUrl(event.urlAfterRedirects);
         this.analytics.trackPageView(event.urlAfterRedirects);
         if (isPlatformBrowser(this.platformId)) {
@@ -52,6 +57,11 @@ export class AppComponent implements OnDestroy {
       });
 
     if (isPlatformBrowser(this.platformId)) {
+      this.initialNavigationComplete = this.router.navigated;
+      void this.authService.waitForUser().then(() => {
+        this.authReady = true;
+        this.finishInitialLoad();
+      });
       this.startPlayerPreload();
       window.addEventListener('pageshow', this.onPageShow);
       document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -106,6 +116,12 @@ export class AppComponent implements OnDestroy {
     const isTelecastOverlay = /^\/(?:auction-overlay|youtube-live)(?:\/|$)/.test(url);
     document.documentElement.classList.toggle('telecast-overlay', isTelecastOverlay);
     document.body.classList.toggle('telecast-overlay', isTelecastOverlay);
+  }
+
+  private finishInitialLoad(): void {
+    if (this.authReady && (this.initialNavigationComplete || this.router.navigated)) {
+      this.initialPageReady = true;
+    }
   }
 
   private onPageShow = (event: PageTransitionEvent): void => {
