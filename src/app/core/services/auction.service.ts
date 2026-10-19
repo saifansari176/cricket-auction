@@ -120,9 +120,22 @@ export class AuctionService {
 
     await this.migrateLegacyData();
     const selection = await this.getSelection();
-    const auction = selection?.activeAuctionId
-      ? await this.getAuctionById(selection.activeAuctionId)
-      : null;
+    let auction: AuctionSettings | null = null;
+
+    if (selection?.activeAuctionId) {
+      try {
+        auction = await this.getAuctionById(selection.activeAuctionId);
+      } catch (error) {
+        if (!(error instanceof Error) || error.message !== 'You do not have access to this auction.') {
+          throw error;
+        }
+        console.warn('Clearing a saved auction selection that this user can no longer access.', error);
+      }
+
+      if (!auction) {
+        await this.firebase.delete(this.selectionPath(user.uid), 'current');
+      }
+    }
 
     const activeAuction = auction && selection?.activeAuctionId
       ? { ...auction, activeAuctionId: selection.activeAuctionId }

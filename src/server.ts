@@ -99,7 +99,8 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
   if (isAdmin) return user;
 
   if (body.collection === 'users' && body.id === user.uid && ['getById', 'set', 'update'].includes(body.action)) return user;
-  if (body.collection.startsWith(`users/${user.uid}/preferences/`)) return user;
+  if (body.collection === `users/${user.uid}/preferences`
+    || body.collection.startsWith(`users/${user.uid}/preferences/`)) return user;
   if (body.collection === 'auctionSettings'
     && body.id === `current_${user.uid}`
     && body.action === 'getById') return user;
