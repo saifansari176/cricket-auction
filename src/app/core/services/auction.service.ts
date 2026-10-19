@@ -611,6 +611,9 @@ export class AuctionService {
 
   /** Copies the old flat collections once, without deleting any existing data. */
   private async migrateLegacyData(): Promise<void> {
+    const user = await this.authService.waitForUser();
+    if (!this.authService.isAdmin(user)) return;
+
     const migration = await this.firebase.getById<{ completed?: boolean }>('appSettings', 'auctionDataStructureV2');
     if (migration?.completed) return;
 
