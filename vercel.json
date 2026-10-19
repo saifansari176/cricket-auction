@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://cricket-auction--saifcricketauction.asia-southeast1.hosted.app/api/:path*"
+      "destination": "https://cricket-auction-3--saifcricketauction.asia-southeast1.hosted.app/api/:path*"
     }
   ]
 }
