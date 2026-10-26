@@ -12,6 +12,7 @@ import { join } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { applicationDefault, cert, getApps, initializeApp as initializeAdminApp } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from 'firebase-admin/auth';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -41,6 +42,19 @@ type FirestoreRequest = {
   value?: unknown;
   data?: Record<string, unknown>;
 };
+
+type AuctionOwnerData = {
+  createdBy?: unknown;
+  createdByEmail?: unknown;
+};
+
+function ownsAuction(user: DecodedIdToken, auction: AuctionOwnerData | undefined): boolean {
+  if (auction?.['createdBy'] === user.uid) return true;
+  return user.email_verified === true
+    && typeof user.email === 'string'
+    && typeof auction?.['createdByEmail'] === 'string'
+    && auction['createdByEmail'].toLowerCase() === user.email.toLowerCase();
+}
 
 function collectionReference(path: string) {
   const segments = path.split('/').filter(Boolean);
@@ -98,9 +112,11 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
   const isAdmin = profile.data()?.['role'] === 'admin';
   if (isAdmin) return user;
 
-  if (body.collection === 'auctions' && body.action === 'getById' && body.id) {
+  if (body.collection === 'auctions'
+    && body.id
+    && ['getById', 'update'].includes(body.action)) {
     const auction = await firestore.doc(`auctions/${body.id}`).get();
-    if (auction.data()?.['createdBy'] === user.uid) return user;
+    if (ownsAuction(user, auction.data())) return user;
   }
   if (body.collection === 'users' && body.id === user.uid && ['getById', 'set', 'update'].includes(body.action)) return user;
   if (body.collection === `users/${user.uid}/preferences`
@@ -111,7 +127,7 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
 
   if (auctionId) {
     const auction = await firestore.doc(`auctions/${auctionId}`).get();
-    if (auction.data()?.['createdBy'] === user.uid) return user;
+    if (ownsAuction(user, auction.data())) return user;
   }
   if (body.collection === 'auctions' && body.action === 'add') return user;
   throw new Error('You do not have access to this auction.');
@@ -125,8 +141,24 @@ async function requireAuctionManager(req: express.Request, auctionId: string) {
     firestore.doc(`auctions/${auctionId}`).get()
   ]);
   if (!auction.exists) throw new Error('Auction not found.');
-  if (profile.data()?.['role'] === 'admin' || auction.data()?.['createdBy'] === user.uid) return user;
+  if (profile.data()?.['role'] === 'admin' || ownsAuction(user, auction.data())) return user;
   throw new Error('You do not have access to this auction.');
+}
+
+async function deleteCollectionInBatches(collectionPath: string, auctionId?: string): Promise<void> {
+  const collection = firestore.collection(collectionPath);
+
+  while (true) {
+    const query = auctionId
+      ? collection.where('auctionId', '==', auctionId).limit(400)
+      : collection.limit(400);
+    const snapshot = await query.get();
+    if (snapshot.empty) return;
+
+    const batch = firestore.batch();
+    snapshot.docs.forEach((document) => batch.delete(document.ref));
+    await batch.commit();
+  }
 }
 
 const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
@@ -158,10 +190,17 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
           ? await firestore.doc(`users/${user.uid}`).get()
           : null;
         const isAdmin = profile?.data()?.['role'] === 'admin';
-        const snapshot = user && body.collection === 'auctions' && !isAdmin
-          ? await records.where('createdBy', '==', user.uid).get()
-          : await records.get();
-        res.json(snapshot.docs.map((entry) => ({ id: entry.id, ...entry.data() })));
+        const snapshots = user && body.collection === 'auctions' && !isAdmin
+          ? await Promise.all([
+            records.where('createdBy', '==', user.uid).get(),
+            ...(user.email_verified === true && user.email
+              ? [records.where('createdByEmail', '==', user.email).get()]
+              : [])
+          ])
+          : [await records.get()];
+        const entries = new Map(snapshots.flatMap((snapshot) => snapshot.docs)
+          .map((entry) => [entry.id, { id: entry.id, ...entry.data() }]));
+        res.json([...entries.values()]);
         return;
       }
       case 'getById': {
@@ -223,6 +262,41 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
 app.post('/api/data/{*path}', handleFirestoreRequest);
 // Kept temporarily for browsers that still have the prior frontend bundle cached.
 app.post('/api/firestore', handleFirestoreRequest);
+
+/** Deletes an auction and its legacy records after verifying ownership. */
+app.post('/api/auctions/:auctionId/delete', async (req, res) => {
+  const { auctionId } = req.params;
+
+  try {
+    const user = await requireAuctionManager(req, auctionId);
+    await Promise.all([
+      ...['teams', 'players', 'bids', 'categories'].map((name) =>
+        deleteCollectionInBatches(`auctions/${auctionId}/${name}`)
+      ),
+      ...['teams', 'players', 'bids', 'playerCategories'].map((name) =>
+        deleteCollectionInBatches(name, auctionId)
+      )
+    ]);
+
+    await firestore.doc(`auctionSettings/${auctionId}`).delete();
+    const legacySelectionIds = [
+      `current_${user.uid}`,
+      ...(await firestore.doc(`users/${user.uid}`).get()).data()?.['role'] === 'admin' ? ['current'] : []
+    ];
+    await Promise.all(legacySelectionIds.map(async (id) => {
+      const selection = firestore.doc(`auctionSettings/${id}`);
+      const snapshot = await selection.get();
+      if (snapshot.data()?.['activeAuctionId'] === auctionId) await selection.delete();
+    }));
+
+    await firestore.doc(`auctions/${auctionId}`).delete();
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to delete auction.';
+    const status = /Authentication|access/.test(message) ? 403 : /not found/i.test(message) ? 404 : 400;
+    res.status(status).json({ error: message });
+  }
+});
 
 /** Supplies only the duplicate/limit checks needed by the anonymous registration form. */
 app.post('/api/public/auctions/:auctionId/registration-check', async (req, res) => {

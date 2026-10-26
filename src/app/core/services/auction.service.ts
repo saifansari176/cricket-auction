@@ -183,7 +183,10 @@ export class AuctionService {
     return auctions
       .filter((auction) => auction.id !== 'current')
       .filter((auction) => !auction.id?.startsWith('current_'))
-      .filter((auction) => isAdmin || !user?.uid || auction.createdBy === user.uid)
+      .filter((auction) => isAdmin
+        || !user?.uid
+        || auction.createdBy === user.uid
+        || (!!user.email && auction.createdByEmail?.toLowerCase() === user.email.toLowerCase()))
       .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
   }
@@ -215,28 +218,11 @@ export class AuctionService {
   async deleteAuction(auctionId: string): Promise<void> {
     const current = await this.get();
 
-    await Promise.all([
-      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'teams')),
-      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'players')),
-      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'bids')),
-      this.firebase.deleteCollection(this.auctionCollection(auctionId, 'categories'))
-    ]);
-
-    await this.deleteLegacyAuctionRecords(auctionId);
-
-    await this.firebase.delete(
-      this.auctionsCollection,
-      auctionId
-    );
-
-    await this.firebase.delete(this.legacySettingsCollection, auctionId);
+    await this.firebase.post<void>(`/api/auctions/${encodeURIComponent(auctionId)}/delete`, {});
+    this.firebase.clearReadCache();
 
     if (current?.id === auctionId || current?.activeAuctionId === auctionId) {
-      await Promise.all([
-        this.firebase.delete(this.selectionPath(), 'current'),
-        this.firebase.delete(this.legacySettingsCollection, 'current'),
-        this.deleteCurrentUserLegacySelection()
-      ]);
+      await this.firebase.delete(this.selectionPath(), 'current');
       this.activeAuction$.next(null);
     }
 
@@ -318,7 +304,9 @@ export class AuctionService {
     if (!auction || !user?.active) return false;
     return this.authService.isAdmin(user)
       || auction.createdBy === user.uid
-      || (!!auction.createdByEmail && auction.createdByEmail === user.email);
+      || (!!auction.createdByEmail
+        && !!user.email
+        && auction.createdByEmail.toLowerCase() === user.email.toLowerCase());
   }
 
   async setPlayerFormFields(auctionId: string, settings: PlayerFormFieldSettings): Promise<void> {
@@ -651,31 +639,6 @@ export class AuctionService {
     await Promise.all(records
       .filter((record) => record.id && record.auctionId === auctionId)
       .map((record) => this.firebase.set(this.auctionCollection(auctionId, destination), record.id!, record)));
-  }
-
-  private async deleteLegacyAuctionRecords(auctionId: string): Promise<void> {
-    await Promise.all([
-      this.deleteLegacyRecordsByAuctionId('teams', auctionId),
-      this.deleteLegacyRecordsByAuctionId('players', auctionId),
-      this.deleteLegacyRecordsByAuctionId('bids', auctionId),
-      this.deleteLegacyRecordsByAuctionId('playerCategories', auctionId)
-    ]);
-  }
-
-  private async deleteLegacyRecordsByAuctionId(collectionName: string, auctionId: string): Promise<void> {
-    const records = await this.firebase.getAll<{ id?: string; auctionId?: string }>(collectionName);
-    await Promise.all(
-      records
-        .filter((record) => record.id && record.auctionId === auctionId)
-        .map((record) => this.firebase.delete(collectionName, record.id!))
-    );
-  }
-
-  private async deleteCurrentUserLegacySelection(): Promise<void> {
-    const user = await this.authService.waitForUser();
-    if (user?.uid) {
-      await this.firebase.delete(this.legacySettingsCollection, `current_${user.uid}`);
-    }
   }
 
 }
