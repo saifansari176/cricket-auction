@@ -58,6 +58,15 @@ export class PlayerService {
 
     if (!player.auctionId) return false;
 
+    const user = await this.auctionService.authService.waitForUser();
+    if (!user) {
+      await this.firebase.post<{ id: string }>(
+        `/api/public/auctions/${encodeURIComponent(player.auctionId)}/registrations`,
+        { ...player, mobile: player.mobile.trim() }
+      );
+      return true;
+    }
+
     if (!await this.canAddPlayer(player.auctionId)) return false;
 
     const { id, ...playerData } = player;

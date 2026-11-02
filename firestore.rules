@@ -1,9 +1,74 @@
 rules_version = '2';
 
+// ===============================================================
+// Assumed data model
+// ===============================================================
+// All auction, player, team, bid and user documents are read and written
+// through the authenticated Express/Admin SDK API. The only direct browser
+// Firestore access is the read-only live-state listener used by public display
+// and overlay pages. User and player documents contain PII and are never
+// readable directly from Firestore.
+// ===============================================================
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Kept as common integrity helpers. No browser-originated writes are
+    // permitted by this ruleset.
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('uid' in request.resource.data) || request.resource.data.uid == resource.data.uid;
+    }
+
+    function isActiveAdmin() {
+      return isAuthenticated()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.active == true;
+    }
+
+    function hasVerifiedEmail(email) {
+      return isAuthenticated()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == email;
+    }
+
+    function isAuctionManager(auctionId) {
+      return isAuthenticated()
+        && exists(/databases/$(database)/documents/auctions/$(auctionId))
+        && (
+          isActiveAdmin()
+          || get(/databases/$(database)/documents/auctions/$(auctionId)).data.createdBy == request.auth.uid
+          || hasVerifiedEmail(get(/databases/$(database)/documents/auctions/$(auctionId)).data.createdByEmail)
+        );
+    }
+
+    function isPublicLiveAuction(auctionId) {
+      return exists(/databases/$(database)/documents/auctions/$(auctionId))
+        && get(/databases/$(database)/documents/auctions/$(auctionId)).data.publicLiveViewEnabled == true;
+    }
+
+    // Public displays listen to this one document only. `get` intentionally
+    // excludes collection enumeration; all other public data is sanitized by
+    // the server API before being returned.
+    match /auctions/{auctionId}/liveState/current {
+      allow get: if isPublicLiveAuction(auctionId) || isAuctionManager(auctionId);
+    }
+
+    // Default deny: direct Firestore writes (including role changes) and every
+    // other direct read are prohibited. The Admin SDK is not constrained by
+    // Security Rules and performs the server-side authorization/validation.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

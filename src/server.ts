@@ -64,6 +64,46 @@ function collectionReference(path: string) {
   return firestore.collection(path);
 }
 
+function publicAuction(data: Record<string, unknown>) {
+  const { createdBy: _createdBy, createdByEmail: _createdByEmail, publicPlayerListToken: _token, ...safe } = data;
+  return safe;
+}
+
+function publicPlayer(data: Record<string, unknown>) {
+  const {
+    mobile: _mobile, note: _note, paymentOrderId: _paymentOrderId,
+    paymentId: _paymentId, paymentAmount: _paymentAmount,
+    paymentPaidAt: _paymentPaidAt, paymentStatus: _paymentStatus,
+    ...safe
+  } = data;
+  return safe;
+}
+
+function publicBid(data: Record<string, unknown>) {
+  const { mobile: _mobile, tshirtSize: _tshirtSize, trouserSize: _trouserSize, ...safe } = data;
+  return safe;
+}
+
+function publicResponse(collection: string, entry: Record<string, unknown>): Record<string, unknown> {
+  if (collection === 'auctions') return publicAuction(entry);
+  const segments = collection.split('/').filter(Boolean);
+  const subcollection = segments[0] === 'auctions' ? segments[2] : '';
+  if (subcollection === 'players') return publicPlayer(entry);
+  if (subcollection === 'bids') return publicBid(entry);
+  return entry;
+}
+
+function isPlayerPhotoUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:'
+      && url.hostname === 'firebasestorage.googleapis.com'
+      && url.pathname.startsWith('/v0/b/saifcricketauction.firebasestorage.app/o/players%2F');
+  } catch {
+    return false;
+  }
+}
+
 function auctionIdFromCollection(path: string): string | null {
   const segments = path.split('/').filter(Boolean);
   return segments[0] === 'auctions' && segments.length >= 2 ? segments[1] : null;
@@ -84,31 +124,26 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
     const auction = await firestore.doc(`auctions/${auctionId}`).get();
     const data = auction.data();
     const subcollection = body.collection.split('/').filter(Boolean)[2];
-    if (data?.['publicLiveViewEnabled'] !== false && ['teams', 'players', 'bids'].includes(subcollection)) return null;
+    if (data?.['publicLiveViewEnabled'] === true && ['teams', 'players', 'bids'].includes(subcollection)) return null;
     if (data?.['publicPlayerListEnabled'] === true && subcollection === 'players') return null;
     if (data?.['registrationLinkEnabled'] === true && subcollection === 'categories') return null;
   }
   if (!user && body.action === 'getById' && auctionId && body.collection.endsWith('/liveState')) {
     const auction = await firestore.doc(`auctions/${auctionId}`).get();
-    if (auction.data()?.['publicLiveViewEnabled'] !== false) return null;
+    if (auction.data()?.['publicLiveViewEnabled'] === true) return null;
   }
   if (!user && body.action === 'getById' && body.collection === 'auctions' && body.id) {
     const auction = await firestore.doc(`auctions/${body.id}`).get();
     const data = auction.data();
-    if (data?.['publicLiveViewEnabled'] !== false || data?.['publicPlayerListEnabled'] === true || data?.['registrationLinkEnabled'] === true) return null;
+    if (data?.['publicLiveViewEnabled'] === true || data?.['publicPlayerListEnabled'] === true || data?.['registrationLinkEnabled'] === true) return null;
   }
   if (!user && body.action === 'getOneByField' && body.collection === 'auctions' && body.field === 'publicPlayerListToken') return null;
 
-  // Anonymous users may submit a player only while that auction's registration link is enabled.
-  if (!user && body.action === 'createIfNoMatchingField' && auctionId && body.collection.endsWith('/players')) {
-    const auction = await firestore.doc(`auctions/${auctionId}`).get();
-    if (auction.exists && auction.data()?.['registrationLinkEnabled'] === true) return null;
-  }
   if (!user) throw new Error('Authentication is required.');
 
-  if (body.collection === 'auctions' && body.action === 'getAll') return user;
-
   const profile = await firestore.doc(`users/${user.uid}`).get();
+  if (profile.exists && profile.data()?.['active'] !== true) throw new Error('This user account is inactive.');
+  if (body.collection === 'auctions' && body.action === 'getAll') return user;
   const isAdmin = profile.data()?.['role'] === 'admin';
   if (isAdmin) return user;
 
@@ -141,6 +176,7 @@ async function requireAuctionManager(req: express.Request, auctionId: string) {
     firestore.doc(`auctions/${auctionId}`).get()
   ]);
   if (!auction.exists) throw new Error('Auction not found.');
+  if (profile.data()?.['active'] !== true) throw new Error('This user account is inactive.');
   if (profile.data()?.['role'] === 'admin' || ownsAuction(user, auction.data())) return user;
   throw new Error('You do not have access to this auction.');
 }
@@ -176,6 +212,9 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
       if (existing.exists) {
         payload['role'] = existing.data()?.['role'];
         payload['active'] = existing.data()?.['active'];
+        payload['teamLimit'] = existing.data()?.['teamLimit'];
+        payload['playerLimit'] = existing.data()?.['playerLimit'];
+        payload['email'] = existing.data()?.['email'];
       } else {
         const anyProfile = await records.limit(1).get();
         payload['role'] = anyProfile.empty ? 'admin' : 'user';
@@ -200,20 +239,23 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
           : [await records.get()];
         const entries = new Map(snapshots.flatMap((snapshot) => snapshot.docs)
           .map((entry) => [entry.id, { id: entry.id, ...entry.data() }]));
-        res.json([...entries.values()]);
+        const responseEntries = [...entries.values()];
+        res.json(user ? responseEntries : responseEntries.map((entry) => publicResponse(body.collection, entry)));
         return;
       }
       case 'getById': {
         if (!body.id) throw new Error('Document id is required.');
         const entry = await records.doc(body.id).get();
-        res.json(entry.exists ? { id: entry.id, ...entry.data() } : null);
+        const result = entry.exists ? { id: entry.id, ...entry.data() } : null;
+        res.json(result && !user ? publicResponse(body.collection, result) : result);
         return;
       }
       case 'getOneByField': {
         if (!body.field) throw new Error('Field is required.');
         const snapshot = await records.where(body.field, '==', body.value).limit(1).get();
         const entry = snapshot.docs[0];
-        res.json(entry ? { id: entry.id, ...entry.data() } : null);
+        const result = entry ? { id: entry.id, ...entry.data() } : null;
+        res.json(result && !user ? publicResponse(body.collection, result) : result);
         return;
       }
       case 'add': {
@@ -323,6 +365,92 @@ app.post('/api/public/auctions/:auctionId/registration-check', async (req, res) 
   }
 });
 
+/** Creates a public registration from a fixed schema; the browser cannot set sale or payment state. */
+app.post('/api/public/auctions/:auctionId/registrations', async (req, res) => {
+  const { auctionId } = req.params;
+  const input = req.body as Record<string, unknown>;
+  const text = (name: string, max: number, required = false) => {
+    const value = typeof input[name] === 'string' ? input[name].trim() : '';
+    if ((required && !value) || value.length > max) throw new Error(`Invalid ${name}.`);
+    return value;
+  };
+
+  try {
+    const auctionRef = firestore.doc(`auctions/${auctionId}`);
+    const auctionSnapshot = await auctionRef.get();
+    const auction = auctionSnapshot.data();
+    if (!auctionSnapshot.exists || auction?.['registrationLinkEnabled'] !== true) throw new Error('Registration is unavailable.');
+
+    const firstName = text('firstName', 80, true);
+    const lastName = text('lastName', 80);
+    const mobile = text('mobile', 10, true);
+    const jerseyNumber = text('jerseyNumber', 3);
+    const playerType = text('playerType', 50);
+    const currentTeam = text('currentTeam', 100);
+    const categoryId = text('categoryId', 128);
+    const tshirtSize = text('tshirtSize', 30);
+    const trouserSize = text('trouserSize', 30);
+    const note = text('note', 500);
+    const photo = text('photo', 2000, true);
+    if (!/^\d{10}$/.test(mobile) || (jerseyNumber && !/^\d{1,3}$/.test(jerseyNumber)) || !isPlayerPhotoUrl(photo)) {
+      throw new Error('Registration details are invalid.');
+    }
+
+    let category: Record<string, unknown> | undefined;
+    if (categoryId) {
+      const categorySnapshot = await firestore.doc(`auctions/${auctionId}/categories/${categoryId}`).get();
+      if (!categorySnapshot.exists) throw new Error('Selected category is unavailable.');
+      category = categorySnapshot.data();
+    }
+
+    const paymentRequired = auction['registrationPaymentEnabled'] === true;
+    const paymentId = paymentRequired ? text('paymentId', 128, true) : '';
+    const paymentOrderId = paymentRequired ? text('paymentOrderId', 128, true) : '';
+    const expectedAmount = Math.round(Number(auction['registrationPaymentAmount'] || 0) * 100);
+    if (paymentRequired) {
+      if (!razorpay || expectedAmount < 100) throw new Error('Registration payment is not configured.');
+      const [payment, order] = await Promise.all([
+        razorpay.payments.fetch(paymentId),
+        razorpay.orders.fetch(paymentOrderId)
+      ]);
+      if (payment.order_id !== paymentOrderId || payment.status !== 'captured'
+        || order.notes?.['auctionId'] !== auctionId || order.amount !== expectedAmount || payment.amount !== expectedAmount) {
+        throw new Error('Registration payment could not be verified.');
+      }
+    }
+
+    const players = firestore.collection(`auctions/${auctionId}/players`);
+    const created = await firestore.runTransaction((transaction) => {
+      // Return this chain explicitly. The Admin SDK requires the transaction
+      // callback itself to return a Promise on every execution attempt.
+      return Promise.all([
+        transaction.get(players.where('mobile', '==', mobile).limit(1)),
+        transaction.get(players.limit(Math.max(1, Number(auction['playerLimit'] ?? 10)))),
+        paymentRequired ? transaction.get(players.where('paymentId', '==', paymentId).limit(1)) : Promise.resolve(null)
+      ]).then(([sameMobile, existingPlayers, samePayment]) => {
+        if (!sameMobile.empty) throw new Error('Player with this mobile number already exists.');
+        if (paymentRequired && samePayment && !samePayment.empty) throw new Error('This payment has already been used.');
+        if (existingPlayers.size >= Math.max(0, Number(auction['playerLimit'] ?? 10))) throw new Error('Player limit reached.');
+
+        const playerRef = players.doc(mobile);
+        transaction.set(playerRef, {
+          auctionId, firstName, lastName, mobile, jerseyNumber, playerType, currentTeam,
+          categoryId, categoryName: String(category?.['name'] || ''), tshirtSize, trouserSize, note, photo,
+          baseBid: Number(category?.['basePrice'] ?? auction['basePlayerPrice'] ?? auction['minimumBid'] ?? 0),
+          bidIncreaseBy: Number(category?.['bidIncreaseBy'] ?? auction['bidIncreaseBy'] ?? 0),
+          paymentRequired, paymentOrderId, paymentId, paymentAmount: paymentRequired ? expectedAmount / 100 : 0,
+          paymentPaidAt: paymentRequired ? new Date().toISOString() : '',
+          paymentStatus: paymentRequired ? 'Verified' : 'Not required', status: 'Available'
+        });
+        return playerRef.id;
+      });
+    });
+    res.status(201).json({ id: created });
+  } catch (error) {
+    res.status(400).json({ error: error instanceof Error ? error.message : 'Unable to submit registration.' });
+  }
+});
+
 /** Atomically records a sale, deducts points, increments the team count, and marks the player sold. */
 app.post('/api/auctions/:auctionId/sales', async (req, res) => {
   const { auctionId } = req.params;
@@ -373,15 +501,22 @@ app.post('/api/create-order', async (req, res) => {
     return;
   }
 
-  const amount = Number(req.body?.amount);
   const auctionId = typeof req.body?.auctionId === 'string' ? req.body.auctionId.trim() : '';
 
-  if (!Number.isInteger(amount) || amount < 100 || !auctionId) {
-    res.status(400).json({ error: 'A valid auction and an amount of at least 100 paise are required.' });
+  if (!auctionId) {
+    res.status(400).json({ error: 'A valid auction is required.' });
     return;
   }
 
   try {
+    const auction = await firestore.doc(`auctions/${auctionId}`).get();
+    const settings = auction.data();
+    const amount = Math.round(Number(settings?.['registrationPaymentAmount'] || 0) * 100);
+    if (!auction.exists || settings?.['registrationLinkEnabled'] !== true
+      || settings?.['registrationPaymentEnabled'] !== true || amount < 100) {
+      res.status(400).json({ error: 'Registration payment is unavailable.' });
+      return;
+    }
     const order = await razorpay.orders.create({
       amount,
       currency: 'INR',
@@ -435,14 +570,19 @@ app.post('/api/verify-payment', async (req, res) => {
   }
 
   try {
-    const order = await razorpay.orders.fetch(orderId);
-    if (order.notes?.['auctionId'] !== auctionId) {
+    const [order, auction] = await Promise.all([
+      razorpay.orders.fetch(orderId),
+      firestore.doc(`auctions/${auctionId}`).get()
+    ]);
+    const expectedAmount = Math.round(Number(auction.data()?.['registrationPaymentAmount'] || 0) * 100);
+    if (!auction.exists || auction.data()?.['registrationPaymentEnabled'] !== true
+      || order.notes?.['auctionId'] !== auctionId || order.amount !== expectedAmount) {
       res.status(400).json({ error: 'This payment does not belong to the selected auction.' });
       return;
     }
 
     const payment = await razorpay.payments.fetch(paymentId);
-    if (payment.order_id !== orderId || payment.status !== 'captured') {
+    if (payment.order_id !== orderId || payment.status !== 'captured' || payment.amount !== expectedAmount) {
       res.status(400).json({ error: 'This payment has not been captured successfully.' });
       return;
     }
