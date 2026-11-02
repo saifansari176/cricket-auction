@@ -31,7 +31,7 @@ export class AppComponent implements OnDestroy {
   private readonly dataPreloadSubscriptions = new Subscription();
   private hiddenAt = 0;
   private readonly resumeReloadDelay = 2 * 60 * 1000;
-  private authReady = false;
+  private landingNavigationSequence = 0;
   private initialNavigationComplete = false;
   initialPageReady = false;
 
@@ -49,6 +49,10 @@ export class AppComponent implements OnDestroy {
       .subscribe((event) => {
         this.initialNavigationComplete = true;
         this.finishInitialLoad();
+        const landingNavigationSequence = ++this.landingNavigationSequence;
+        if (event.urlAfterRedirects.split('?')[0] === '/') {
+          void this.redirectSignedInLanding(landingNavigationSequence);
+        }
         this.seo.updateForUrl(event.urlAfterRedirects);
         this.analytics.trackPageView(event.urlAfterRedirects);
         if (isPlatformBrowser(this.platformId)) {
@@ -58,10 +62,6 @@ export class AppComponent implements OnDestroy {
 
     if (isPlatformBrowser(this.platformId)) {
       this.initialNavigationComplete = this.router.navigated;
-      void this.authService.waitForUser().then(() => {
-        this.authReady = true;
-        this.finishInitialLoad();
-      });
       this.startPlayerPreload();
       window.addEventListener('pageshow', this.onPageShow);
       document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -119,8 +119,22 @@ export class AppComponent implements OnDestroy {
   }
 
   private finishInitialLoad(): void {
-    if (this.authReady && (this.initialNavigationComplete || this.router.navigated)) {
+    if (this.initialNavigationComplete || this.router.navigated) {
       this.initialPageReady = true;
+    }
+  }
+
+  private async redirectSignedInLanding(sequence: number): Promise<void> {
+    try {
+      const user = await this.authService.waitForUser();
+      if (!user?.active || sequence !== this.landingNavigationSequence || this.router.url.split('?')[0] !== '/') return;
+
+      const activeAuctionId = await this.auctionService.getActiveAuctionId();
+      if (sequence === this.landingNavigationSequence && this.router.url.split('?')[0] === '/') {
+        await this.router.navigateByUrl(activeAuctionId ? '/dashboard' : '/auction-settings');
+      }
+    } catch (error) {
+      console.error('Unable to redirect the signed-in user from the home page.', error);
     }
   }
 

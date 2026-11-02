@@ -38,7 +38,9 @@ export class AuthService {
     onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (!firebaseUser) this.firebase.clearReadCache();
-        const appUser = firebaseUser ? await this.loadOrCreateProfile(firebaseUser) : null;
+        const appUser = firebaseUser
+          ? await this.loading.withoutLoader(() => this.loadOrCreateProfile(firebaseUser))
+          : null;
         this.currentUser$.next(appUser);
       } catch (error) {
         console.error('Unable to load the signed-in user profile.', error);

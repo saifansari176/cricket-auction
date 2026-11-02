@@ -48,19 +48,6 @@ export const guestGuard: CanActivateFn = async () => {
   return router.createUrlTree([activeAuctionId ? '/dashboard' : '/auction-settings']);
 };
 
-/** Send a restored signed-in session to its selected auction dashboard. */
-export const landingGuard: CanActivateFn = async () => {
-  const authService = inject(AuthService);
-  const auctionService = inject(AuctionService);
-  const router = inject(Router);
-  const user = await authService.waitForUser();
-
-  if (!user?.active) return true;
-
-  const activeAuctionId = await auctionService.getActiveAuctionId();
-  return router.createUrlTree([activeAuctionId ? '/dashboard' : '/auction-settings']);
-};
-
 export const auctionSelectionGuard: CanActivateFn = async () => {
   const auctionService = inject(AuctionService);
   const router = inject(Router);

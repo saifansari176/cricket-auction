@@ -1,11 +1,10 @@
 import { Routes } from '@angular/router';
-import { adminGuard, auctionOwnerGuard, auctionSelectionGuard, authGuard, guestGuard, landingGuard } from './core/guards/auth.guard';
+import { adminGuard, auctionOwnerGuard, auctionSelectionGuard, authGuard, guestGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    canActivate: [landingGuard],
     loadComponent: () =>
       import('./pages/public/home/home.component').then((m) => m.HomeComponent),
   },
