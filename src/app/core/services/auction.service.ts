@@ -18,6 +18,18 @@ export interface LiveAuctionState {
   updatedAt?: string;
 }
 
+export interface PublicAuctionSummary {
+  id: string;
+  auctionName: string;
+  auctionDate: string;
+  logo: string;
+  organizerName: string;
+  organizerContact: string;
+  isActive: boolean;
+  publicLiveViewEnabled: boolean;
+  registrationLinkEnabled: boolean;
+}
+
 export interface LiveAuctionResultEvent {
   id: string;
   action: 'sold' | 'unsold';
@@ -189,6 +201,10 @@ export class AuctionService {
         || (!!user.email && auction.createdByEmail?.toLowerCase() === user.email.toLowerCase()))
       .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 
+  }
+
+  async getPublicAuctions(): Promise<PublicAuctionSummary[]> {
+    return this.firebase.post<PublicAuctionSummary[]>('/api/public/auctions', {});
   }
 
   async setActiveAuction(auctionId: string): Promise<void> {

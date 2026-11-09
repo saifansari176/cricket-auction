@@ -23,6 +23,12 @@ export const routes: Routes = [
   },
 
   {
+    path: 'coming-auctions',
+    loadComponent: () =>
+      import('./pages/public/coming-auctions/coming-auctions.component').then((m) => m.ComingAuctionsComponent),
+  },
+
+  {
     path: 'past-auctions',
     loadComponent: () =>
       import('./pages/public/past-auctions/past-auctions.component').then((m) => m.PastAuctionsComponent),

@@ -94,6 +94,10 @@ export class AuctionSettingsComponent {
 
     auctionDate: ['', Validators.required],
 
+    organizerName: ['', [Validators.required, nonBlank]],
+
+    organizerContact: ['', [Validators.required, Validators.pattern(/^\+?[0-9\s()-]{7,20}$/)]],
+
     pointsPerTeam: [0, [Validators.required, Validators.min(1)]],
 
     minimumBid: [0, [Validators.required, Validators.min(1)]],
@@ -182,6 +186,10 @@ export class AuctionSettingsComponent {
       auctionName: auction.auctionName,
 
       auctionDate: auction.auctionDate,
+
+      organizerName: auction.organizerName || '',
+
+      organizerContact: auction.organizerContact || '',
 
       pointsPerTeam: Number(auction.pointsPerTeam),
 
@@ -340,6 +348,10 @@ export class AuctionSettingsComponent {
       auctionName: '',
 
       auctionDate: '',
+
+      organizerName: '',
+
+      organizerContact: '',
 
       pointsPerTeam: 0,
 
@@ -629,6 +641,10 @@ export class AuctionSettingsComponent {
       auctionName: this.form.value.auctionName || '',
 
       auctionDate: this.form.value.auctionDate || '',
+
+      organizerName: this.form.value.organizerName?.trim() || '',
+
+      organizerContact: this.form.value.organizerContact?.trim() || '',
 
       pointsPerTeam: Number(this.form.value.pointsPerTeam),
 

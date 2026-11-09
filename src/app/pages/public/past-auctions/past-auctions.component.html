@@ -4,11 +4,12 @@
         <p class="eyebrow">PAST AUCTIONS</p>
         <h1>Completed auctions</h1>
         <p class="intro">Explore tournaments successfully conducted with Cricbids.</p>
-        <div class="auction-grid" *ngIf="auctions.length; else none">
-            <article *ngFor="let auction of auctions"><img *ngIf="auction.logo; else fallback" [src]="auction.logo"
-                    [alt]="auction.auctionName + ' logo'"><ng-template #fallback>
-                    <div class="fallback">CB</div>
-                </ng-template>
+        <p class="empty" *ngIf="loading">Loading past auctions...</p>
+        <p class="empty error" *ngIf="!loading && errorMessage">{{errorMessage}}</p>
+        <div class="auction-grid" *ngIf="!loading && !errorMessage && auctions.length; else none">
+            <article *ngFor="let auction of auctions">
+                <img *ngIf="auction.logo" [src]="auction.logo" [alt]="auction.auctionName + ' logo'"
+                    (error)="hideBrokenLogo($event)">
                 <div>
                     <h2>{{auction.auctionName}}</h2>
                     <p>{{auction.auctionDate || 'Completed auction'}}</p>
@@ -16,7 +17,9 @@
                 </div>
             </article>
         </div><ng-template #none>
-            <p class="empty">Completed auctions will appear here.</p>
+            <p class="empty" *ngIf="!loading && !errorMessage && !auctions.length">
+                Completed auctions will appear here.
+            </p>
         </ng-template>
     </main>
     <footer class="site-footer"><div class="contact-grid"><article><strong class="footer-heading">Founder</strong><a href="tel:9823300308"><strong>Mohammad Saif Ansari</strong> 9823300308</a><a href="tel:9320006789">9320006789</a></article><article><strong class="footer-heading">Co-Founder</strong><a href="tel:9699760242"><strong>Saad Ansari</strong> 9699760242</a></article><article><strong class="footer-heading">Partners</strong><span class="phone-row"><a href="tel:9689950988">Noor Ansari · 9689950988</a><a href="tel:8793669939">Arif Ansari · 8793669939</a></span><span class="phone-row"><a href="tel:9175982907">Raj Ansari · 9175982907</a><a href="tel:8554849463">Usamah Momin · 8554849463</a></span></article><article><strong class="footer-heading">Technology Partner / Powered by</strong><span class="technology-name">Techcharm Pvt Ltd</span><span class="technology-contact">Khalid Ansari Sir</span></article></div></footer>

@@ -1,42 +1,14 @@
 .past-page {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     background: linear-gradient(135deg, rgba(8, 20, 47, .94), rgba(15, 55, 144, .86)), url('/banner-poster.png') center / cover fixed;
     color: #0f172a
 }
 
-.past-page header {
-    height: 74px;
-    padding: 10px clamp(20px, 6vw, 88px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fff;
-    border-bottom: 1px solid #e5eaf2
-}
-
-.past-page header img {
-    width: 108px;
-    height: 54px;
-    object-fit: contain
-}
-
-.past-page nav {
-    display: flex;
-    gap: 18px
-}
-
-.past-page nav a {
-    color: #334155;
-    text-decoration: none;
-    font-weight: 700
-}
-
-.past-page nav a:hover,
-.past-page nav a.active {
-    color: #1d4ed8
-}
-
 .past-page main {
+    flex: 1;
+    width: 100%;
     max-width: 1080px;
     margin: auto;
     padding: 72px 24px
@@ -78,21 +50,13 @@
     border-radius: 14px
 }
 
-.auction-grid img,
-.fallback {
+.auction-grid img {
     width: 62px;
     height: 62px;
     object-fit: contain;
     background: #f8fafc;
     border-radius: 10px;
     flex: none
-}
-
-.fallback {
-    display: grid;
-    place-items: center;
-    color: #2563eb;
-    font-weight: 800
 }
 
 .auction-grid h2 {
@@ -104,6 +68,10 @@
 .empty {
     margin: 0;
     color: #64748b
+}
+
+.error {
+    color: #fecaca
 }
 
 .auction-grid a {
@@ -169,19 +137,6 @@
 @media(max-width:720px) {
     .past-page {
         background-attachment: scroll
-    }
-
-    .past-page header {
-        padding: 9px 16px
-    }
-
-    .past-page header img {
-        width: 82px
-    }
-
-    .past-page nav {
-        gap: 10px;
-        font-size: .83rem
     }
 
     .auction-grid,

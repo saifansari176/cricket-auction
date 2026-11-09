@@ -28,6 +28,11 @@ export class SeoService {
       description: 'Browse completed cricket auctions hosted with Cricbids.',
       indexable: true
     },
+    '/coming-auctions': {
+      title: 'Upcoming Cricket Auctions | Cricbids',
+      description: 'Find upcoming cricket auctions and share player registration links with Cricbids.',
+      indexable: true
+    },
     '/player-registration': {
       title: 'Cricket Player Registration | Cricbids',
       description: 'Register as a player for a cricket auction hosted on Cricbids.',

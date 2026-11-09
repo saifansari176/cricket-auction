@@ -1,0 +1,76 @@
+<div class="coming-page">
+  <app-public-header />
+  <main>
+    <p class="eyebrow">UPCOMING AUCTIONS</p>
+    <h1>Coming auctions</h1>
+    <p class="intro">Find an upcoming tournament and share its player registration link.</p>
+
+    <p class="empty" *ngIf="loading">Loading upcoming auctions...</p>
+    <p class="empty error" *ngIf="!loading && errorMessage">{{ errorMessage }}</p>
+
+    <section class="auction-grid" *ngIf="!loading && !errorMessage && auctions.length; else noAuctions"
+      aria-label="Upcoming auctions">
+      <article *ngFor="let auction of auctions">
+        <img *ngIf="auction.logo" [src]="auction.logo" [alt]="auction.auctionName + ' logo'"
+          (error)="hideBrokenLogo($event)">
+        <div class="auction-details">
+          <div class="auction-heading">
+            <h2>{{ auction.auctionName }}</h2>
+            <span class="registration-badge"><span aria-hidden="true"></span> Registration open</span>
+          </div>
+          <p class="auction-date">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"></rect><path d="M7.5 3v4M16.5 3v4M3.5 9.5h17"></path></svg>
+            {{ auction.auctionDate | date:'mediumDate' }}
+          </p>
+          <p class="organizer" *ngIf="auction.organizerName">
+            <span class="organizer-label">Organized by</span>
+            <strong>{{ auction.organizerName }}</strong>
+          </p>
+          <a class="organizer-contact d-none" *ngIf="auction.organizerContact && phoneLink(auction.organizerContact)"
+            [href]="'tel:' + phoneLink(auction.organizerContact)">
+            {{ auction.organizerContact }}
+          </a>
+          <div class="auction-actions">
+            <a class="registration-link" [href]="registrationLink(auction)" target="_blank" rel="noopener noreferrer">
+              Open player registration <span aria-hidden="true">↗</span>
+            </a>
+            <span class="copy-control">
+              <button type="button" class="copy-button" [class.copied]="copiedAuctionId === auction.id"
+                [attr.aria-label]="copiedAuctionId === auction.id ? 'Player registration link copied' : 'Copy player registration link'"
+                [attr.title]="copiedAuctionId === auction.id ? 'Copied' : 'Copy registration link'"
+                (click)="copyRegistrationLink(auction)">
+                <svg *ngIf="copiedAuctionId !== auction.id; else copiedIcon" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="8" y="8" width="12" height="12" rx="2"></rect>
+                  <path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"></path>
+                </svg>
+                <ng-template #copiedIcon>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m5 12 4 4L19 6"></path>
+                  </svg>
+                </ng-template>
+              </button>
+              <span *ngIf="copyFeedbackAuctionId === auction.id"
+                class="copy-tooltip" [class.error]="copyFeedbackError" role="status" aria-live="polite">
+                {{ copyFeedbackMessage }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <ng-template #noAuctions>
+      <p class="empty" *ngIf="!loading && !errorMessage && !auctions.length">
+        Upcoming auctions with registration enabled will appear here.
+      </p>
+    </ng-template>
+  </main>
+  <footer class="site-footer">
+    <div class="contact-grid">
+      <article><strong class="footer-heading">Founder</strong><a href="tel:9823300308"><strong>Mohammad Saif Ansari</strong> 9823300308</a><a href="tel:9320006789">9320006789</a></article>
+      <article><strong class="footer-heading">Co-Founder</strong><a href="tel:9699760242"><strong>Saad Ansari</strong> 9699760242</a></article>
+      <article><strong class="footer-heading">Partners</strong><span class="phone-row"><a href="tel:9689950988">Noor Ansari · 9689950988</a><a href="tel:8793669939">Arif Ansari · 8793669939</a></span><span class="phone-row"><a href="tel:9175982907">Raj Ansari · 9175982907</a><a href="tel:8554849463">Usamah Momin · 8554849463</a></span></article>
+      <article><strong class="footer-heading">Technology Partner / Powered by</strong><span class="technology-name">Techcharm Pvt Ltd</span><span class="technology-contact">Khalid Ansari Sir</span></article>
+    </div>
+  </footer>
+</div>

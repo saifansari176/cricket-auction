@@ -305,6 +305,39 @@ app.post('/api/data/{*path}', handleFirestoreRequest);
 // Kept temporarily for browsers that still have the prior frontend bundle cached.
 app.post('/api/firestore', handleFirestoreRequest);
 
+/** Lists only public auction tiles, without exposing private auction settings or ownership. */
+app.post('/api/public/auctions', async (_req, res) => {
+  try {
+    const collection = firestore.collection('auctions');
+    const [liveAuctions, registrationAuctions] = await Promise.all([
+      collection.where('publicLiveViewEnabled', '==', true).get(),
+      collection.where('registrationLinkEnabled', '==', true).get()
+    ]);
+    const documents = new Map<string, (typeof liveAuctions.docs)[number]>();
+    for (const document of [...liveAuctions.docs, ...registrationAuctions.docs]) {
+      documents.set(document.id, document);
+    }
+    const auctions = [...documents.values()].map((document) => {
+        const data = document.data();
+        return {
+          id: document.id,
+          auctionName: typeof data['auctionName'] === 'string' ? data['auctionName'] : '',
+          auctionDate: typeof data['auctionDate'] === 'string' ? data['auctionDate'] : '',
+          logo: typeof data['logo'] === 'string' ? data['logo'] : '',
+          organizerName: typeof data['organizerName'] === 'string' ? data['organizerName'] : '',
+          organizerContact: typeof data['organizerContact'] === 'string' ? data['organizerContact'] : '',
+          isActive: data['isActive'] === true,
+          publicLiveViewEnabled: data['publicLiveViewEnabled'] === true,
+          registrationLinkEnabled: data['registrationLinkEnabled'] === true
+        };
+      });
+    res.json(auctions);
+  } catch (error) {
+    console.error('Unable to list public auctions:', error);
+    res.status(500).json({ error: 'Unable to load public auctions.' });
+  }
+});
+
 /** Deletes an auction and its legacy records after verifying ownership. */
 app.post('/api/auctions/:auctionId/delete', async (req, res) => {
   const { auctionId } = req.params;

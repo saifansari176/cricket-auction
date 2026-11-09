@@ -27,6 +27,10 @@ export interface AuctionSettings {
 
   logo:string;
 
+  organizerName?: string;
+
+  organizerContact?: string;
+
   pointsPerTeam:number;
 
   playersPerTeam:number;
