@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, NgZone, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuctionBid } from '../../../core/models/bid';
 import { AuctionSettings } from '../../../core/models/auction-settings';
@@ -45,7 +45,8 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
     private auctionService: AuctionService,
     private imagePreview: ImagePreviewService,
     private zone: NgZone,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: object
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +96,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   }
 
   private startLiveUpdates(): void {
-    if (this.liveStateSubscription || !this.auctionId) return;
+    if (!isPlatformBrowser(this.platformId) || this.liveStateSubscription || !this.auctionId) return;
     this.liveStateSubscription = this.auctionService.watchLiveState(this.auctionId, (state) => {
       this.zone.run(() => {
         if (!state?.updatedAt || state.updatedAt === this.lastLiveStateUpdatedAt) return;

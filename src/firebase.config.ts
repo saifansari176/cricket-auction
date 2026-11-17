@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth';
 import {
+  getFirestore,
   initializeFirestore,
   memoryLocalCache,
   persistentLocalCache,
@@ -36,11 +37,25 @@ function supportsPersistentFirestoreCache(): boolean {
 // IndexedDB is Firestore's supported browser cache. It preserves Firestore
 // value types, works offline, and synchronizes its cache across browser tabs.
 // SSR and restricted mobile browsers safely use memory instead.
-export const db = initializeFirestore(app, {
-  localCache: supportsPersistentFirestoreCache()
-    ? persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-    : memoryLocalCache()
-});
+function initializeClientFirestore() {
+  try {
+    return initializeFirestore(app, {
+      localCache: supportsPersistentFirestoreCache()
+        ? persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+        : memoryLocalCache()
+    });
+  } catch (error) {
+    if (error instanceof Error
+      && 'code' in error
+      && error.code === 'failed-precondition'
+      && error.message.includes('initializeFirestore() has already been called with different options')) {
+      return getFirestore(app);
+    }
+    throw error;
+  }
+}
+
+export const db = initializeClientFirestore();
 
 export const storage = getStorage(app);
 

@@ -84,10 +84,16 @@ function publicBid(data: Record<string, unknown>) {
   return safe;
 }
 
+function publicTeam(data: Record<string, unknown>) {
+  const { ownerName: _ownerName, ...safe } = data;
+  return safe;
+}
+
 function publicResponse(collection: string, entry: Record<string, unknown>): Record<string, unknown> {
   if (collection === 'auctions') return publicAuction(entry);
   const segments = collection.split('/').filter(Boolean);
   const subcollection = segments[0] === 'auctions' ? segments[2] : '';
+  if (subcollection === 'teams') return publicTeam(entry);
   if (subcollection === 'players') return publicPlayer(entry);
   if (subcollection === 'bids') return publicBid(entry);
   return entry;
@@ -124,7 +130,7 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
     const auction = await firestore.doc(`auctions/${auctionId}`).get();
     const data = auction.data();
     const subcollection = body.collection.split('/').filter(Boolean)[2];
-    if (data?.['publicLiveViewEnabled'] === true && ['teams', 'players', 'bids'].includes(subcollection)) return null;
+    if (typeof data?.['publicLiveViewEnabled'] === 'boolean' && ['teams', 'players', 'bids'].includes(subcollection)) return null;
     if (data?.['publicPlayerListEnabled'] === true && subcollection === 'players') return null;
     if (data?.['registrationLinkEnabled'] === true && subcollection === 'categories') return null;
   }
@@ -135,7 +141,7 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
   if (!user && body.action === 'getById' && body.collection === 'auctions' && body.id) {
     const auction = await firestore.doc(`auctions/${body.id}`).get();
     const data = auction.data();
-    if (data?.['publicLiveViewEnabled'] === true || data?.['publicPlayerListEnabled'] === true || data?.['registrationLinkEnabled'] === true) return null;
+    if (typeof data?.['publicLiveViewEnabled'] === 'boolean' || data?.['publicPlayerListEnabled'] === true || data?.['registrationLinkEnabled'] === true) return null;
   }
   if (!user && body.action === 'getOneByField' && body.collection === 'auctions' && body.field === 'publicPlayerListToken') return null;
 

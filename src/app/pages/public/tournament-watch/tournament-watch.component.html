@@ -10,7 +10,7 @@
         <p class="eyebrow">CRICBIDS • LIVE TOURNAMENT</p>
         <h1>{{ auction?.auctionName }}</h1>
       </div>
-      <span class="live-pill tournament-status" [class.completed]="liveState?.status === 'completed'">
+      <span *ngIf="publicLiveViewEnabled" class="live-pill tournament-status" [class.completed]="liveState?.status === 'completed'">
         {{ liveState?.status === 'completed'
         ? 'COMPLETED' : 'LIVE' }}</span>
       <div class="tournament-contact text-center">
@@ -19,7 +19,7 @@
       </div>
     </header>
 
-    <section class="live-card" *ngIf="publicLiveViewEnabled; else auctionCompleted">
+    <section class="live-card" *ngIf="publicLiveViewEnabled">
       <div *ngIf="currentPlayer; else waiting" class="live-player">
         <div class="player-profile featured-player">
           <img class="player-image" [src]="currentPlayer.photo || '/cricbids-logo.png'"
@@ -72,14 +72,6 @@
         </div>
       </ng-template>
     </section>
-    <ng-template #auctionCompleted>
-      <section class="live-card">
-        <div class="waiting">
-          <h2>Auction completed</h2>
-        </div>
-      </section>
-    </ng-template>
-
     <!-- Tournament summary cards intentionally removed from the public watch view.
       <article><span class="stat-icon teams-icon">â™›</span><b>{{ teams.length }}</b><span>TEAMS</span></article>
       <article><span class="stat-icon sold-icon">âœ“</span><b>{{ bids.length }}</b><span>PLAYERS SOLD</span></article>
@@ -92,7 +84,7 @@
         <div>
           <p class="eyebrow">TOURNAMENT REPORT</p>
             <h2>Team squads &amp; budget</h2>
-        </div><button class="refresh-button" type="button" (click)="load(false)">
+        </div><button *ngIf="publicLiveViewEnabled" class="refresh-button" type="button" (click)="load(false)">
           <img style="width: 100px; height: auto;" src="/cricbids-logo.png" class="brand-mark py-1" alt="CRICBIDS logo">
           <span>Refresh</span></button>
       </div>

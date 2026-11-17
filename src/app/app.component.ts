@@ -62,8 +62,6 @@ export class AppComponent implements OnDestroy {
 
     if (isPlatformBrowser(this.platformId)) {
       this.initialNavigationComplete = this.router.navigated;
-      console.log("1234",this.initialNavigationComplete);
-      
         if (this.initialNavigationComplete) {
           this.finishInitialLoad();
           this.updateTelecastCanvas(this.router.url);

@@ -252,12 +252,18 @@ export class AuctionService {
     bids: AuctionBid[];
     liveState: LiveAuctionState | null;
   }> {
-    const [auction, teams, players, bids, liveState] = await Promise.all([
-      this.getAuctionById(auctionId),
+    const auction = await this.getAuctionById(auctionId);
+    if (!auction) {
+      return { auction: null, teams: [], players: [], bids: [], liveState: null };
+    }
+
+    const [teams, players, bids, liveState] = await Promise.all([
       this.firebase.getAll<Team>(this.auctionCollection(auctionId, 'teams'), refreshMutableData),
       this.firebase.getAll<Player>(this.auctionCollection(auctionId, 'players'), refreshMutableData),
       this.firebase.getAll<AuctionBid>(this.auctionCollection(auctionId, 'bids'), refreshMutableData),
-      this.firebase.getById<LiveAuctionState>(this.auctionCollection(auctionId, 'liveState'), 'current')
+      auction.publicLiveViewEnabled === false
+        ? Promise.resolve(null)
+        : this.firebase.getById<LiveAuctionState>(this.auctionCollection(auctionId, 'liveState'), 'current')
     ]);
     return { auction, teams, players, bids, liveState };
   }
