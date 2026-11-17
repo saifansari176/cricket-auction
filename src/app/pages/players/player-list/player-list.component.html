@@ -26,7 +26,7 @@
             <span *ngIf="preparingCatalogue" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
             <span aria-live="polite">{{preparingCatalogue ? 'Preparing PDF...' : (pdfDownloadUrl ? 'Download PDF' : 'Prepare PDF')}}</span>
         </button>
-        <div class="public-list-toggle">
+        <div class="public-list-toggle d-none">
             <label class="form-check form-switch mb-0">
                 <input class="form-check-input" type="checkbox" [checked]="publicPlayerListEnabled" [disabled]="updatingPublicPlayerList || !activeAuctionId" (change)="togglePublicPlayerList()">
                 <span class="form-check-label">Public list {{publicPlayerListEnabled ? 'On' : 'Off'}}</span>

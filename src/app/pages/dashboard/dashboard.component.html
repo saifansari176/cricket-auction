@@ -25,6 +25,12 @@
       <span>Unsold Players</span>
       <strong>{{unsoldPlayers.length}}</strong>
     </button>
+
+    <button *ngIf="categoryPlayers.length > 0" type="button" class="summary-card" [class.active]="activeList === 'categoryPlayers'"
+      (click)="showList('categoryPlayers')">
+      <span>Category Players</span>
+      <strong>{{categoryPlayers.length}}</strong>
+    </button>
   </div>
 
   <div class="list-panel">
@@ -161,7 +167,8 @@
         </tbody>
       </table>
 
-      <table *ngIf="activeList === 'available'" class="table table-bordered table-hover align-middle">
+      <table *ngIf="activeList === 'available' || activeList === 'categoryPlayers'"
+        class="table table-bordered table-hover align-middle">
         <thead class="table-dark">
           <tr>
             <th>#</th>
@@ -189,11 +196,12 @@
             <th>
               <div class="type-header">
                 <span>Category</span>
-                <select *ngIf="activeList === 'available'" [(ngModel)]="categoryFilter"
+                <select *ngIf="activeList === 'available' || activeList === 'categoryPlayers'"
+                  [ngModel]="categoryFilter" (ngModelChange)="setCategoryFilter($event)"
                   aria-label="Filter player category">
                   <option value="">All categories</option>
-                  <option value="__regular__">Regular Players</option>
-                  <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
+                  <option *ngIf="hasRegularAvailablePlayers" value="__regular__">Regular Players</option>
+                  <option *ngFor="let category of categoryFilterOptions" [value]="category.id">{{category.name}}</option>
                 </select>
               </div>
             </th>
@@ -201,7 +209,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let player of filteredAvailablePlayers; let i = index">
+          <tr *ngFor="let player of displayedAvailablePlayers; let i = index">
             <td>{{i + 1}}</td>
             <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName"
                 class="img-dashboard-fluid" (click)="openPreview(player.photo, player.firstName + ' ' + player.lastName)" title="Click to preview" style="cursor:pointer"><span *ngIf="!player.photo">-</span></td>
@@ -209,12 +217,31 @@
             <td>{{player.playerType}}</td>
             <td>{{player.status}}</td>
             <td>{{player.baseBid}}</td>
-            <td>{{player.categoryName || 'Regular'}}</td>
+            <td>{{getPlayerCategoryName(player)}}</td>
             <td>
-              <button type="button" class="btn btn-sm btn-auction" (click)="startAuction(player)"
-                title="Start auction for this player">
-                🔨 Auction
-              </button>
+              <div class="d-flex align-items-center gap-2">
+                <ng-container *ngIf="activeList === 'categoryPlayers'; else availablePlayerAction">
+                  <select class="form-select form-select-sm" [value]="getSelectedCategoryAction(player)"
+                    (change)="setSelectedCategoryAction(player, $event)" aria-label="Category player action">
+                    <option value="">Choose an action...</option>
+                    <!-- <optgroup label="Move to category"> -->
+                    <option *ngFor="let category of categories" [value]="'move:' + category.id"
+                      [disabled]="category.id === player.categoryId">{{category.name}}</option>
+                    <!-- </optgroup> -->
+                    <option value="remove">Remove from category</option>
+                  </select>
+                  <button type="button" class="btn btn-sm btn-primary"
+                    [disabled]="!getSelectedCategoryAction(player)"
+                    (click)="applyCategoryPlayerAction(player)">Apply</button>
+                </ng-container>
+                <ng-template #availablePlayerAction>
+                  <button *ngIf="player.status === 'Available' || player.status === 'Unsold'" type="button"
+                    class="btn btn-sm btn-auction" (click)="startAuction(player)"
+                    title="Start auction for this player">
+                    🔨 Auction
+                  </button>
+                </ng-template>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -291,7 +318,11 @@
         <ng-template #playerDetails>
           <div class="accordion-details"><span>Mobile <strong>{{$any(player).mobile}}</strong></span><span>Status
               <strong>{{$any(player).status}}</strong></span><span>Base Bid
-              <strong>{{$any(player).baseBid}}</strong></span><button *ngIf="activeList === 'available'" type="button"
+              <strong>{{$any(player).baseBid}}</strong></span><span
+              *ngIf="activeList === 'available' || activeList === 'categoryPlayers'">Category
+              <strong>{{getPlayerCategoryName($any(player))}}</strong></span><button
+              *ngIf="(activeList === 'available' || activeList === 'categoryPlayers') &&
+                ($any(player).status === 'Available' || $any(player).status === 'Unsold')" type="button"
               class="btn btn-sm btn-auction" (click)="startAuction($any(player))">Auction</button></div>
         </ng-template>
       </details>

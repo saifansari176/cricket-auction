@@ -12,6 +12,7 @@ import { PlayerCategory } from '../../../core/models/player-category';
 import { PlayerCategoryService } from '../../../core/services/player-category.service';
 import { PlayerService } from '../../../core/services/player.service';
 import { Player } from '../../../core/models/player';
+import { ImagePreviewService } from '../../../shared/image-preview/image-preview.service';
 
 @Component({
   selector: 'app-player-categories',
@@ -26,6 +27,7 @@ export class PlayerCategoriesComponent {
   private categoryService = inject(PlayerCategoryService);
   private message = inject(MessageService);
   private playerService = inject(PlayerService);
+  private imagePreview = inject(ImagePreviewService);
   private router = inject(Router);
 
   categories: PlayerCategory[] = [];
@@ -92,6 +94,13 @@ export class PlayerCategoriesComponent {
 
   getPlayersForCategory(categoryId?: string): Player[] {
     return this.players.filter((player) => player.categoryId === categoryId);
+  }
+
+  openPhotoPreview(player: Player, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!player.photo) return;
+    this.imagePreview.open(player.photo, `${player.firstName} ${player.lastName}`.trim());
   }
 
   getCategoryBidIncrease(category: PlayerCategory): number {

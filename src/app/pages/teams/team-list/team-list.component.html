@@ -51,7 +51,7 @@
 
                 <th>Players</th>
 
-                <th>Action</th>
+                <th class="team-actions">Action</th>
 
             </tr>
 
@@ -103,24 +103,20 @@
 
                 </td>
 
-                <td>
+                <td class="team-actions">
+                    <div class="team-action-buttons">
+                        <a
+                            [routerLink]="['/teams/edit',team.id!]"
+                            class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
 
-                    <a
-                        [routerLink]="['/teams/edit',team.id!]"
-                        class="btn btn-warning btn-sm me-2">
-
-                        Edit
-
-                    </a>
-
-                    <button
-                        class="btn btn-danger btn-sm"
-                        (click)="deleteTeam(team.id!)">
-
-                        Delete
-
-                    </button>
-
+                        <button
+                            class="btn btn-danger btn-sm"
+                            (click)="deleteTeam(team.id!)">
+                            Delete
+                        </button>
+                    </div>
                 </td>
 
             </tr>

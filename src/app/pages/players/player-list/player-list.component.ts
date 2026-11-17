@@ -92,7 +92,7 @@ export class PlayerListComponent implements OnDestroy {
     ]);
     this.paymentEnabled = auction?.registrationPaymentEnabled === true;
     const auctionId = auction?.activeAuctionId || auction?.id || '';
-    this.players = await Promise.all(players.map(async (player) => {
+    const loadedPlayers = await Promise.all(players.map(async (player) => {
       if (player.paymentStatus !== 'Verified' || !player.paymentId || Number(player.paymentAmount || 0) > 0 || !auctionId) {
         return player;
       }
@@ -105,6 +105,10 @@ export class PlayerListComponent implements OnDestroy {
         console.error(`Unable to sync payment ${player.paymentId}:`, error);
         return player;
       }
+    }));
+    this.players = loadedPlayers.map((player) => ({
+      ...player,
+      photo: this.normalizePhotoUrl(player.photo)
     }));
   }
 
@@ -368,6 +372,9 @@ get categories(): string[] {
 
     const fileMatch = url.match(/\/file\/d\/([^/]+)/);
     if (fileMatch?.[1]) return fileMatch[1];
+
+    const googleusercontentMatch = url.match(/lh\d+\.googleusercontent\.com\/d\/([^/?#=]+)/i);
+    if (googleusercontentMatch?.[1]) return googleusercontentMatch[1];
 
     return '';
   }

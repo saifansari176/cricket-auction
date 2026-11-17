@@ -62,6 +62,12 @@ export class AppComponent implements OnDestroy {
 
     if (isPlatformBrowser(this.platformId)) {
       this.initialNavigationComplete = this.router.navigated;
+      console.log("1234",this.initialNavigationComplete);
+      
+        if (this.initialNavigationComplete) {
+          this.finishInitialLoad();
+          this.updateTelecastCanvas(this.router.url);
+        }
       this.startPlayerPreload();
       window.addEventListener('pageshow', this.onPageShow);
       document.addEventListener('visibilitychange', this.onVisibilityChange);
@@ -113,9 +119,17 @@ export class AppComponent implements OnDestroy {
   }
 
   private updateTelecastCanvas(url: string): void {
+    const routePath = url.split('?')[0];
+    const requestedPath = window.location.pathname.replace(/\/+$/, '') || '/';
+    const isRequestedOverlay = /^\/auction-overlay\/[^/]+$/.test(requestedPath);
     const isTelecastOverlay = /^\/(?:auction-overlay|youtube-live)(?:\/|$)/.test(url);
+    if (isRequestedOverlay && !isTelecastOverlay) return;
+
     document.documentElement.classList.toggle('telecast-overlay', isTelecastOverlay);
     document.body.classList.toggle('telecast-overlay', isTelecastOverlay);
+    if (isRequestedOverlay && /^\/auction-overlay\/[^/]+$/.test(routePath)) {
+      document.documentElement.classList.remove('telecast-overlay-loading');
+    }
   }
 
   private finishInitialLoad(): void {
