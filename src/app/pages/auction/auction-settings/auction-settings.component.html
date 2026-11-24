@@ -111,14 +111,6 @@
               <button type="button" class="btn btn-danger btn-sm me-2" (click)="deleteAuction(auction)">
                 Delete
               </button>
-              <button
-                *ngIf="isAdmin"
-                type="button"
-                class="btn btn-outline-danger btn-sm me-2"
-                [disabled]="!auction.id || cleaningImageAuctions.has(auction.id)"
-                (click)="removeAuctionImages(auction)">
-                {{auction.id && cleaningImageAuctions.has(auction.id) ? 'Removing...' : 'Remove Images'}}
-              </button>
               <button type="button" class="btn btn-primary btn-sm" (click)="playerRegistrationFormPopup(auction)">
             Share Link
               </button>
@@ -130,7 +122,7 @@
     <div *ngIf="!loading && auctions.length > 0" class="mobile-auction-list">
       <details *ngFor="let auction of filteredAuctions" [open]="selectedAuctionId === auction.id" class="auction-accordion">
         <summary><img *ngIf="auction.logo" [src]="auction.logo" alt=""><span *ngIf="!auction.logo" class="logo-placeholder">Logo</span><span><strong>{{auction.auctionName}}</strong><small>{{auction.auctionDate | date:'mediumDate'}}</small></span></summary>
-        <div class="auction-details"><span>Points / Team <strong>{{auction.pointsPerTeam}}</strong></span><span>Players / Team <strong>{{auction.playersPerTeam}}</strong></span><span>Base Price <strong>{{auction.basePlayerPrice || auction.minimumBid}}</strong></span><div class="action-cell"><button type="button" class="btn btn-success btn-sm" *ngIf="selectedAuctionId !== auction.id" (click)="activateAuction(auction)">Select</button><button type="button" class="btn btn-warning btn-sm" (click)="editAuction(auction)">Edit</button><button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">Delete</button><button *ngIf="isAdmin" type="button" class="btn btn-outline-danger btn-sm" [disabled]="!auction.id || cleaningImageAuctions.has(auction.id)" (click)="removeAuctionImages(auction)">{{auction.id && cleaningImageAuctions.has(auction.id) ? 'Removing...' : 'Remove Images'}}</button><button type="button" class="btn btn-primary btn-sm" (click)="playerRegistrationFormPopup(auction)">Share Link</button></div></div>
+        <div class="auction-details"><span>Points / Team <strong>{{auction.pointsPerTeam}}</strong></span><span>Players / Team <strong>{{auction.playersPerTeam}}</strong></span><span>Base Price <strong>{{auction.basePlayerPrice || auction.minimumBid}}</strong></span><div class="action-cell"><button type="button" class="btn btn-success btn-sm" *ngIf="selectedAuctionId !== auction.id" (click)="activateAuction(auction)">Select</button><button type="button" class="btn btn-warning btn-sm" (click)="editAuction(auction)">Edit</button><button type="button" class="btn btn-danger btn-sm" (click)="deleteAuction(auction)">Delete</button><button type="button" class="btn btn-primary btn-sm" (click)="playerRegistrationFormPopup(auction)">Share Link</button></div></div>
       </details>
     </div>
     <div *ngIf="!loading && auctions.length > 0 && filteredAuctions.length === 0" class="empty-state">
