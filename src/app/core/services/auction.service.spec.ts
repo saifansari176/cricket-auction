@@ -29,4 +29,16 @@ describe('AuctionService', () => {
     expect(service.firebase.getAll).toHaveBeenCalledTimes(3);
     expect(getById).toHaveBeenCalledOnceWith('auctions', 'auction-1');
   });
+
+  it('invalidates cached player, team, and bid data after changing a sold player status', async () => {
+    spyOn(service, 'get').and.resolveTo({ id: 'auction-1', activeAuctionId: 'auction-1' } as AuctionSettings);
+    spyOn(service.firebase, 'post').and.resolveTo(undefined);
+    const clearReadCache = spyOn(service.firebase, 'clearReadCache');
+
+    await service.changeSoldBidStatus('bid-1', 'Unsold');
+
+    expect(clearReadCache).toHaveBeenCalledWith('auctions/auction-1/players');
+    expect(clearReadCache).toHaveBeenCalledWith('auctions/auction-1/teams');
+    expect(clearReadCache).toHaveBeenCalledWith('auctions/auction-1/bids');
+  });
 });

@@ -381,9 +381,7 @@ export class AuctionService {
       teamId,
       bidAmount
     });
-    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'players'));
-    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'teams'));
-    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'bids'));
+    this.clearAuctionTransactionCaches(auctionId);
   }
 
   async getBids(): Promise<AuctionBid[]> {
@@ -507,6 +505,7 @@ export class AuctionService {
       `/api/auctions/${encodeURIComponent(auctionId)}/bids/${encodeURIComponent(bidId)}/undo`,
       {}
     );
+    this.clearAuctionTransactionCaches(auctionId);
   }
 
   async changeSoldBidStatus(bidId: string, status: 'Available' | 'Unsold'): Promise<void> {
@@ -516,6 +515,13 @@ export class AuctionService {
       `/api/auctions/${encodeURIComponent(auctionId)}/bids/${encodeURIComponent(bidId)}/status`,
       { status }
     );
+    this.clearAuctionTransactionCaches(auctionId);
+  }
+
+  private clearAuctionTransactionCaches(auctionId: string): void {
+    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'players'));
+    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'teams'));
+    this.firebase.clearReadCache(this.auctionCollection(auctionId, 'bids'));
   }
 
   async syncPlayerBidDetails(player: Player): Promise<void> {
