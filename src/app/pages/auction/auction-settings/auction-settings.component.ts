@@ -79,6 +79,7 @@ export class AuctionSettingsComponent {
   paymentSummary: PaymentSummary | null = null;
   paymentSummaryLoading = false;
   paymentRecords: PaymentRecord[] = [];
+  cleaningImageAuctions = new Set<string>();
 
   showForm = false;
 
@@ -456,6 +457,46 @@ export class AuctionSettingsComponent {
 
     this.loading = false;
 
+  }
+
+  async removeAuctionImages(auction: AuctionSettings): Promise<void> {
+    if (!this.isAdmin || !auction.id || this.cleaningImageAuctions.has(auction.id)) return;
+
+    const confirmed = await this.message.confirm(
+      `Permanently remove player photos and team logos from "${auction.auctionName}"? Player, team, and sale records will remain. These photos will no longer appear in this tournament's history. Auction logos are not affected.`,
+      'Remove Tournament Images',
+      'Remove Images'
+    );
+    if (!confirmed) return;
+
+    this.cleaningImageAuctions.add(auction.id);
+    try {
+      const result = await this.auctionService.cleanupAuctionImages(auction.id);
+      if (result.failedImages > 0) {
+        this.message.error(
+          `Image cleanup was incomplete. ${result.failedImages} image(s) could not be deleted; their records were kept. Please retry.`
+        );
+        return;
+      }
+
+      const removedCount = result.removedPlayerImages + result.removedTeamLogos;
+      if (removedCount === 0 && result.sharedImagesSkipped === 0) {
+        this.message.info('No player photos or team logos were found for this tournament.');
+        return;
+      }
+
+      this.message.success(
+        `Removed ${result.removedPlayerImages} player photo(s) and ${result.removedTeamLogos} team logo(s).`
+        + (result.sharedImagesSkipped
+          ? ` Kept ${result.sharedImagesSkipped} image(s) still used by another tournament.`
+          : '')
+      );
+    } catch (error) {
+      console.error('Unable to remove tournament images.', error);
+      this.message.error(error instanceof Error ? error.message : 'Unable to remove tournament images.');
+    } finally {
+      this.cleaningImageAuctions.delete(auction.id);
+    }
   }
 
   playerRegistrationFormPopup(auction: AuctionSettings): void {

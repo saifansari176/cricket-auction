@@ -30,6 +30,13 @@ export interface PublicAuctionSummary {
   registrationLinkEnabled: boolean;
 }
 
+export interface AuctionImageCleanupResult {
+  removedPlayerImages: number;
+  removedTeamLogos: number;
+  sharedImagesSkipped: number;
+  failedImages: number;
+}
+
 export interface LiveAuctionResultEvent {
   id: string;
   action: 'sold' | 'unsold';
@@ -242,6 +249,15 @@ export class AuctionService {
       this.activeAuction$.next(null);
     }
 
+  }
+
+  async cleanupAuctionImages(auctionId: string): Promise<AuctionImageCleanupResult> {
+    const result = await this.firebase.post<AuctionImageCleanupResult>(
+      `/api/auctions/${encodeURIComponent(auctionId)}/cleanup-images`,
+      {}
+    );
+    this.clearAuctionTransactionCaches(auctionId);
+    return result;
   }
 
   /** Read-only data used by the public tournament watch link. */
