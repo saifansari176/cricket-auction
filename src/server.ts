@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs';
 import { applicationDefault, cert, getApps, initializeApp as initializeAdminApp } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from 'firebase-admin/auth';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, type QueryDocumentSnapshot } from 'firebase-admin/firestore';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -33,6 +33,63 @@ const razorpay = razorpayKeyId && razorpayKeySecret
   : null;
 
 app.use(express.json());
+const registrationAttempts = new Map<string, { count: number; resetAt: number }>();
+const publicRegistrationRateLimit = 20;
+const publicRegistrationWindowMs = 15 * 60 * 1000;
+const publicAuctionsCache = new Map<string, { expiresAt: number; value: unknown }>();
+const publicAuctionsCacheKey = 'public-auctions-v1';
+const publicAuctionsCacheTtlMs = 30_000;
+const publicDataCache = new Map<string, { expiresAt: number; value: unknown }>();
+const publicDataCacheTtlMs = 5_000;
+const publicDataCacheMaxEntries = 200;
+const maxCategoryTransactionWrites = 500;
+
+function clearPublicDataCache(auctionId?: string | null): void {
+  if (!auctionId) {
+    publicDataCache.clear();
+    return;
+  }
+  for (const key of publicDataCache.keys()) {
+    const cachedRequest = JSON.parse(key) as { collection?: string };
+    const collection = cachedRequest.collection || '';
+    if (collection === 'auctions'
+      || collection === `auctions/${auctionId}`
+      || collection.startsWith(`auctions/${auctionId}/`)) {
+      publicDataCache.delete(key);
+    }
+  }
+  publicAuctionsCache.delete(publicAuctionsCacheKey);
+}
+
+function removeExpiredPublicDataCacheEntries(now: number): void {
+  for (const [key, entry] of publicDataCache) {
+    if (entry.expiresAt <= now) publicDataCache.delete(key);
+  }
+}
+
+function getPublicDataCacheResult(key: string): { found: boolean; value?: unknown } {
+  const now = Date.now();
+  removeExpiredPublicDataCacheEntries(now);
+  const entry = publicDataCache.get(key);
+  if (!entry) return { found: false };
+
+  publicDataCache.delete(key);
+  publicDataCache.set(key, entry);
+  return { found: true, value: entry.value };
+}
+
+function allowPublicRegistration(req: express.Request): boolean {
+  const key = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const current = registrationAttempts.get(key);
+  if (!current || current.resetAt <= now) {
+    registrationAttempts.set(key, { count: 1, resetAt: now + publicRegistrationWindowMs });
+    return true;
+  }
+  if (current.count >= publicRegistrationRateLimit) return false;
+  current.count += 1;
+  return true;
+}
 
 type FirestoreRequest = {
   action: 'getAll' | 'getById' | 'getOneByField' | 'add' | 'set' | 'update' | 'delete' | 'createIfNoMatchingField';
@@ -99,6 +156,41 @@ function publicResponse(collection: string, entry: Record<string, unknown>): Rec
   return entry;
 }
 
+function cachePublicDataResult(req: express.Request, body: FirestoreRequest, value: unknown): void {
+  if (req.headers.authorization) return;
+  if (!['getAll', 'getById', 'getOneByField'].includes(body.action)) return;
+  const cacheKey = JSON.stringify({
+    action: body.action,
+    collection: body.collection,
+    id: body.id,
+    field: body.field,
+    value: body.value
+  });
+  const now = Date.now();
+  removeExpiredPublicDataCacheEntries(now);
+  publicDataCache.delete(cacheKey);
+  while (publicDataCache.size >= publicDataCacheMaxEntries) {
+    const oldestKey = publicDataCache.keys().next().value;
+    if (oldestKey === undefined) break;
+    publicDataCache.delete(oldestKey);
+  }
+  publicDataCache.set(cacheKey, { expiresAt: now + publicDataCacheTtlMs, value });
+}
+
+class CategoryTransactionWriteLimitError extends Error {}
+
+async function updatePlayersWithBulkWriter(
+  players: QueryDocumentSnapshot[],
+  update: Record<string, string | number>
+): Promise<void> {
+  const writer = firestore.bulkWriter();
+  try {
+    await Promise.all(players.map((player) => writer.update(player.ref, update)));
+  } finally {
+    await writer.close();
+  }
+}
+
 function isPlayerPhotoUrl(value: string): boolean {
   try {
     const url = new URL(value);
@@ -130,7 +222,7 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
     const auction = await firestore.doc(`auctions/${auctionId}`).get();
     const data = auction.data();
     const subcollection = body.collection.split('/').filter(Boolean)[2];
-    if (typeof data?.['publicLiveViewEnabled'] === 'boolean' && ['teams', 'players', 'bids'].includes(subcollection)) return null;
+    if (data?.['publicLiveViewEnabled'] === true && ['teams', 'players', 'bids'].includes(subcollection)) return null;
     if (data?.['publicPlayerListEnabled'] === true && subcollection === 'players') return null;
     if (data?.['registrationLinkEnabled'] === true && subcollection === 'categories') return null;
   }
@@ -141,7 +233,7 @@ async function authorizeDataRequest(req: express.Request, body: FirestoreRequest
   if (!user && body.action === 'getById' && body.collection === 'auctions' && body.id) {
     const auction = await firestore.doc(`auctions/${body.id}`).get();
     const data = auction.data();
-    if (typeof data?.['publicLiveViewEnabled'] === 'boolean' || data?.['publicPlayerListEnabled'] === true || data?.['registrationLinkEnabled'] === true) return null;
+    if (data?.['publicLiveViewEnabled'] === true || data?.['publicPlayerListEnabled'] === true || data?.['registrationLinkEnabled'] === true) return null;
   }
   if (!user && body.action === 'getOneByField' && body.collection === 'auctions' && body.field === 'publicPlayerListToken') return null;
 
@@ -208,11 +300,35 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
   try {
     if (!body?.action || !body.collection) throw new Error('Invalid request.');
     const user = await authorizeDataRequest(req, body);
+    if (!user
+      && ['getAll', 'getById', 'getOneByField'].includes(body.action)
+      && ['auctions', 'teams', 'players', 'bids', 'categories', 'liveState'].some((name) =>
+        body.collection === 'auctions' || body.collection.includes(`/${name}`)
+      )) {
+      const cacheKey = JSON.stringify({
+        action: body.action,
+        collection: body.collection,
+        id: body.id,
+        field: body.field,
+        value: body.value
+      });
+      const cached = getPublicDataCacheResult(cacheKey);
+      if (cached.found) {
+        res.set('Cache-Control', 'private, no-cache');
+        res.json(cached.value);
+        return;
+      }
+    }
     const records = collectionReference(body.collection);
     const payload = body.data || {};
 
     // Never allow a client to assign an auction to a different owner.
     if (body.collection === 'auctions' && body.action === 'add' && user) payload['createdBy'] = user.uid;
+    if (body.collection === 'auctions' && body.action === 'update' && user) {
+      const existingAuction = await records.doc(body.id!).get();
+      payload['createdBy'] = existingAuction.data()?.['createdBy'] || user.uid;
+      payload['createdByEmail'] = existingAuction.data()?.['createdByEmail'] || user.email || '';
+    }
     if (body.collection === 'users' && body.id && user && body.id === user.uid && ['set', 'update'].includes(body.action)) {
       const existing = await records.doc(body.id).get();
       if (existing.exists) {
@@ -246,14 +362,18 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
         const entries = new Map(snapshots.flatMap((snapshot) => snapshot.docs)
           .map((entry) => [entry.id, { id: entry.id, ...entry.data() }]));
         const responseEntries = [...entries.values()];
-        res.json(user ? responseEntries : responseEntries.map((entry) => publicResponse(body.collection, entry)));
+        const response = user ? responseEntries : responseEntries.map((entry) => publicResponse(body.collection, entry));
+        if (!user) cachePublicDataResult(req, body, response);
+        res.json(response);
         return;
       }
       case 'getById': {
         if (!body.id) throw new Error('Document id is required.');
         const entry = await records.doc(body.id).get();
         const result = entry.exists ? { id: entry.id, ...entry.data() } : null;
-        res.json(result && !user ? publicResponse(body.collection, result) : result);
+        const response = result && !user ? publicResponse(body.collection, result) : result;
+        if (!user) cachePublicDataResult(req, body, response);
+        res.json(response);
         return;
       }
       case 'getOneByField': {
@@ -261,11 +381,14 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
         const snapshot = await records.where(body.field, '==', body.value).limit(1).get();
         const entry = snapshot.docs[0];
         const result = entry ? { id: entry.id, ...entry.data() } : null;
-        res.json(result && !user ? publicResponse(body.collection, result) : result);
+        const response = result && !user ? publicResponse(body.collection, result) : result;
+        if (!user) cachePublicDataResult(req, body, response);
+        res.json(response);
         return;
       }
       case 'add': {
         const entry = await records.add(payload);
+        clearPublicDataCache(auctionIdFromCollection(body.collection) || (body.collection === 'auctions' ? body.id : undefined));
         res.status(201).json({ id: entry.id });
         return;
       }
@@ -273,13 +396,36 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
       case 'update': {
         if (!body.id) throw new Error('Document id is required.');
         const entry = records.doc(body.id);
-        if (body.action === 'set') await entry.set(payload); else await entry.update(payload);
+        if (body.action === 'set'
+          && body.collection === 'users'
+          && user
+          && body.id === user.uid) {
+          const existing = await entry.get();
+          if (!existing.exists) {
+            await firestore.runTransaction((transaction) =>
+              transaction.get(records.limit(1)).then((firstProfile) => {
+                payload['role'] = firstProfile.empty ? 'admin' : 'user';
+                payload['active'] = true;
+                payload['uid'] = user.uid;
+                transaction.set(entry, payload);
+              })
+            );
+          } else {
+            await entry.set(payload);
+          }
+        } else if (body.action === 'set') {
+          await entry.set(payload);
+        } else {
+          await entry.update(payload);
+        }
+        clearPublicDataCache(auctionIdFromCollection(body.collection) || (body.collection === 'auctions' ? body.id : undefined));
         res.status(204).end();
         return;
       }
       case 'delete': {
         if (!body.id) throw new Error('Document id is required.');
         await records.doc(body.id).delete();
+        clearPublicDataCache(auctionIdFromCollection(body.collection) || (body.collection === 'auctions' ? body.id : undefined));
         res.status(204).end();
         return;
       }
@@ -296,6 +442,7 @@ const handleFirestoreRequest: express.RequestHandler = async (req, res) => {
             });
           })
         );
+        clearPublicDataCache(auctionIdFromCollection(body.collection) || undefined);
         res.status(created ? 201 : 409).json({ created });
         return;
       }
@@ -314,6 +461,12 @@ app.post('/api/firestore', handleFirestoreRequest);
 /** Lists only public auction tiles, without exposing private auction settings or ownership. */
 app.post('/api/public/auctions', async (_req, res) => {
   try {
+    const cached = publicAuctionsCache.get(publicAuctionsCacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      res.set('Cache-Control', 'public, max-age=30');
+      res.json(cached.value);
+      return;
+    }
     const collection = firestore.collection('auctions');
     const [liveAuctions, registrationAuctions] = await Promise.all([
       collection.where('publicLiveViewEnabled', '==', true).get(),
@@ -337,6 +490,11 @@ app.post('/api/public/auctions', async (_req, res) => {
           registrationLinkEnabled: data['registrationLinkEnabled'] === true
         };
       });
+    publicAuctionsCache.set(publicAuctionsCacheKey, {
+      expiresAt: Date.now() + publicAuctionsCacheTtlMs,
+      value: auctions
+    });
+    res.set('Cache-Control', 'public, max-age=30');
     res.json(auctions);
   } catch (error) {
     console.error('Unable to list public auctions:', error);
@@ -371,6 +529,7 @@ app.post('/api/auctions/:auctionId/delete', async (req, res) => {
     }));
 
     await firestore.doc(`auctions/${auctionId}`).delete();
+    publicAuctionsCache.delete(publicAuctionsCacheKey);
     res.status(204).end();
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to delete auction.';
@@ -406,6 +565,10 @@ app.post('/api/public/auctions/:auctionId/registration-check', async (req, res) 
 
 /** Creates a public registration from a fixed schema; the browser cannot set sale or payment state. */
 app.post('/api/public/auctions/:auctionId/registrations', async (req, res) => {
+  if (!allowPublicRegistration(req)) {
+    res.status(429).json({ error: 'Too many registration attempts. Please try again later.' });
+    return;
+  }
   const { auctionId } = req.params;
   const input = req.body as Record<string, unknown>;
   const text = (name: string, max: number, required = false) => {
@@ -484,9 +647,45 @@ app.post('/api/public/auctions/:auctionId/registrations', async (req, res) => {
         return playerRef.id;
       });
     });
+    clearPublicDataCache(auctionId);
     res.status(201).json({ id: created });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'Unable to submit registration.' });
+  }
+});
+
+/** Atomically returns a player from Unsold to Available. */
+app.post('/api/auctions/:auctionId/players/:playerId/mark-available', async (req, res) => {
+  const { auctionId, playerId } = req.params;
+  try {
+    await requireAuctionManager(req, auctionId);
+    const playerRef = firestore.doc(`auctions/${auctionId}/players/${playerId}`);
+    const player = await firestore.runTransaction((transaction) =>
+      transaction.get(playerRef).then((snapshot) => {
+        if (!snapshot.exists) throw new Error('Player no longer exists.');
+        const currentPlayer = snapshot.data()!;
+        if (currentPlayer['status'] !== 'Unsold') {
+          throw new Error('This player is no longer unsold.');
+        }
+        const updatedPlayer = {
+          ...currentPlayer,
+          status: 'Available',
+          soldToTeamId: '',
+          soldPrice: 0
+        };
+        transaction.update(playerRef, {
+          status: updatedPlayer.status,
+          soldToTeamId: updatedPlayer.soldToTeamId,
+          soldPrice: updatedPlayer.soldPrice
+        });
+        return { ...updatedPlayer, id: playerId };
+      })
+    );
+    clearPublicDataCache(auctionId);
+    res.json(player);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to return the player to the auction.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
   }
 });
 
@@ -500,36 +699,340 @@ app.post('/api/auctions/:auctionId/sales', async (req, res) => {
     await requireAuctionManager(req, auctionId);
     if (!playerId || !teamId || !Number.isFinite(bidAmount) || bidAmount <= 0) throw new Error('Valid player, team, and bid are required.');
 
-    const result = await firestore.runTransaction(async (transaction) => {
+    const result = await firestore.runTransaction((transaction) => {
       const playerRef = firestore.doc(`auctions/${auctionId}/players/${playerId}`);
       const teamRef = firestore.doc(`auctions/${auctionId}/teams/${teamId}`);
-      const [playerSnapshot, teamSnapshot] = await Promise.all([transaction.get(playerRef), transaction.get(teamRef)]);
-      if (!playerSnapshot.exists || !teamSnapshot.exists) throw new Error('Player or team no longer exists.');
-      const player = playerSnapshot.data()!;
-      const team = teamSnapshot.data()!;
-      if (player['status'] !== 'Available') throw new Error('This player is no longer available.');
-      if (Number(team['remainingPoints'] || 0) < bidAmount) throw new Error('This team does not have enough points.');
-      if (Number(team['playersBought'] || 0) >= Number(team['playerLimit'] || Infinity)) throw new Error('This team has reached its player limit.');
+      return Promise.all([transaction.get(playerRef), transaction.get(teamRef)]).then(([playerSnapshot, teamSnapshot]) => {
+        if (!playerSnapshot.exists || !teamSnapshot.exists) throw new Error('Player or team no longer exists.');
+        const player = playerSnapshot.data()!;
+        const team = teamSnapshot.data()!;
+        if (player['status'] !== 'Available') throw new Error('This player is no longer available.');
+        if (Number(team['remainingPoints'] || 0) < bidAmount) throw new Error('This team does not have enough points.');
+        if (Number(team['playersBought'] || 0) >= Number(team['playerLimit'] || Infinity)) throw new Error('This team has reached its player limit.');
 
-      const bidRef = firestore.collection(`auctions/${auctionId}/bids`).doc();
-      const soldDate = new Date().toISOString();
-      transaction.set(bidRef, {
-        auctionId, playerId, playerName: `${player['firstName'] || ''} ${player['lastName'] || ''}`.trim(),
-        teamId, teamName: team['teamName'] || '', bidAmount,
-        mobile: player['mobile'] || '', jerseyNumber: player['jerseyNumber'] || '',
-        tshirtSize: player['tshirtSize'] || '', trouserSize: player['trouserSize'] || '',
-        photoUrl: player['photo'] || '', sold: true, soldDate
+        const bidRef = firestore.collection(`auctions/${auctionId}/bids`).doc();
+        const soldDate = new Date().toISOString();
+        transaction.set(bidRef, {
+          auctionId, playerId, playerName: `${player['firstName'] || ''} ${player['lastName'] || ''}`.trim(),
+          teamId, teamName: team['teamName'] || '', bidAmount,
+          mobile: player['mobile'] || '', jerseyNumber: player['jerseyNumber'] || '',
+          tshirtSize: player['tshirtSize'] || '', trouserSize: player['trouserSize'] || '',
+          photoUrl: player['photo'] || '', sold: true, soldDate
+        });
+        transaction.update(playerRef, { status: 'Sold', soldToTeamId: teamId, soldPrice: bidAmount });
+        transaction.update(teamRef, {
+          remainingPoints: Number(team['remainingPoints'] || 0) - bidAmount,
+          playersBought: Number(team['playersBought'] || 0) + 1
+        });
+        return { bidId: bidRef.id, player: { id: playerId, ...player, status: 'Sold', soldToTeamId: teamId, soldPrice: bidAmount }, team: { id: teamId, ...team, remainingPoints: Number(team['remainingPoints'] || 0) - bidAmount, playersBought: Number(team['playersBought'] || 0) + 1 } };
       });
-      transaction.update(playerRef, { status: 'Sold', soldToTeamId: teamId, soldPrice: bidAmount });
-      transaction.update(teamRef, {
-        remainingPoints: Number(team['remainingPoints'] || 0) - bidAmount,
-        playersBought: Number(team['playersBought'] || 0) + 1
-      });
-      return { bidId: bidRef.id, player: { id: playerId, ...player, status: 'Sold', soldToTeamId: teamId, soldPrice: bidAmount }, team: { id: teamId, ...team, remainingPoints: Number(team['remainingPoints'] || 0) - bidAmount, playersBought: Number(team['playersBought'] || 0) + 1 } };
     });
+    clearPublicDataCache(auctionId);
     res.status(201).json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to record sale.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/bids/:bidId/undo', async (req, res) => {
+  const { auctionId, bidId } = req.params;
+  try {
+    await requireAuctionManager(req, auctionId);
+    await firestore.runTransaction((transaction) => {
+      const bidRef = firestore.doc(`auctions/${auctionId}/bids/${bidId}`);
+      return transaction.get(bidRef).then((bidSnapshot) => {
+        if (!bidSnapshot.exists) throw new Error('The sale no longer exists.');
+        const bid = bidSnapshot.data()!;
+        if (bid['sold'] !== true) throw new Error('Only sold bid records can be undone.');
+        const playerRef = firestore.doc(`auctions/${auctionId}/players/${String(bid['playerId'] || '')}`);
+        const teamRef = firestore.doc(`auctions/${auctionId}/teams/${String(bid['teamId'] || '')}`);
+        return Promise.all([transaction.get(playerRef), transaction.get(teamRef)]).then(([playerSnapshot, teamSnapshot]) => {
+          transaction.delete(bidRef);
+          if (playerSnapshot.exists) {
+            transaction.update(playerSnapshot.ref, { status: 'Available', soldToTeamId: '', soldPrice: 0 });
+          }
+          if (teamSnapshot.exists) {
+            const team = teamSnapshot.data()!;
+            transaction.update(teamSnapshot.ref, {
+              remainingPoints: Number(team['remainingPoints'] || 0) + Number(bid['bidAmount'] || 0),
+              playersBought: Math.max(0, Number(team['playersBought'] || 0) - 1)
+            });
+          }
+        });
+      });
+    });
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to undo sale.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/bids/:bidId/status', async (req, res) => {
+  const { auctionId, bidId } = req.params;
+  const status = req.body?.status;
+  if (status !== 'Available' && status !== 'Unsold') {
+    res.status(400).json({ error: 'A valid player status is required.' });
+    return;
+  }
+  try {
+    await requireAuctionManager(req, auctionId);
+    await firestore.runTransaction((transaction) => {
+      const bidRef = firestore.doc(`auctions/${auctionId}/bids/${bidId}`);
+      return transaction.get(bidRef).then((bidSnapshot) => {
+        if (!bidSnapshot.exists) throw new Error('The sale no longer exists.');
+        const bid = bidSnapshot.data()!;
+        const playerRef = firestore.doc(`auctions/${auctionId}/players/${String(bid['playerId'] || '')}`);
+        const teamRef = firestore.doc(`auctions/${auctionId}/teams/${String(bid['teamId'] || '')}`);
+        return Promise.all([transaction.get(playerRef), transaction.get(teamRef)]).then(([playerSnapshot, teamSnapshot]) => {
+          transaction.delete(bidRef);
+          if (playerSnapshot.exists) {
+            transaction.update(playerSnapshot.ref, {
+              status,
+              soldToTeamId: status === 'Available' ? '' : bid['teamId'] || '',
+              soldPrice: status === 'Available' ? 0 : Number(bid['bidAmount'] || 0)
+            });
+          }
+          if (teamSnapshot.exists) {
+            const team = teamSnapshot.data()!;
+            transaction.update(teamSnapshot.ref, {
+              remainingPoints: Number(team['remainingPoints'] || 0) + Number(bid['bidAmount'] || 0),
+              playersBought: Math.max(0, Number(team['playersBought'] || 0) - 1)
+            });
+          }
+        });
+      });
+    });
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to change player status.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/categories/:categoryId/apply', async (req, res) => {
+  const { auctionId, categoryId } = req.params;
+  const categoryName = typeof req.body?.categoryName === 'string' ? req.body.categoryName.trim() : '';
+  const basePrice = Number(req.body?.basePrice);
+  const bidIncreaseBy = Number(req.body?.bidIncreaseBy);
+  if (!categoryName || !Number.isFinite(basePrice) || basePrice < 0
+    || !Number.isFinite(bidIncreaseBy) || bidIncreaseBy < 0) {
+    res.status(400).json({ error: 'Valid category details are required.' });
+    return;
+  }
+  try {
+    await requireAuctionManager(req, auctionId);
+    const categoryRef = firestore.doc(`auctions/${auctionId}/categories/${categoryId}`);
+    const playersQuery = firestore.collection(`auctions/${auctionId}/players`)
+      .where('categoryId', '==', categoryId);
+    const categoryUpdate = {
+      auctionId,
+      name: categoryName,
+      basePrice,
+      bidIncreaseBy,
+      updatedAt: new Date().toISOString()
+    };
+    const playerUpdate = { categoryName, baseBid: basePrice, bidIncreaseBy };
+
+    try {
+      await firestore.runTransaction((transaction) =>
+        Promise.all([
+          transaction.get(categoryRef),
+          transaction.get(playersQuery)
+        ]).then(([categorySnapshot, players]) => {
+          if (!categorySnapshot.exists) throw new Error('Category no longer exists.');
+          if (players.size + 1 > maxCategoryTransactionWrites) {
+            throw new CategoryTransactionWriteLimitError();
+          }
+          transaction.update(categorySnapshot.ref, categoryUpdate);
+          for (const player of players.docs) {
+            transaction.update(player.ref, playerUpdate);
+          }
+        })
+      );
+    } catch (error) {
+      if (!(error instanceof CategoryTransactionWriteLimitError)) throw error;
+
+      const [categorySnapshot, players] = await Promise.all([
+        categoryRef.get(),
+        playersQuery.get()
+      ]);
+      if (!categorySnapshot.exists) throw new Error('Category no longer exists.');
+      try {
+        await updatePlayersWithBulkWriter(players.docs, playerUpdate);
+        await categoryRef.update(categoryUpdate);
+      } catch (error) {
+        clearPublicDataCache(auctionId);
+        throw error;
+      }
+    }
+
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to update category.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/categories/:categoryId/delete', async (req, res) => {
+  const { auctionId, categoryId } = req.params;
+  try {
+    await requireAuctionManager(req, auctionId);
+    const auctionRef = firestore.doc(`auctions/${auctionId}`);
+    const categoryRef = firestore.doc(`auctions/${auctionId}/categories/${categoryId}`);
+    const playersQuery = firestore.collection(`auctions/${auctionId}/players`)
+      .where('categoryId', '==', categoryId);
+
+    try {
+      await firestore.runTransaction((transaction) =>
+        Promise.all([
+          transaction.get(auctionRef),
+          transaction.get(categoryRef),
+          transaction.get(playersQuery)
+        ]).then(([auctionSnapshot, categorySnapshot, players]) => {
+          if (!categorySnapshot.exists) throw new Error('Category no longer exists.');
+          if (players.size + 1 > maxCategoryTransactionWrites) {
+            throw new CategoryTransactionWriteLimitError();
+          }
+          const auction = auctionSnapshot.data() || {};
+          const regularBasePrice = Number(auction['basePlayerPrice'] ?? auction['minimumBid'] ?? 0);
+          const regularBidIncrease = Number(auction['bidIncreaseBy'] ?? 0);
+          transaction.delete(categorySnapshot.ref);
+          for (const player of players.docs) {
+            transaction.update(player.ref, {
+              categoryId: '',
+              categoryName: '',
+              baseBid: regularBasePrice,
+              bidIncreaseBy: regularBidIncrease
+            });
+          }
+        })
+      );
+    } catch (error) {
+      if (!(error instanceof CategoryTransactionWriteLimitError)) throw error;
+
+      const [auctionSnapshot, categorySnapshot, players] = await Promise.all([
+        auctionRef.get(),
+        categoryRef.get(),
+        playersQuery.get()
+      ]);
+      if (!categorySnapshot.exists) throw new Error('Category no longer exists.');
+      const auction = auctionSnapshot.data() || {};
+      try {
+        await updatePlayersWithBulkWriter(players.docs, {
+          categoryId: '',
+          categoryName: '',
+          baseBid: Number(auction['basePlayerPrice'] ?? auction['minimumBid'] ?? 0),
+          bidIncreaseBy: Number(auction['bidIncreaseBy'] ?? 0)
+        });
+        await categoryRef.delete();
+      } catch (error) {
+        clearPublicDataCache(auctionId);
+        throw error;
+      }
+    }
+
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to delete category.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/teams/reconcile', async (req, res) => {
+  const { auctionId } = req.params;
+  const pointsPerTeam = Number(req.body?.pointsPerTeam);
+  const playersPerTeam = Number(req.body?.playersPerTeam);
+  if (!Number.isFinite(pointsPerTeam) || pointsPerTeam < 0
+    || !Number.isFinite(playersPerTeam) || playersPerTeam < 0) {
+    res.status(400).json({ error: 'Valid team limits are required.' });
+    return;
+  }
+  try {
+    await requireAuctionManager(req, auctionId);
+    await firestore.runTransaction((transaction) =>
+      Promise.all([
+        transaction.get(firestore.collection(`auctions/${auctionId}/teams`)),
+        transaction.get(firestore.collection(`auctions/${auctionId}/bids`).where('sold', '==', true))
+      ]).then(([teams, bids]) => {
+        for (const team of teams.docs) {
+          const teamBids = bids.docs.filter((bid) => bid.data()['teamId'] === team.id);
+          const spent = teamBids.reduce((total, bid) => total + Number(bid.data()['bidAmount'] || 0), 0);
+          transaction.update(team.ref, {
+            totalPoints: pointsPerTeam,
+            remainingPoints: pointsPerTeam - spent,
+            playerLimit: playersPerTeam,
+            playersBought: teamBids.length
+          });
+        }
+      })
+    );
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to reconcile teams.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/bids/sync-player', async (req, res) => {
+  const { auctionId } = req.params;
+  const playerId = typeof req.body?.playerId === 'string' ? req.body.playerId : '';
+  if (!playerId) {
+    res.status(400).json({ error: 'Player id is required.' });
+    return;
+  }
+  try {
+    await requireAuctionManager(req, auctionId);
+    await firestore.runTransaction((transaction) =>
+      transaction.get(
+        firestore.collection(`auctions/${auctionId}/bids`).where('playerId', '==', playerId)
+      ).then((bids) => {
+        for (const bid of bids.docs) {
+          transaction.update(bid.ref, {
+            playerName: typeof req.body?.playerName === 'string' ? req.body.playerName : bid.data()['playerName'] || '',
+            mobile: typeof req.body?.mobile === 'string' ? req.body.mobile : bid.data()['mobile'] || '',
+            jerseyNumber: typeof req.body?.jerseyNumber === 'string' ? req.body.jerseyNumber : bid.data()['jerseyNumber'] || '',
+            tshirtSize: typeof req.body?.tshirtSize === 'string' ? req.body.tshirtSize : bid.data()['tshirtSize'] || '',
+            photoUrl: typeof req.body?.photoUrl === 'string' ? req.body.photoUrl : bid.data()['photoUrl'] || ''
+          });
+        }
+      })
+    );
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to sync player bids.';
+    res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
+  }
+});
+
+app.post('/api/auctions/:auctionId/bids/sync-team', async (req, res) => {
+  const { auctionId } = req.params;
+  const teamId = typeof req.body?.teamId === 'string' ? req.body.teamId : '';
+  const teamName = typeof req.body?.teamName === 'string' ? req.body.teamName : '';
+  if (!teamId) {
+    res.status(400).json({ error: 'Team id is required.' });
+    return;
+  }
+  try {
+    await requireAuctionManager(req, auctionId);
+    await firestore.runTransaction((transaction) =>
+      transaction.get(
+        firestore.collection(`auctions/${auctionId}/bids`).where('teamId', '==', teamId)
+      ).then((bids) => {
+        for (const bid of bids.docs) transaction.update(bid.ref, { teamName });
+      })
+    );
+    clearPublicDataCache(auctionId);
+    res.status(204).end();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to sync team bids.';
     res.status(/Authentication|access/.test(message) ? 403 : 400).json({ error: message });
   }
 });

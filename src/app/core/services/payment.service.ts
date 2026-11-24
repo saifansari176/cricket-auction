@@ -31,6 +31,7 @@ interface RazorpayWindow extends Window {
 @Injectable({ providedIn: 'root' })
 export class PaymentService {
   private checkoutScript?: Promise<void>;
+  private readonly verifiedPaymentAmountCache = new Map<string, Promise<number>>();
 
   async payForRegistration(auctionId: string, auctionName: string, amountInRupees: number): Promise<VerifiedPayment> {
     const amount = Math.round(amountInRupees * 100);
@@ -69,6 +70,21 @@ export class PaymentService {
   }
 
   async getVerifiedPaymentAmount(auctionId: string, paymentId: string): Promise<number> {
+    const cacheKey = `${auctionId}:${paymentId}`;
+    const existing = this.verifiedPaymentAmountCache.get(cacheKey);
+    if (existing) return existing;
+
+    const pending = this.fetchVerifiedPaymentAmount(auctionId, paymentId);
+    this.verifiedPaymentAmountCache.set(cacheKey, pending);
+    try {
+      return await pending;
+    } catch (error) {
+      this.verifiedPaymentAmountCache.delete(cacheKey);
+      throw error;
+    }
+  }
+
+  private async fetchVerifiedPaymentAmount(auctionId: string, paymentId: string): Promise<number> {
     const response = await fetch('/api/payment-details', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

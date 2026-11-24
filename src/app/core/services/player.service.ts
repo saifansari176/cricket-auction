@@ -184,22 +184,15 @@ async deletePlayer(id: string) {
   }
 
   async markAvailable(playerId: string): Promise<Player | null> {
-    const player = await this.getPlayerById(playerId);
+    const auctionId = await this.auctionService.getActiveAuctionId();
+    if (!auctionId) return null;
 
-    if (!player) {
-      return null;
-    }
-
-    const updatedPlayer: Player = {
-      ...player,
-      status: 'Available',
-      soldToTeamId: '',
-      soldPrice: 0
-    };
-
-    await this.updatePlayer(updatedPlayer);
-
-    return updatedPlayer;
+    const player = await this.firebase.post<Player>(
+      `/api/auctions/${encodeURIComponent(auctionId)}/players/${encodeURIComponent(playerId)}/mark-available`,
+      {}
+    );
+    this.firebase.clearReadCache(this.auctionCollection(auctionId));
+    return player;
   }
 
  async getAvailablePlayers(): Promise<Player[]> {

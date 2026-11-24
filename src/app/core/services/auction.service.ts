@@ -500,40 +500,47 @@ export class AuctionService {
     if (auctionId) await this.firebase.delete(this.auctionCollection(auctionId, 'bids'), bidId);
   }
 
+  async undoBid(bidId: string): Promise<void> {
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) throw new Error('Select an auction before undoing a sale.');
+    await this.firebase.post(
+      `/api/auctions/${encodeURIComponent(auctionId)}/bids/${encodeURIComponent(bidId)}/undo`,
+      {}
+    );
+  }
+
+  async changeSoldBidStatus(bidId: string, status: 'Available' | 'Unsold'): Promise<void> {
+    const auctionId = await this.getActiveAuctionId();
+    if (!auctionId) throw new Error('Select an auction before changing a player status.');
+    await this.firebase.post(
+      `/api/auctions/${encodeURIComponent(auctionId)}/bids/${encodeURIComponent(bidId)}/status`,
+      { status }
+    );
+  }
+
   async syncPlayerBidDetails(player: Player): Promise<void> {
     if (!player.id) return;
-
-    const bids = await this.getPlayerHistory(player.id);
     const auctionId = await this.getActiveAuctionId();
     if (!auctionId) return;
-    const playerName = `${player.firstName} ${player.lastName}`.trim();
-
-    await Promise.all(
-      bids
-        .filter((bid) => !!bid.id)
-.map((bid) => this.firebase.update(this.auctionCollection(auctionId, 'bids'), bid.id!, {
-          ...bid,
-          playerName,
-          mobile: player.mobile,
-          jerseyNumber: player.jerseyNumber,
-          tshirtSize: player.tshirtSize,
-          photoUrl: player.photo
-        }))
+    await this.firebase.post(
+      `/api/auctions/${encodeURIComponent(auctionId)}/bids/sync-player`,
+      {
+        playerId: player.id,
+        playerName: `${player.firstName} ${player.lastName}`.trim(),
+        mobile: player.mobile,
+        jerseyNumber: player.jerseyNumber,
+        tshirtSize: player.tshirtSize,
+        photoUrl: player.photo
+      }
     );
   }
 
   async syncTeamBidDetails(teamId: string, teamName: string): Promise<void> {
-    const bids = await this.getBids();
     const auctionId = await this.getActiveAuctionId();
     if (!auctionId) return;
-
-    await Promise.all(
-      bids
-        .filter((bid) => bid.teamId === teamId && !!bid.id)
-        .map((bid) => this.firebase.update(this.auctionCollection(auctionId, 'bids'), bid.id!, {
-          ...bid,
-          teamName
-        }))
+    await this.firebase.post(
+      `/api/auctions/${encodeURIComponent(auctionId)}/bids/sync-team`,
+      { teamId, teamName }
     );
   }
 
