@@ -13,7 +13,8 @@ import { readFileSync } from 'node:fs';
 import { applicationDefault, cert, getApps, initializeApp as initializeAdminApp } from 'firebase-admin/app';
 import { getAuth as getAdminAuth } from 'firebase-admin/auth';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { getFirestore, type QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { getFirestore, type DocumentReference, type QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -43,6 +44,7 @@ const publicDataCache = new Map<string, { expiresAt: number; value: unknown }>()
 const publicDataCacheTtlMs = 5_000;
 const publicDataCacheMaxEntries = 200;
 const maxCategoryTransactionWrites = 500;
+const firebaseStorageBucket = 'saifcricketauction.firebasestorage.app';
 
 function clearPublicDataCache(auctionId?: string | null): void {
   if (!auctionId) {
@@ -191,15 +193,67 @@ async function updatePlayersWithBulkWriter(
   }
 }
 
-function isPlayerPhotoUrl(value: string): boolean {
+function getManagedStorageObjectName(
+  value: unknown,
+  folder?: 'players' | 'teams'
+): string | null {
+  if (typeof value !== 'string') return null;
   try {
     const url = new URL(value);
-    return url.protocol === 'https:'
-      && url.hostname === 'firebasestorage.googleapis.com'
-      && url.pathname.startsWith('/v0/b/saifcricketauction.firebasestorage.app/o/players%2F');
+    const prefix = `/v0/b/${firebaseStorageBucket}/o/`;
+    if (url.protocol !== 'https:' || url.hostname !== 'firebasestorage.googleapis.com'
+      || !url.pathname.startsWith(prefix)) return null;
+    const objectName = decodeURIComponent(url.pathname.slice(prefix.length));
+    const segments = objectName.split('/');
+    return segments.length === 2
+      && (folder ? segments[0] === folder : ['players', 'teams'].includes(segments[0]))
+      && segments[1]
+      ? objectName
+      : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+function isPlayerPhotoUrl(value: string): boolean {
+  return getManagedStorageObjectName(value, 'players') !== null;
+}
+
+type AuctionImageFolder = 'players' | 'teams';
+type AuctionImageField = 'photo' | 'photoUrl' | 'logo';
+
+async function getAuctionAndLegacyRecords(
+  auctionId: string,
+  collectionName: 'players' | 'teams' | 'bids'
+): Promise<QueryDocumentSnapshot[]> {
+  const [auctionRecords, legacyRecords] = await Promise.all([
+    firestore.collection(`auctions/${auctionId}/${collectionName}`).get(),
+    firestore.collection(collectionName).where('auctionId', '==', auctionId).get()
+  ]);
+  const records = new Map<string, QueryDocumentSnapshot>();
+  for (const record of [...auctionRecords.docs, ...legacyRecords.docs]) {
+    records.set(record.ref.path, record);
+  }
+  return [...records.values()];
+}
+
+async function findImageReferences(
+  collectionName: 'players' | 'teams' | 'bids',
+  field: AuctionImageField,
+  urls: string[]
+): Promise<QueryDocumentSnapshot[]> {
+  const records = new Map<string, QueryDocumentSnapshot>();
+  for (let index = 0; index < urls.length; index += 30) {
+    const batch = urls.slice(index, index + 30);
+    const [nestedRecords, rootRecords] = await Promise.all([
+      firestore.collectionGroup(collectionName).where(field, 'in', batch).get(),
+      firestore.collection(collectionName).where(field, 'in', batch).get()
+    ]);
+    for (const record of [...nestedRecords.docs, ...rootRecords.docs]) {
+      records.set(record.ref.path, record);
+    }
+  }
+  return [...records.values()];
 }
 
 function auctionIdFromCollection(path: string): string | null {
@@ -277,6 +331,14 @@ async function requireAuctionManager(req: express.Request, auctionId: string) {
   if (profile.data()?.['active'] !== true) throw new Error('This user account is inactive.');
   if (profile.data()?.['role'] === 'admin' || ownsAuction(user, auction.data())) return user;
   throw new Error('You do not have access to this auction.');
+}
+
+async function requireAdministrator(req: express.Request): Promise<void> {
+  const user = await authenticatedUser(req);
+  if (!user) throw new Error('Authentication is required.');
+  const profile = await firestore.doc(`users/${user.uid}`).get();
+  if (profile.data()?.['active'] !== true) throw new Error('This user account is inactive.');
+  if (profile.data()?.['role'] !== 'admin') throw new Error('Administrator access is required.');
 }
 
 async function deleteCollectionInBatches(collectionPath: string, auctionId?: string): Promise<void> {
@@ -499,6 +561,122 @@ app.post('/api/public/auctions', async (_req, res) => {
   } catch (error) {
     console.error('Unable to list public auctions:', error);
     res.status(500).json({ error: 'Unable to load public auctions.' });
+  }
+});
+
+app.post('/api/auctions/:auctionId/cleanup-images', async (req, res) => {
+  const { auctionId } = req.params;
+  try {
+    await requireAdministrator(req);
+    const auction = await firestore.doc(`auctions/${auctionId}`).get();
+    if (!auction.exists) throw new Error('Auction not found.');
+
+    const [players, teams, bids] = await Promise.all([
+      getAuctionAndLegacyRecords(auctionId, 'players'),
+      getAuctionAndLegacyRecords(auctionId, 'teams'),
+      getAuctionAndLegacyRecords(auctionId, 'bids')
+    ]);
+    const targetDocumentPaths = new Set(
+      [...players, ...teams, ...bids].map((record) => record.ref.path)
+    );
+    const imageReferences: Array<{
+      ref: DocumentReference;
+      field: 'photo' | 'photoUrl' | 'logo';
+      objectName: string;
+    }> = [];
+    const imageUrls = new Set<string>();
+    const addImageReference = (
+      record: QueryDocumentSnapshot,
+      field: 'photo' | 'photoUrl' | 'logo',
+      folder: AuctionImageFolder
+    ) => {
+      const value = record.data()[field];
+      const objectName = getManagedStorageObjectName(value, folder);
+      if (objectName && typeof value === 'string') {
+        imageUrls.add(value);
+        imageReferences.push({ ref: record.ref, field, objectName });
+      }
+    };
+
+    for (const player of players) addImageReference(player, 'photo', 'players');
+    for (const team of teams) addImageReference(team, 'logo', 'teams');
+    for (const bid of bids) addImageReference(bid, 'photoUrl', 'players');
+
+    const objectNames = new Set(imageReferences.map((reference) => reference.objectName));
+    const sharedObjectNames = new Set<string>();
+    if (objectNames.size > 0) {
+      const urls = [...imageUrls];
+      const [playerReferences, bidReferences, teamReferences] = await Promise.all([
+        findImageReferences('players', 'photo', urls),
+        findImageReferences('bids', 'photoUrl', urls),
+        findImageReferences('teams', 'logo', urls)
+      ]);
+      const checkSharedReferences = (
+        records: QueryDocumentSnapshot[],
+        field: AuctionImageField
+      ) => {
+        for (const record of records) {
+          if (targetDocumentPaths.has(record.ref.path)
+            || record.ref.path.startsWith(`auctions/${auctionId}/`)
+            || record.data()?.['auctionId'] === auctionId) continue;
+          const objectName = getManagedStorageObjectName(record.data()[field]);
+          if (objectName && objectNames.has(objectName)) sharedObjectNames.add(objectName);
+        }
+      };
+      checkSharedReferences(playerReferences, 'photo');
+      checkSharedReferences(bidReferences, 'photoUrl');
+      checkSharedReferences(teamReferences, 'logo');
+    }
+
+    const storageBucket = getStorage(adminApp).bucket(firebaseStorageBucket);
+    const deletedObjectNames = new Set<string>();
+    const failedObjectNames = new Set<string>();
+    const objectsToDelete = [...objectNames].filter((name) => !sharedObjectNames.has(name));
+    for (let index = 0; index < objectsToDelete.length; index += 20) {
+      const batch = objectsToDelete.slice(index, index + 20);
+      const results = await Promise.allSettled(
+        batch.map((objectName) => storageBucket.file(objectName).delete({ ignoreNotFound: true }))
+      );
+      results.forEach((result, resultIndex) => {
+        const objectName = batch[resultIndex];
+        if (result.status === 'fulfilled') {
+          deletedObjectNames.add(objectName);
+        } else {
+          failedObjectNames.add(objectName);
+          console.error(`Unable to delete auction image ${objectName}:`, result.reason);
+        }
+      });
+    }
+
+    const referencesToClear = imageReferences.filter((reference) =>
+      deletedObjectNames.has(reference.objectName) || sharedObjectNames.has(reference.objectName)
+    );
+    const writer = firestore.bulkWriter();
+    const writeResults = await Promise.allSettled(referencesToClear.map((reference) =>
+      writer.update(reference.ref, { [reference.field]: '' })
+    ));
+    await writer.close();
+    clearPublicDataCache(auctionId);
+
+    if (writeResults.some((result) => result.status === 'rejected')) {
+      res.status(500).json({
+        error: 'Some image references could not be cleared. Retry cleanup; deleted files will be safely ignored.'
+      });
+      return;
+    }
+
+    res.json({
+      removedPlayerImages: [...deletedObjectNames].filter((name) => name.startsWith('players/')).length,
+      removedTeamLogos: [...deletedObjectNames].filter((name) => name.startsWith('teams/')).length,
+      sharedImagesSkipped: sharedObjectNames.size,
+      failedImages: failedObjectNames.size
+    });
+  } catch (error) {
+    clearPublicDataCache(auctionId);
+    const message = error instanceof Error ? error.message : 'Unable to remove auction images.';
+    const status = /Authentication|access|inactive/i.test(message) ? 403
+      : /not found/i.test(message) ? 404 : 500;
+    res.status(status).json({ error: message });
   }
 });
 
