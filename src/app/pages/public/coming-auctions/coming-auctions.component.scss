@@ -36,17 +36,18 @@ h1 {
 .auction-grid {
   margin-top: 36px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
 }
 
 .auction-grid article {
   position: relative;
   min-width: 0;
+  min-height: 205px;
   display: flex;
-  align-items: center;
-  gap: 18px;
-  padding: 20px;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px;
   background: linear-gradient(135deg, #fff 0%, #f8fbff 100%);
   border: 1px solid rgba(191, 219, 254, .82);
   border-radius: 18px;
@@ -72,8 +73,8 @@ h1 {
 }
 
 .auction-grid img {
-  width: 74px;
-  height: 74px;
+  width: 68px;
+  height: 68px;
   padding: 5px;
   object-fit: cover;
   background: linear-gradient(145deg, #eff6ff, #fff);
@@ -91,17 +92,18 @@ h1 {
 .auction-heading {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .auction-grid h2 {
-  min-width: 0;
+  width: 100%;
   margin: 0;
   color: #0f2445;
-  font-size: 1.08rem;
+  font-size: 1.18rem;
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.28;
+  letter-spacing: -.01em;
   overflow-wrap: anywhere;
 }
 
