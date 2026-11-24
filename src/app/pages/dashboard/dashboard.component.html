@@ -85,7 +85,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let player of filteredPlayers; let i = index">
+          <tr *ngFor="let player of filteredPlayers; let i = index; trackBy: trackByPlayer">
             <td>{{i + 1}}</td>
             <td><img [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName" class="img-dashboard-fluid" (click)="openPreview(player.photo, player.firstName + ' ' + player.lastName)" title="Click to preview" style="cursor:pointer">
             </td>
@@ -110,7 +110,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let team of filteredTeams; let i = index">
+          <tr *ngFor="let team of filteredTeams; let i = index; trackBy: trackByTeam">
             <td>{{i + 1}}</td>
             <td>{{team.teamName}}</td>
             <td>{{team.ownerName}}</td>
@@ -142,7 +142,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let player of filteredSoldPlayers; let i = index">
+          <tr *ngFor="let player of filteredSoldPlayers; let i = index; trackBy: trackByBid">
             <td>{{i + 1}}</td>
             <td><img *ngIf="getBidPlayerPhoto(player)" [src]="getBidPlayerPhoto(player)" [alt]="player.playerName"
                 class="img-dashboard-fluid" (click)="openPreview(getBidPlayerPhoto(player), player.playerName)" title="Click to preview" style="cursor:pointer"><span *ngIf="!getBidPlayerPhoto(player)">-</span></td>
@@ -209,7 +209,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let player of displayedAvailablePlayers; let i = index">
+          <tr *ngFor="let player of displayedAvailablePlayers; let i = index; trackBy: trackByPlayer">
             <td>{{i + 1}}</td>
             <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName"
                 class="img-dashboard-fluid" (click)="openPreview(player.photo, player.firstName + ' ' + player.lastName)" title="Click to preview" style="cursor:pointer"><span *ngIf="!player.photo">-</span></td>
@@ -267,7 +267,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let player of filteredUnsoldPlayers; let i = index">
+          <tr *ngFor="let player of filteredUnsoldPlayers; let i = index; trackBy: trackByPlayer">
             <td>{{i + 1}}</td>
             <td><img *ngIf="player.photo" [src]="player.photo" [alt]="player.firstName + ' ' + player.lastName"
                 class="img-dashboard-fluid" (click)="openPreview(player.photo, player.firstName + ' ' + player.lastName)" title="Click to preview" style="cursor:pointer"><span *ngIf="!player.photo">-</span></td>
@@ -287,7 +287,7 @@
     </div>
 
     <div *ngIf="activeList !== 'teams'" class="mobile-player-list">
-      <details *ngFor="let player of mobilePlayerRows" class="player-accordion">
+      <details *ngFor="let player of mobilePlayerRows; trackBy: trackByPlayer" class="player-accordion">
         <summary>
 <ng-container *ngIf="activeList === 'sold'; else playerImage">
             <img *ngIf="getBidPlayerPhoto($any(player))" [src]="getBidPlayerPhoto($any(player))" alt="Player photo" (click)="openPreview(getBidPlayerPhoto($any(player)), $any(player).playerName)" title="Click to preview" style="cursor:pointer">

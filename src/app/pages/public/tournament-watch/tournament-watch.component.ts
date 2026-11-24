@@ -92,7 +92,7 @@ export class TournamentWatchComponent implements OnInit, OnDestroy {
   }
 
   get publicLiveViewEnabled(): boolean {
-    return this.auction?.publicLiveViewEnabled !== false;
+    return this.auction?.publicLiveViewEnabled === true;
   }
 
   private startLiveUpdates(): void {

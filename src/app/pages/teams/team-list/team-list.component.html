@@ -4,7 +4,7 @@
 
         <h3>Team List</h3>
 
-        <div class="d-flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2 team-list-actions">
 
             <a
                 routerLink="/teams/add"
@@ -14,13 +14,18 @@
 
             </a>
 
-            <button
-                class="btn btn-primary"
-                (click)="exportExcel()">
+            <button type="button" class="file-action excel-action import-action" (click)="fileInput.click()" title="Import Excel" aria-label="Import Excel">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H4v20h16V8Z M14 2v6h6 M7 11l5 7m0-7-5 7 M17 18v-7m-3 3 3-3 3 3"/></svg>
+                <span>Import Excel</span>
+            </button>
+
+            <button type="button" class="btn btn-primary" (click)="exportExcel()">
 
                 Export Excel
 
             </button>
+
+            <input #fileInput type="file" accept=".xlsx,.xls" hidden (change)="importExcel($event)">
 
         </div>
 

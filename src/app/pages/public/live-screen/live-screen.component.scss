@@ -27,7 +27,7 @@
       rgba(1, 12, 35, 0.20),
       rgba(1, 8, 25, 0.65)
     ),
-    url('/banner-poster.png') center center / cover no-repeat;
+    url('/banner-poster.webp') center center / cover no-repeat;
 
   color: #fff;
 
@@ -53,7 +53,7 @@
   z-index: 0;
 
   background:
-    url('/banner-poster.png') center center / cover no-repeat;
+    url('/banner-poster.webp') center center / cover no-repeat;
 
   opacity: 0.5;
 
@@ -2687,7 +2687,7 @@
 .live-screen {
   background:
     linear-gradient(180deg, rgba(1, 12, 35, 0.08), rgba(1, 8, 25, 0.38)),
-    url('/banner-poster.png') center center / cover no-repeat;
+    url('/banner-poster.webp') center center / cover no-repeat;
 }
 
 .live-screen::before {
@@ -2823,5 +2823,60 @@
       minmax(100px, 16vh)
       minmax(0, 1fr)
       minmax(56px, 9vh);
+  }
+}
+
+/* Keep long auction names inside the header and let the header grow as needed. */
+.screen-shell {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.screen-header {
+  min-width: 0;
+  min-height: clamp(128px, 18vh, 180px);
+  grid-template-columns:
+    minmax(90px, 0.7fr)
+    minmax(0, 2fr)
+    minmax(220px, 1.2fr);
+}
+
+.auction-heading,
+.auction-title-text {
+  min-width: 0;
+}
+
+.auction-title-text {
+  flex: 1 1 0;
+  container-type: inline-size;
+}
+
+.auction-title-text h1 {
+  font-size: clamp(18px, min(3.3vw, 7cqi), 56px);
+  line-height: 1.05;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+@media (max-width: 900px) {
+  .screen-header {
+    grid-template-columns:
+      minmax(56px, 0.45fr)
+      minmax(0, 1fr)
+      minmax(150px, 0.7fr);
+    gap: clamp(6px, 1.2vw, 12px);
+    min-height: unset;
+  }
+}
+
+@media (max-width: 650px) {
+  .screen-header {
+    grid-template-columns: 70px minmax(0, 1fr);
+    min-height: unset;
+  }
+
+  .auction-title-text h1 {
+    font-size: clamp(16px, 5vw, 22px);
+    line-height: 1.1;
   }
 }

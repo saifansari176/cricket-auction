@@ -151,7 +151,7 @@
     <tbody>
     <tr *ngFor="let player of filteredPlayers; let i=index">
 
-    <td>{{i+1}}</td>
+    <td>{{i + 1}}</td>
     <td>
 
       <img
@@ -194,7 +194,7 @@
 
           <a
         [routerLink]="['/players/edit', player.id]"
-        class="btn btn-warning btn-sm me-2 mb-2">
+        class="btn btn-warning btn-sm me-2">
 
         Edit
 

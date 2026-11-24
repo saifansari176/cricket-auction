@@ -2,7 +2,6 @@
 import { PlayerService } from '../../../core/services/player.service';
 import { RouterLink, RouterModule } from '@angular/router';
 import { Player } from '../../../core/models/player';
-import * as XLSX from 'xlsx';
 import { createPlayerExcel } from '../../../shared/player-excel';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -41,6 +40,7 @@ export class PlayerListComponent implements OnDestroy {
   private destroyed = false;
   paymentEnabled = false;
   private activeAuctionSubscription?: Subscription;
+  private paymentSyncErrors = new Set<string>();
 
   constructor(
     private playerService: PlayerService,
@@ -90,19 +90,37 @@ export class PlayerListComponent implements OnDestroy {
       this.playerService.getPlayers(),
       this.auctionService.get()
     ]);
+    this.paymentSyncErrors.clear();
     this.paymentEnabled = auction?.registrationPaymentEnabled === true;
     const auctionId = auction?.activeAuctionId || auction?.id || '';
+    const pending = players.filter((player) =>
+      player.paymentStatus === 'Verified'
+      && !!player.paymentId
+      && Number(player.paymentAmount || 0) <= 0
+      && !!auctionId
+    );
+    const amounts = new Map<string, number>();
+    for (let index = 0; index < pending.length; index += 4) {
+      await Promise.all(pending.slice(index, index + 4).map(async (player) => {
+        try {
+          const amount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId!);
+          amounts.set(player.id || player.mobile, amount);
+        } catch (error) {
+          this.paymentSyncErrors.add(player.id || player.mobile);
+          console.error(`Unable to sync payment ${player.paymentId}:`, error);
+        }
+      }));
+    }
     const loadedPlayers = await Promise.all(players.map(async (player) => {
-      if (player.paymentStatus !== 'Verified' || !player.paymentId || Number(player.paymentAmount || 0) > 0 || !auctionId) {
-        return player;
-      }
+      const key = player.id || player.mobile;
+      if (!amounts.has(key)) return player;
+      const updatedPlayer = { ...player, auctionId, paymentAmount: amounts.get(key)! };
       try {
-        const paymentAmount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId);
-        const updatedPlayer = { ...player, auctionId, paymentAmount };
         await this.playerService.updatePlayer(updatedPlayer);
         return updatedPlayer;
       } catch (error) {
-        console.error(`Unable to sync payment ${player.paymentId}:`, error);
+        this.paymentSyncErrors.add(key);
+        console.error(`Unable to save synced payment amount for ${player.paymentId}:`, error);
         return player;
       }
     }));
@@ -114,6 +132,7 @@ export class PlayerListComponent implements OnDestroy {
 
   paymentAmountLabel(player: Player): string {
     if (player.paymentStatus !== 'Verified') return '-';
+    if (this.paymentSyncErrors.has(player.id || player.mobile)) return 'Payment amount unavailable';
     const amount = Number(player.paymentAmount || 0);
     return amount > 0 ? `₹${amount}` : 'Paid — syncing amount';
   }
@@ -270,8 +289,9 @@ get categories(): string[] {
     }));
   }
 
-  exportCsv(): void {
+  async exportCsv(): Promise<void> {
     const rows = this.getExportData();
+    const XLSX = await import('xlsx');
     const worksheet = XLSX.utils.json_to_sheet(rows);
     const csv = XLSX.utils.sheet_to_csv(worksheet) + [
       '',
@@ -284,70 +304,89 @@ get categories(): string[] {
     this.downloadFile(new Blob([csv], { type: 'text/csv;charset=utf-8;' }), 'Players.csv');
   }
 
-  importExcel(event: Event) {
+  async importExcel(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async (loadEvent: ProgressEvent<FileReader>) => {
-      const result = loadEvent.target?.result;
-      if (typeof result !== 'string') return;
+    try {
+      const { read, utils } = await import('xlsx');
+      const workbook = read(await file.arrayBuffer(), { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = sheetName ? workbook.Sheets[sheetName] : undefined;
+      if (!worksheet) {
+        this.message.warning('The Excel file does not contain a worksheet.');
+        return;
+      }
 
-      const workbook = XLSX.read(result, { type: 'binary' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const excelData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
-      const [existingPlayers, auction] = await Promise.all([
-        this.playerService.getPlayers(),
-        this.auctionService.get()
-      ]);
-      const baseBid = Number(auction?.basePlayerPrice ?? auction?.minimumBid ?? 0);
+      const excelData = utils.sheet_to_json<Record<string, unknown>>(worksheet);
+      await this.importExcelRows(excelData);
+    } catch (error) {
+      console.error('Player Excel import failed', error);
+      this.message.error('Unable to complete Excel import. Some rows may have been saved; refresh the list before retrying.');
+    } finally {
+      input.value = '';
+    }
+  }
 
-      let imported = 0;
-      let skipped = 0;
+  private async importExcelRows(excelData: Record<string, unknown>[]): Promise<void> {
+    const [existingPlayers, auction] = await Promise.all([
+      this.playerService.getPlayers(),
+      this.auctionService.get()
+    ]);
+    const baseBid = Number(auction?.basePlayerPrice ?? auction?.minimumBid ?? 0);
 
-      for (const row of excelData) {
-        const mobile = this.getCellValue(row, 'Mobile').replace('.0', '').trim();
-        const jerseyNumber = this.getCellValue(row, 'Jersey Number');
-        if (!/^[0-9]{10}$/.test(mobile) || !/^[0-9]{1,3}$/.test(jerseyNumber)) {
-          skipped++;
-          continue;
-        }
+    let imported = 0;
+    let skipped = 0;
+    let failed = 0;
 
-        const exists = existingPlayers.some(p => p.mobile === mobile);
-        if (exists) {
-          skipped++;
-          continue;
-        }
+    for (const row of excelData) {
+      const mobile = this.getCellValue(row, 'Mobile').replace('.0', '').trim();
+      const jerseyNumber = this.getCellValue(row, 'Jersey Number');
+      if (!/^[0-9]{10}$/.test(mobile) || !/^[0-9]{1,3}$/.test(jerseyNumber)) {
+        skipped++;
+        continue;
+      }
 
-        const player: Player = {
-          firstName: this.getCellValue(row, 'First Name'),
-          lastName: this.getCellValue(row, 'Last Name'),
-          mobile,
-          jerseyNumber,
-          playerType: this.getCellValue(row, 'Player Type'),
-          tshirtSize: this.getCellValue(row, 'T-Shirt Size'),
-          trouserSize: this.getCellValue(row, 'Trouser Size'),
-          baseBid,
-          note: this.getCellValue(row, 'Note'),
-          photo: this.normalizePhotoUrl(row['Photo']),
-          status: 'Available'
-        };
+      const exists = existingPlayers.some(p => p.mobile === mobile);
+      if (exists) {
+        skipped++;
+        continue;
+      }
 
-        const saved = await this.playerService.savePlayer(player);
-        if (saved) {
+      const player: Player = {
+        firstName: this.getCellValue(row, 'First Name'),
+        lastName: this.getCellValue(row, 'Last Name'),
+        mobile,
+        jerseyNumber,
+        playerType: this.getCellValue(row, 'Player Type'),
+        tshirtSize: this.getCellValue(row, 'T-Shirt Size'),
+        trouserSize: this.getCellValue(row, 'Trouser Size'),
+        baseBid,
+        note: this.getCellValue(row, 'Note'),
+        photo: this.normalizePhotoUrl(row['Photo']),
+        status: 'Available'
+      };
+
+      try {
+        if (await this.playerService.savePlayer(player)) {
           imported++;
         } else {
           skipped++;
         }
+      } catch (error) {
+        console.error(`Unable to import player ${mobile}:`, error);
+        failed++;
       }
+    }
 
-      await this.loadPlayers();
-      this.message.success(`Imported: ${imported}\nSkipped: ${skipped}`, 'Import Completed');
-      input.value = '';
-    };
-
-    reader.readAsBinaryString(file);
+    await this.loadPlayers();
+    const summary = `Imported: ${imported}\nSkipped: ${skipped}${failed ? `\nFailed: ${failed}` : ''}`;
+    if (failed) {
+      this.message.error(summary, 'Import Completed with Errors');
+    } else {
+      this.message.success(summary, 'Import Completed');
+    }
   }
 
   private getCellValue(row: Record<string, unknown>, key: string): string {

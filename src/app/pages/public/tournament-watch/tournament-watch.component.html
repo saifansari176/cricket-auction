@@ -46,7 +46,7 @@
             <span class="player-number" *ngIf="currentPlayer.jerseyNumber">{{ currentPlayer.jerseyNumber }}</span>
             <div class="base-price">
               <span>Base price</span>
-              <strong>{{ currentPlayer.baseBid | currency:'INR':'symbol':'1.0-0' }}</strong>
+              <strong>{{ currentPlayer.baseBid | number:'1.0-0' }} Pts</strong>
             </div>
           </div>
         </div>
@@ -54,7 +54,7 @@
           <span>CURRENT BID</span>
           <strong>{{ (liveState?.currentBid ||
             currentPlayer.baseBid) |
-            currency:'INR':'symbol':'1.0-0' }}</strong></div>
+            number:'1.0-0' }} Pts</strong></div>
           <div class="current-bid live-bid bid-panel" *ngIf="highestTeam; else noBid">
             <div>
               <span class="eyebrow">HIGHEST BID</span>
@@ -75,7 +75,7 @@
     <!-- Tournament summary cards intentionally removed from the public watch view.
       <article><span class="stat-icon teams-icon">â™›</span><b>{{ teams.length }}</b><span>TEAMS</span></article>
       <article><span class="stat-icon sold-icon">âœ“</span><b>{{ bids.length }}</b><span>PLAYERS SOLD</span></article>
-      <article><span class="stat-icon amount-icon">â‚¹</span><b>{{ totalSpent | currency:'INR':'symbol':'1.0-0' }}</b><span>TOTAL SPENT</span></article>
+      <article><span class="stat-icon amount-icon">Pts</span><b>{{ totalSpent | number:'1.0-0' }} Pts</b><span>TOTAL SPENT</span></article>
     </section>
 
     -->
@@ -97,8 +97,8 @@
                 <span>
                   <strong>{{ team.teamName }}</strong>
                   <span class="team-stats">
-                    <span><b>{{ soldForTeam(team).length }}</b> players • <b>{{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}</b> spent</span>
-                    <span class="remaining"><b>{{ remainingPlayers(team) }}</b> players • <b>{{ remainingAmount(team) | currency:'INR':'symbol':'1.0-0' }}</b> remaining</span>
+                    <span><b>{{ soldForTeam(team).length }}</b> players • <b>{{ spentByTeam(team) | number:'1.0-0' }} Pts</b> spent</span>
+                    <span class="remaining"><b>{{ remainingPlayers(team) }}</b> players • <b>{{ remainingAmount(team) | number:'1.0-0' }} Pts</b> remaining</span>
                   </span>
                 </span>
               </span>
@@ -111,7 +111,7 @@
                 <b>{{ soldForTeam(team).length }} purchased</b>
               </div>
               <ul>
-                <li *ngFor="let bid of soldForTeam(team); trackBy: trackById"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" loading="lazy" decoding="async" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></li>
+                <li *ngFor="let bid of soldForTeam(team); trackBy: trackById"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" loading="lazy" decoding="async" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount | number:'1.0-0' }} Pts</b></li>
                 <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
               </ul>
             </div>
@@ -124,14 +124,14 @@
             <div>
               <h3>{{ team.teamName }}</h3>
               <div class="team-stats">
-                <p><b>{{ soldForTeam(team).length }}</b> players • <b>{{ spentByTeam(team) | currency:'INR':'symbol':'1.0-0' }}</b> spent</p>
-                <p class="remaining"><b>{{ remainingPlayers(team) }}</b> players • <b>{{ remainingAmount(team) | currency:'INR':'symbol':'1.0-0' }}</b> remaining</p>
+                <p><b>{{ soldForTeam(team).length }}</b> players • <b>{{ spentByTeam(team) | number:'1.0-0' }} Pts</b> spent</p>
+                <p class="remaining"><b>{{ remainingPlayers(team) }}</b> players • <b>{{ remainingAmount(team) | number:'1.0-0' }} Pts</b> remaining</p>
               </div>
             </div>
           </div>
           <ul>
             <li *ngFor="let bid of soldForTeam(team); trackBy: trackById"><span><img [src]="getBidPhoto(bid)" [alt]="bid.playerName" class="player-thumbnail" loading="lazy" decoding="async" (click)="openPreview(getBidPhoto(bid), bid.playerName)" title="Click to preview"></span><span>{{ bid.playerName }}</span><b>{{ bid.bidAmount |
-                currency:'INR':'symbol':'1.0-0' }}</b></li>
+                number:'1.0-0' }} Pts</b></li>
             <li *ngIf="!soldForTeam(team).length" class="muted">No players purchased yet.</li>
           </ul>
         </article>
@@ -152,7 +152,7 @@
           <p class="eyebrow">LATEST RESULTS</p>
           <h2>Recent purchases</h2>
           <div class="sale" *ngFor="let sale of latestSales; trackBy: trackById"><span>{{ sale.playerName }}</span><span>{{ sale.teamName
-            }}</span><b>{{ sale.bidAmount | currency:'INR':'symbol':'1.0-0' }}</b></div>
+            }}</span><b>{{ sale.bidAmount | number:'1.0-0' }} Pts</b></div>
           <p *ngIf="!latestSales.length" class="muted">No completed purchases yet.</p>
         </div>
       </div>

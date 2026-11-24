@@ -14,9 +14,8 @@ export class TeamService {
 
   private collection = 'teams';
 
-  async getTeams(): Promise<Team[]> {
-
-  const activeAuctionId = await this.auctionService.getActiveAuctionId();
+  async getTeams(auctionId?: string): Promise<Team[]> {
+  const activeAuctionId = auctionId || await this.auctionService.getActiveAuctionId();
 
   return activeAuctionId
     ? this.firebase.getAll<Team>(this.auctionCollection(activeAuctionId))
@@ -180,25 +179,12 @@ export class TeamService {
   }
 
   async reconcileTeams(pointsPerTeam: number, playersPerTeam: number): Promise<void> {
-    const [teams, bids] = await Promise.all([
-      this.getTeams(),
-      this.auctionService.getBids()
-    ]);
-
-    const soldBids = bids.filter((bid) => bid.sold);
-
-    await Promise.all(teams.map((team) => {
-      const teamBids = soldBids.filter((bid) => bid.teamId === team.id);
-      const spentPoints = teamBids.reduce((total, bid) => total + Number(bid.bidAmount || 0), 0);
-
-      return this.updateTeam({
-        ...team,
-        totalPoints: Number(pointsPerTeam),
-        remainingPoints: Number(pointsPerTeam) - spentPoints,
-        playerLimit: Number(playersPerTeam),
-        playersBought: teamBids.length
-      });
-    }));
+    const auctionId = await this.auctionService.getActiveAuctionId();
+    if (!auctionId) return;
+    await this.firebase.post(
+      `/api/auctions/${encodeURIComponent(auctionId)}/teams/reconcile`,
+      { pointsPerTeam, playersPerTeam }
+    );
   }
 
   private normaliseTeamName(teamName: string): string {

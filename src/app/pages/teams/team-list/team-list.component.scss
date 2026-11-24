@@ -5,6 +5,48 @@
   white-space: nowrap;
 }
 
+.team-list-actions {
+  align-items: center;
+}
+
+.file-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid currentColor;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.file-action svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.excel-action {
+  color: #176b42;
+  background: #edf8f1;
+}
+
+.excel-action:hover {
+  background: #d5efdf;
+}
+
+.file-action:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
 .team-action-buttons {
   display: flex;
   align-items: center;

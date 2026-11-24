@@ -55,8 +55,8 @@ export class YoutubeLiveComponent implements OnInit, OnDestroy {
   }
 
   formatBidAmount(amount: number): string {
-    if (amount >= 100_000) return `${(amount / 100_000).toFixed(2)} LAKH`;
-    return `₹${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(amount)}`;
+    if (amount >= 100_000) return `${(amount / 100_000).toFixed(2)} lakh Pts`;
+    return `${new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(amount)} Pts`;
   }
 
   get highestTeam(): Team | undefined {
@@ -83,7 +83,7 @@ export class YoutubeLiveComponent implements OnInit, OnDestroy {
       this.liveState = data.liveState;
       this.lastResultEventId = data.liveState?.resultEvent?.id || '';
       this.notFound = !data.auction;
-      if (data.auction?.publicLiveViewEnabled !== false) {
+      if (data.auction?.publicLiveViewEnabled === true) {
         this.subscription = this.auctionService.watchLiveState(this.auctionId, (state) => {
           if (!state) return;
           this.liveState = state;

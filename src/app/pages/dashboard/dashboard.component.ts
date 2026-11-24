@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import * as XLSX from 'xlsx';
 import { AuctionBid } from '../../core/models/bid';
 import { Player } from '../../core/models/player';
 import { Team } from '../../core/models/team';
@@ -58,7 +57,6 @@ export class DashboardComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const listFromRoute = this.route.snapshot.queryParamMap.get('list');
-    console.log('DashboardComponent initialized with listFromRoute:', listFromRoute);
     if (listFromRoute === 'available' || listFromRoute === 'players' || listFromRoute === 'teams' || listFromRoute === 'sold' || listFromRoute === 'unsold' || listFromRoute === 'categoryPlayers') {
       this.activeList = listFromRoute as DashboardList;
     }
@@ -433,7 +431,7 @@ export class DashboardComponent implements OnInit {
 
   async changeSoldPlayerStatus(bid: AuctionBid, event: Event): Promise<void> {
     const status = (event.target as HTMLSelectElement)?.value;
-    if (!status) return;
+    if (status !== 'Available' && status !== 'Unsold') return;
     if (!bid.playerId || !bid.id) {
       this.message.warning('This player or bid record is missing required data.');
       return;
@@ -450,22 +448,7 @@ export class DashboardComponent implements OnInit {
     }
 
     try {
-      if (status === 'Available') {
-        await this.playerService.markAvailable(bid.playerId);
-      } else {
-        await this.playerService.markUnsold(bid.playerId);
-      }
-
-      await this.auctionService.deleteBid(bid.id);
-
-      const team = this.teams.find((t) => t.id === bid.teamId);
-      if (team?.id) {
-        await this.teamService.updateTeam({
-          ...team,
-          remainingPoints: Number(team.remainingPoints || 0) + Number(bid.bidAmount || 0),
-          playersBought: Math.max(0, Number(team.playersBought || 0) - 1)
-        });
-      }
+      await this.auctionService.changeSoldBidStatus(bid.id, status);
 
       await this.refreshData(false);
 
@@ -557,18 +540,31 @@ export class DashboardComponent implements OnInit {
     if (!auctionId) return players;
     this.paymentSummaryLoading = true;
     try {
-      return await Promise.all(players.map(async (player) => {
-        if (player.paymentStatus !== 'Verified' || !player.paymentId || Number(player.paymentAmount || 0) > 0) return player;
-        try {
-          const paymentAmount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId);
-          const updatedPlayer = { ...player, auctionId, paymentAmount };
-          await this.playerService.updatePlayer(updatedPlayer);
-          return updatedPlayer;
-        } catch (error) {
-          console.error(`Unable to sync payment ${player.paymentId}:`, error);
-          return player;
-        }
+      const pending = players.filter((player) =>
+        player.paymentStatus === 'Verified'
+        && !!player.paymentId
+        && Number(player.paymentAmount || 0) <= 0
+      );
+      const updatedAmounts = new Map<string, number>();
+      for (let index = 0; index < pending.length; index += 4) {
+        const batch = pending.slice(index, index + 4);
+        await Promise.all(batch.map(async (player) => {
+          try {
+            const paymentAmount = await this.paymentService.getVerifiedPaymentAmount(auctionId, player.paymentId!);
+            updatedAmounts.set(player.id || player.mobile, paymentAmount);
+          } catch (error) {
+            console.error(`Unable to sync payment ${player.paymentId}:`, error);
+          }
+        }));
+      }
+      const updated = await Promise.all(players.map(async (player) => {
+        const key = player.id || player.mobile;
+        if (!updatedAmounts.has(key)) return player;
+        const updatedPlayer = { ...player, auctionId, paymentAmount: updatedAmounts.get(key)! };
+        await this.playerService.updatePlayer(updatedPlayer);
+        return updatedPlayer;
       }));
+      return updated;
     } finally {
       this.paymentSummaryLoading = false;
     }
@@ -611,8 +607,22 @@ export class DashboardComponent implements OnInit {
     return String(this.players.find((player) => player.id === playerId)?.playerType || '').toLowerCase() === type;
   }
 
-  startAuction(player: Player): void {
+  async startAuction(player: Player): Promise<void> {
     if (!player.id) return;
+
+    if (player.status === 'Unsold') {
+      try {
+        const availablePlayer = await this.playerService.markAvailable(player.id);
+        if (!availablePlayer) {
+          this.message.error('Could not return this unsold player to the auction. Please refresh and try again.');
+          return;
+        }
+      } catch (error) {
+        console.error('Unable to return the unsold player to the auction.', error);
+        this.message.error('Could not return this unsold player to the auction. Please try again.');
+        return;
+      }
+    }
 
     const playerName = `${player.firstName} ${player.lastName}`;
     this.auctionService.startCategoryAuction(player.categoryId || '');
@@ -621,7 +631,11 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/auction']);
   }
 
-  downloadAvailablePlayersExcel(): void {
+  trackByPlayer(_index: number, player: Player): string { return player.id || player.mobile || String(_index); }
+  trackByTeam(_index: number, team: Team): string { return team.id || team.teamName || String(_index); }
+  trackByBid(_index: number, bid: AuctionBid): string { return bid.id || bid.playerId || String(_index); }
+
+  async downloadAvailablePlayersExcel(): Promise<void> {
     const data = this.filteredAvailablePlayers.map((player) => ({
       'Sr No': this.filteredAvailablePlayers.indexOf(player) + 1,
       'First Name': player.firstName,
@@ -633,6 +647,7 @@ export class DashboardComponent implements OnInit {
       Photo: player.photo
     }));
 
+    const XLSX = await import('xlsx');
     const worksheet = XLSX.utils.json_to_sheet(data);
     worksheet['!cols'] = [
       { wch: 18 },

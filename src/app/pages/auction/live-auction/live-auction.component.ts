@@ -55,19 +55,25 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.loading = true;
     try {
       this.auction = await this.auctionService.get();
-      this.categories = await this.categoryService.getCategories(this.auction?.activeAuctionId || this.auction?.id);
-      await this.loadTeams();
+      const auctionId = this.auction?.activeAuctionId || this.auction?.id;
       const selectedPlayer = this.auctionService.selectedPlayer$.value;
+      const [categories, teams, selectedPlayerRecord, availablePlayers] = await Promise.all([
+        this.categoryService.getCategories(auctionId),
+        this.teamService.getTeams(auctionId),
+        selectedPlayer?.id ? this.playerService.getPlayerById(selectedPlayer.id) : Promise.resolve(null),
+        selectedPlayer?.id ? Promise.resolve([] as Player[]) : this.playerService.getAvailablePlayers()
+      ]);
+      this.categories = categories;
+      this.teams = teams;
       if (selectedPlayer?.id) {
-        const player = await this.playerService.getPlayerById(selectedPlayer.id);
-        if (player) {
-          await this.setCurrentPlayer(player);
+        if (selectedPlayerRecord) {
+          await this.setCurrentPlayer(selectedPlayerRecord);
           this.auctionService.clearSelectedPlayer();
         } else {
           await this.loadNextPlayer();
         }
       } else {
-        await this.loadNextPlayer();
+        await this.loadNextPlayer('load', availablePlayers);
       }
     } finally {
       this.loading = false;
@@ -82,10 +88,10 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
     this.teams = await this.teamService.getTeams();
   }
 
-  async loadNextPlayer(action: LiveScreenAction = 'load'): Promise<void> {
+  async loadNextPlayer(action: LiveScreenAction = 'load', initialAvailablePlayers?: Player[]): Promise<void> {
     const categoryId = this.auctionService.selectedCategoryId$.value;
     const isCategoryAuction = this.auctionService.auctionScope$.value === 'category';
-    const allAvailablePlayers = await this.playerService.getAvailablePlayers();
+    const allAvailablePlayers = initialAvailablePlayers ?? await this.playerService.getAvailablePlayers();
     const availablePlayers = isCategoryAuction
       ? allAvailablePlayers.filter((player) => categoryId ? player.categoryId === categoryId : !player.categoryId)
       : allAvailablePlayers;
@@ -210,18 +216,13 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
       return;
     }
 
-    await this.auctionService.deleteBid(lastSoldBid.id);
-    const restoredPlayer = await this.playerService.markAvailable(lastSoldBid.playerId);
+    await this.auctionService.undoBid(lastSoldBid.id);
+    const restoredPlayer = await this.playerService.getPlayerById(lastSoldBid.playerId);
 
     if (!restoredPlayer) {
-      this.message.error('The sale was removed, but the player could not be restored.');
+      this.message.error('The sale was undone, but the player could not be refreshed.');
       return;
     }
-
-    await this.teamService.reconcileTeams(
-      Number(this.auction?.pointsPerTeam || 0),
-      Number(this.auction?.playersPerTeam || 0)
-    );
     await this.loadTeams();
     if (lastAction?.type === 'sold') {
       this.actionHistory.pop();
@@ -240,18 +241,28 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
       return;
     }
     this.actionInProgress = true;
-    this.soldToTeamName = this.highestTeam.teamName;
-    this.showSoldAnimation = true;
-    const soldPlayerId = this.currentPlayer.id;
+    const soldPlayer = this.currentPlayer;
+    const soldTeam = this.highestTeam;
+    const soldBid = this.currentBid;
+    const soldPlayerId = soldPlayer.id!;
+    const soldTeamId = soldTeam.id!;
 
     try {
       await this.loadingService.withoutLoader(async () => {
-        await this.auctionService.sellPlayer(this.currentPlayer!.id!, this.highestTeam!.id!, this.currentBid);
-        this.updateSoldTeamOnScreen(this.highestTeam!.id!, this.currentBid);
+        await this.auctionService.sellPlayer(soldPlayerId, soldTeamId, soldBid);
+        this.soldToTeamName = soldTeam.teamName;
+        this.showSoldAnimation = true;
+        this.updateSoldTeamOnScreen(soldTeamId, soldBid);
         this.actionHistory.push({ type: 'sold', playerId: soldPlayerId });
-        this.lastResultEvent = this.createResultEvent('sold', this.currentBid, this.highestTeam!.teamName);
-        await this.loadTeams();
-        await this.loadNextPlayer('sold');
+        this.lastResultEvent = this.createResultEvent('sold', soldBid, soldTeam.teamName);
+        try {
+          await this.loadTeams();
+          await this.loadNextPlayer('sold');
+        } catch (error) {
+          console.error('Sale recorded, but the live auction could not advance.', error);
+          this.message.error('Player was sold, but the next player could not be loaded. Refresh the page to continue.');
+          return;
+        }
 
         const shouldReturnToDashboard = this.auctionService.shouldReturnToDashboardAfterSale();
         this.auctionService.clearReturnToDashboardAfterSale();
@@ -260,6 +271,9 @@ export class LiveAuctionComponent implements OnInit, OnDestroy {
           this.router.navigate(['/dashboard'], { queryParams: { list: 'available' } });
         }
       });
+    } catch (error) {
+      console.error('Unable to record the player sale.', error);
+      this.message.error(error instanceof Error ? error.message : 'Unable to record the sale. Please try again.');
     } finally {
       this.showSoldAnimation = false;
       this.actionInProgress = false;

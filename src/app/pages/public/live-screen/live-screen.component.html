@@ -144,8 +144,8 @@
                 <strong>
                   {{
                     (player.baseBid || 0)
-                      | currency:'INR':'symbol':'1.0-0'
-                  }}
+                      | number:'1.0-0'
+                  }} Pts
                 </strong>
 
               </div>
@@ -260,8 +260,8 @@
 
               {{
                 currentBid
-                  | currency:'INR':'symbol':'1.0-0'
-              }}
+                  | number:'1.0-0'
+              }} Pts
 
             </div>
 
