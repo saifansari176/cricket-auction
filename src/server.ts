@@ -468,16 +468,13 @@ app.post('/api/public/auctions', async (_req, res) => {
       return;
     }
     const collection = firestore.collection('auctions');
-    const [liveAuctions, registrationAuctions] = await Promise.all([
-      collection.where('publicLiveViewEnabled', '==', true).get(),
-      collection.where('registrationLinkEnabled', '==', true).get()
-    ]);
-    const documents = new Map<string, (typeof liveAuctions.docs)[number]>();
-    for (const document of [...liveAuctions.docs, ...registrationAuctions.docs]) {
-      documents.set(document.id, document);
-    }
-    const auctions = [...documents.values()].map((document) => {
+    const allAuctions = await collection.get();
+    const liveStates = await Promise.all(
+      allAuctions.docs.map((document) => firestore.doc(`auctions/${document.id}/liveState/current`).get())
+    );
+    const auctions = allAuctions.docs.map((document, index) => {
         const data = document.data();
+        const liveState = liveStates[index].data();
         return {
           id: document.id,
           auctionName: typeof data['auctionName'] === 'string' ? data['auctionName'] : '',
@@ -486,6 +483,7 @@ app.post('/api/public/auctions', async (_req, res) => {
           organizerName: typeof data['organizerName'] === 'string' ? data['organizerName'] : '',
           organizerContact: typeof data['organizerContact'] === 'string' ? data['organizerContact'] : '',
           isActive: data['isActive'] === true,
+          completed: liveState?.['status'] === 'completed',
           publicLiveViewEnabled: data['publicLiveViewEnabled'] === true,
           registrationLinkEnabled: data['registrationLinkEnabled'] === true
         };

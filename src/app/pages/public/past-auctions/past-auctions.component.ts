@@ -14,7 +14,7 @@ export class PastAuctionsComponent {
   async ngOnInit(): Promise<void> {
     try {
       this.auctions = (await this.auctionService.getPublicAuctions())
-        .filter((auction) => auction.publicLiveViewEnabled && !auction.isActive && this.isPastAuction(auction.auctionDate))
+        .filter((auction) => auction.completed || (!auction.isActive && this.isPastAuction(auction.auctionDate)))
         .sort((a, b) => b.auctionDate.localeCompare(a.auctionDate));
     } catch (error) {
       console.error('Unable to load past auctions.', error);

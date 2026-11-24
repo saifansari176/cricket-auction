@@ -26,6 +26,7 @@ export interface PublicAuctionSummary {
   organizerName: string;
   organizerContact: string;
   isActive: boolean;
+  completed: boolean;
   publicLiveViewEnabled: boolean;
   registrationLinkEnabled: boolean;
 }
