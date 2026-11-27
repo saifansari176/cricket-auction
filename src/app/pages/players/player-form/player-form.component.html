@@ -203,7 +203,7 @@
 
                     <button class="btn btn-success btn-lg" type="submit" [disabled]="saving || uploadingPhoto" >
 
-                        {{saving ? 'Saving...' : (uploadingPhoto ? 'Uploading photo...' : (isEdit ? 'Update Player' : 'Submit Registration'))}}
+                        {{uploadingPhoto ? 'Uploading photo...' : (saving ? 'Saving...' : (isEdit ? 'Update Player' : 'Submit Registration'))}}
 
                     </button>
 
