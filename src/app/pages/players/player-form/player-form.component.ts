@@ -300,7 +300,6 @@ export class PlayerFormComponent implements OnDestroy {
         return;
       }
 
-      playerSaved = true;
       this.message.success('Player saved successfully.');
 
     }
