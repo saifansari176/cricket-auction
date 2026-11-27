@@ -58,7 +58,7 @@
 
                     <button type="submit" class="btn btn-success btn-lg" [disabled]="saving || uploading">
 
-                        {{ saving ? 'Saving...' : 'Save Team' }}
+                        {{ uploading ? 'Uploading logo...' : (saving ? 'Saving...' : 'Save Team') }}
 
                     </button>
 
