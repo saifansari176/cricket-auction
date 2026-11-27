@@ -1,7 +1,7 @@
 import { nonBlank } from '../../../shared/validation/validators';
 import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -36,7 +36,7 @@ import { ImageCropperComponent } from '../../../shared/image-cropper/image-cropp
   templateUrl: './player-form.component.html',
   styleUrl: './player-form.component.scss'
 })
-export class PlayerFormComponent {
+export class PlayerFormComponent implements OnDestroy {
 
   fb = inject(FormBuilder);
   router = inject(Router);
@@ -60,7 +60,14 @@ export class PlayerFormComponent {
   saving = false;
   uploadingPhoto = false;
   cropFile: File | null = null;
+  photoPreview = '';
+  private pendingPhotoFile: File | null = null;
+  private localPreviewUrl = '';
   private photoUploadVersion = 0;
+
+  ngOnDestroy(): void {
+    this.clearLocalPreview();
+  }
 
   form = this.fb.group({
 
@@ -130,6 +137,7 @@ export class PlayerFormComponent {
     }
 
     this.existingPlayer = player;
+    this.photoPreview = player.photo || '';
 
     this.form.patchValue({
 
@@ -180,6 +188,7 @@ export class PlayerFormComponent {
     }
 
     this.saving = true;
+    let uploadedPhotoUrl = '';
 
     try {
     const player: Player = {
@@ -212,7 +221,7 @@ export class PlayerFormComponent {
 
       note: this.form.value.note || '',
 
-      photo: this.form.value.photo || '',
+      photo: this.pendingPhotoFile ? '' : (this.form.value.photo === 'pending-upload' ? '' : (this.form.value.photo || '')),
 
       status: this.form.value.status || 'Available',
 
@@ -222,6 +231,20 @@ export class PlayerFormComponent {
 
     if (this.isEdit) {
 
+      if (this.pendingPhotoFile) {
+        this.uploadingPhoto = true;
+        try {
+          uploadedPhotoUrl = await this.storageService.uploadPlayerImage(this.pendingPhotoFile);
+          player.photo = uploadedPhotoUrl;
+        } finally {
+          this.uploadingPhoto = false;
+        }
+      }
+      if (!player.photo) {
+        this.form.controls.photo.markAsTouched();
+        this.message.warning('Please select a player photo before saving.');
+        return;
+      }
       await this.playerService.updatePlayer(player);
 
       if (this.existingPlayer?.status === 'Sold' && player.status !== 'Sold') {
@@ -244,21 +267,46 @@ export class PlayerFormComponent {
         return;
       }
 
+      if (await this.playerService.isMobileRegistered(player.auctionId, player.mobile)) {
+        this.message.warning('This mobile number is already registered for this auction. Please use a different mobile number.');
+        return;
+      }
+
+      if (this.pendingPhotoFile) {
+        this.uploadingPhoto = true;
+        try {
+          uploadedPhotoUrl = await this.storageService.uploadPlayerImage(this.pendingPhotoFile);
+          player.photo = uploadedPhotoUrl;
+        } finally {
+          this.uploadingPhoto = false;
+        }
+      }
+
+      if (!player.photo) {
+        this.form.controls.photo.markAsTouched();
+        this.message.warning('Please select a player photo before saving.');
+        return;
+      }
+
       const saved = await this.playerService.savePlayer(player);
 
       if (!saved) {
-
+        if (uploadedPhotoUrl) await this.deleteUploadedPhoto(uploadedPhotoUrl);
         this.message.warning('Player with this mobile number already exists.');
-
         return;
-
       }
 
       this.message.success('Player saved successfully.');
 
     }
 
+    this.pendingPhotoFile = null;
+    this.clearLocalPreview();
     await this.router.navigate(['/players']);
+    } catch (error: unknown) {
+      if (uploadedPhotoUrl) await this.deleteUploadedPhoto(uploadedPhotoUrl);
+      const errorMessage = error instanceof Error ? error.message : 'Unable to save player. Please try again.';
+      this.message.error(errorMessage);
     } finally {
       this.saving = false;
     }
@@ -293,27 +341,28 @@ export class PlayerFormComponent {
 
   async uploadCroppedPhoto(file: File): Promise<void> {
     this.cropFile = null;
-    const uploadVersion = ++this.photoUploadVersion;
-    this.form.patchValue({ photo: '' });
-    this.uploadingPhoto = true;
+    ++this.photoUploadVersion;
+    this.pendingPhotoFile = file;
+    this.form.patchValue({ photo: 'pending-upload' });
+    this.clearLocalPreview();
+    this.localPreviewUrl = URL.createObjectURL(file);
+    this.photoPreview = this.localPreviewUrl;
 
+  }
+
+  private async deleteUploadedPhoto(url: string): Promise<void> {
     try {
-      const uploadedUrl = await this.storageService.uploadPlayerImage(file);
-      if (uploadVersion === this.photoUploadVersion) {
-        this.form.patchValue({ photo: uploadedUrl });
-      }
-    } catch (error: unknown) {
-      if (uploadVersion === this.photoUploadVersion) {
-        console.error('Player image upload failed', error);
-        const message = error instanceof Error ? error.message : 'Please try again.';
-        this.message.error('Image upload failed: ' + message);
-      }
-    } finally {
-      if (uploadVersion === this.photoUploadVersion) {
-        this.uploadingPhoto = false;
-      }
+      await this.storageService.deleteUploadedFile(url);
+    } catch (cleanupError) {
+      console.warn('Unable to clean up uploaded player photo:', cleanupError);
     }
+  }
 
+  private clearLocalPreview(): void {
+    if (this.localPreviewUrl) {
+      URL.revokeObjectURL(this.localPreviewUrl);
+      this.localPreviewUrl = '';
+    }
   }
 
   // =========================================
