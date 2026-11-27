@@ -121,28 +121,90 @@ function collectionReference(path: string) {
   return firestore.collection(path);
 }
 
+/** Returns only explicitly approved fields; new Firestore fields stay private by default. */
+function pickPublicFields(
+  data: Record<string, unknown>,
+  allowedFields: readonly string[]
+): Record<string, unknown> {
+  const safe: Record<string, unknown> = {};
+  for (const field of allowedFields) {
+    if (Object.prototype.hasOwnProperty.call(data, field)) safe[field] = data[field];
+  }
+  return safe;
+}
+
+const publicPlayerFormFields = [
+  'photo', 'lastName', 'jerseyNumber', 'playerType', 'currentTeam',
+  'category', 'tshirtSize', 'trouserSize', 'note', 'baseBid'
+] as const;
+
+function publicPlayerFormSettings(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const settings = value as Record<string, unknown>;
+  const safe: Record<string, unknown> = {};
+  for (const section of ['addPlayer', 'registration'] as const) {
+    const sectionValue = settings[section];
+    if (!sectionValue || typeof sectionValue !== 'object' || Array.isArray(sectionValue)) continue;
+    const safeSection: Record<string, unknown> = {};
+    for (const field of publicPlayerFormFields) {
+      const fieldValue = (sectionValue as Record<string, unknown>)[field];
+      if (typeof fieldValue === 'boolean') safeSection[field] = fieldValue;
+    }
+    safe[section] = safeSection;
+  }
+  return safe;
+}
+
 function publicAuction(data: Record<string, unknown>) {
-  const { createdBy: _createdBy, createdByEmail: _createdByEmail, publicPlayerListToken: _token, ...safe } = data;
+  const safe = pickPublicFields(data, [
+    'id', 'auctionName', 'auctionDate', 'logo', 'organizerName', 'organizerContact',
+    'pointsPerTeam', 'playersPerTeam', 'basePlayerPrice', 'bidIncrement',
+    'minimumBid', 'bidIncreaseBy', 'registrationLinkEnabled',
+    'registrationPaymentEnabled', 'registrationPaymentAmount',
+    'publicLiveViewEnabled', 'publicPlayerListEnabled', 'publicPlayerListSlug', 'isActive'
+  ]);
+  const playerFormFields = publicPlayerFormSettings(data['playerFormFields']);
+  if (playerFormFields) safe['playerFormFields'] = playerFormFields;
   return safe;
 }
 
 function publicPlayer(data: Record<string, unknown>) {
-  const {
-    mobile: _mobile, note: _note, paymentOrderId: _paymentOrderId,
-    paymentId: _paymentId, paymentAmount: _paymentAmount,
-    paymentPaidAt: _paymentPaidAt, paymentStatus: _paymentStatus,
-    ...safe
-  } = data;
-  return safe;
+  return pickPublicFields(data, [
+    'id', 'auctionId', 'firstName', 'lastName', 'jerseyNumber', 'playerType',
+    'currentTeam', 'categoryId', 'categoryName', 'photo', 'baseBid',
+    'bidIncreaseBy', 'status', 'teamId', 'soldAmount', 'soldToTeamId', 'soldPrice'
+  ]);
 }
 
 function publicBid(data: Record<string, unknown>) {
-  const { mobile: _mobile, tshirtSize: _tshirtSize, trouserSize: _trouserSize, ...safe } = data;
-  return safe;
+  return pickPublicFields(data, [
+    'id', 'auctionId', 'playerId', 'playerName', 'teamId', 'teamName',
+    'bidAmount', 'jerseyNumber', 'sold', 'soldDate', 'photoUrl'
+  ]);
 }
 
 function publicTeam(data: Record<string, unknown>) {
-  const { ownerName: _ownerName, ...safe } = data;
+  return pickPublicFields(data, [
+    'id', 'auctionId', 'logo', 'teamName', 'totalPoints',
+    'remainingPoints', 'playerLimit', 'playersBought'
+  ]);
+}
+
+function publicCategory(data: Record<string, unknown>) {
+  return pickPublicFields(data, ['id', 'auctionId', 'name', 'basePrice', 'bidIncreaseBy']);
+}
+
+function publicLiveState(data: Record<string, unknown>) {
+  const safe = pickPublicFields(data, [
+    'id', 'currentPlayerId', 'currentBid', 'highestTeamId',
+    'status', 'lastAction', 'updatedAt'
+  ]);
+  const resultEvent = data['resultEvent'];
+  if (resultEvent && typeof resultEvent === 'object' && !Array.isArray(resultEvent)) {
+    safe['resultEvent'] = pickPublicFields(resultEvent as Record<string, unknown>, [
+      'id', 'action', 'playerName', 'playerPhoto', 'teamName', 'bidAmount'
+    ]);
+  }
   return safe;
 }
 
@@ -153,7 +215,9 @@ function publicResponse(collection: string, entry: Record<string, unknown>): Rec
   if (subcollection === 'teams') return publicTeam(entry);
   if (subcollection === 'players') return publicPlayer(entry);
   if (subcollection === 'bids') return publicBid(entry);
-  return entry;
+  if (subcollection === 'categories') return publicCategory(entry);
+  if (subcollection === 'liveState') return publicLiveState(entry);
+  return {};
 }
 
 function cachePublicDataResult(req: express.Request, body: FirestoreRequest, value: unknown): void {
