@@ -696,7 +696,8 @@ app.post('/api/public/auctions/:auctionId/registrations', async (req, res) => {
         if (paymentRequired && samePayment && !samePayment.empty) throw new Error('This payment has already been used.');
         if (existingPlayers.size >= Math.max(0, Number(auction['playerLimit'] ?? 10))) throw new Error('Player limit reached.');
 
-        const playerRef = players.doc(mobile);
+        // Never use a phone number as a Firestore document ID; IDs are public references.
+        const playerRef = players.doc();
         transaction.set(playerRef, {
           auctionId, firstName, lastName, mobile, jerseyNumber, playerType, currentTeam,
           categoryId, categoryName: String(category?.['name'] || ''), tshirtSize, trouserSize, note, photo,
