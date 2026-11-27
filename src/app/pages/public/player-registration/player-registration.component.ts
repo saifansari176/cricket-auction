@@ -49,7 +49,6 @@ export class PlayerRegistrationComponent implements OnDestroy {
   verifiedPaymentAmount = 0;
   categories: PlayerCategory[] = [];
   private localPreviewUrl = '';
-  private photoUploadVersion = 0;
 
   form = this.fb.group({
     firstName: ['', [Validators.required, nonBlank, Validators.minLength(2)]],
@@ -156,7 +155,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
         player.photo = this.form.value.photo || '';
       }
 
-      if (!player.photo) {
+      if (this.isFieldVisible('photo') && !player.photo) {
         this.form.controls.photo.markAsTouched();
         this.message.warning('Please select a player photo before submitting.');
         return;
@@ -208,15 +207,12 @@ export class PlayerRegistrationComponent implements OnDestroy {
       return;
     }
 
-    // Invalidate a prior upload as soon as a new image is selected.
-    this.photoUploadVersion++;
     this.cropFile = file;
     input.value = '';
   }
 
   async uploadCroppedPhoto(file: File): Promise<void> {
     this.cropFile = null;
-    const uploadVersion = ++this.photoUploadVersion;
     this.pendingPhotoFile = file;
     this.form.patchValue({ photo: 'pending-upload' });
     this.setLocalPreview(file);
