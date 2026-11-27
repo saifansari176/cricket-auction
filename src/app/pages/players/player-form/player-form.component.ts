@@ -63,7 +63,6 @@ export class PlayerFormComponent implements OnDestroy {
   photoPreview = '';
   private pendingPhotoFile: File | null = null;
   private localPreviewUrl = '';
-  private photoUploadVersion = 0;
 
   ngOnDestroy(): void {
     this.clearLocalPreview();
@@ -240,7 +239,7 @@ export class PlayerFormComponent implements OnDestroy {
           this.uploadingPhoto = false;
         }
       }
-      if (!player.photo) {
+      if (this.isFieldVisible('photo') && !player.photo) {
         this.form.controls.photo.markAsTouched();
         this.message.warning('Please select a player photo before saving.');
         return;
@@ -333,15 +332,12 @@ export class PlayerFormComponent implements OnDestroy {
       return;
     }
 
-    // Invalidate a prior upload as soon as a new image is selected.
-    this.photoUploadVersion++;
     this.cropFile = file;
     input.value = '';
   }
 
   async uploadCroppedPhoto(file: File): Promise<void> {
     this.cropFile = null;
-    ++this.photoUploadVersion;
     this.pendingPhotoFile = file;
     this.form.patchValue({ photo: 'pending-upload' });
     this.clearLocalPreview();
