@@ -90,6 +90,10 @@ export class PlayerRegistrationComponent implements OnDestroy {
   }
 
   async submit(): Promise<void> {
+    if (this.cropFile) {
+      this.message.warning('Please finish or cancel photo cropping before submitting.');
+      return;
+    }
     if (this.saving || this.uploadingPhoto || this.paying) {
       return;
     }
