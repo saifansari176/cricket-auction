@@ -273,7 +273,6 @@ if (!settings) {
 
       }
 
-      teamSaved = true;
       this.message.success('Team saved successfully.');
 
     }
