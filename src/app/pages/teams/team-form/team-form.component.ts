@@ -167,6 +167,7 @@ export class TeamFormComponent implements OnDestroy {
 
     this.saving = true;
     let uploadedLogoUrl = '';
+    let teamSaved = false;
 
     try {
 
@@ -210,7 +211,7 @@ if (!settings) {
 
     if (!this.isEdit) {
       if (!await this.teamService.canAddTeam()) {
-        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320000308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
+        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
         return;
       }
     }
@@ -241,13 +242,14 @@ if (!settings) {
         await this.teamService.updateTeam(team);
 
       if (!updated) {
-        if (uploadedLogoUrl) await this.deleteUploadedLogo(uploadedLogoUrl);
+        if (uploadedLogoUrl && !teamSaved) await this.deleteUploadedLogo(uploadedLogoUrl);
         this.message.warning('Team already exists.');
 
         return;
 
       }
 
+      teamSaved = true;
       if (this.existingTeam?.teamName !== team.teamName) {
         await this.auctionService.syncTeamBidDetails(this.teamId, team.teamName);
       }
@@ -256,11 +258,6 @@ if (!settings) {
 
     }
     else {
-
-      if (!await this.teamService.canAddTeam()) {
-        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
-        return;
-      }
 
       const saved =
         await this.teamService.saveTeam(team);
@@ -273,6 +270,7 @@ if (!settings) {
 
       }
 
+      teamSaved = true;
       this.message.success('Team saved successfully.');
 
     }
