@@ -74,9 +74,10 @@ export class PlayerService {
 
     // Mobile number is unique within an auction. The transaction prevents two
     // concurrent submissions from both passing a separate read-before-write.
+    // Keep mobile as the unique business key, not as the public document ID.
     return this.firebase.createIfNoMatchingField(
       this.auctionCollection(player.auctionId),
-      mobile,
+      crypto.randomUUID(),
       'mobile',
       mobile,
       { ...playerData, mobile }
