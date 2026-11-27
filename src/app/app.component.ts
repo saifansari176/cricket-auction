@@ -93,7 +93,9 @@ export class AppComponent implements OnDestroy {
           distinctUntilChanged(),
           filter(Boolean)
         )
-        .subscribe(() => this.preloadPlayers())
+        .subscribe(() => {
+          if (!this.isPublicRoute()) this.preloadPlayers();
+        })
     );
 
     this.dataPreloadSubscriptions.add(
@@ -104,12 +106,40 @@ export class AppComponent implements OnDestroy {
           filter(Boolean)
         )
         .subscribe(() => {
-          if (this.authService.currentUser$.value) this.preloadPlayers();
+          if (this.authService.currentUser$.value && !this.isPublicRoute()) {
+            this.preloadPlayers();
+          }
+        })
+    );
+
+    // Start preloading only after navigation enters the authenticated app.
+    this.dataPreloadSubscriptions.add(
+      this.router.events
+        .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+        .subscribe((event) => {
+          if (!this.isPublicRoute(event.urlAfterRedirects) && this.authService.currentUser$.value) {
+            this.preloadPlayers();
+          }
         })
     );
   }
 
+  private isPublicRoute(url = this.router.url): boolean {
+    const path = url.split('?')[0].split('#')[0];
+    return [
+      '/', '/login', '/player-registration', '/player-list', '/watch',
+      '/live-screen', '/youtube-live', '/auction-overlay', '/how-it-works',
+      '/coming-auctions', '/past-auctions'
+    ].some((route) => route === '/'
+      ? path === '/'
+      : path === route || path.startsWith(route + '/'));
+  }
+
   private preloadPlayers(): void {
+    // Public pages must not trigger player preloading or its dependent
+    // active-auction migration and preference reads.
+    if (this.isPublicRoute()) return;
+
     void this.playerService.getPlayers().catch((error: unknown) => {
       // Preloading is an optimization; the destination page can retry normally.
       console.warn('Unable to preload players.', error);
