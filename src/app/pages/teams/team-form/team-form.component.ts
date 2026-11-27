@@ -59,7 +59,6 @@ export class TeamFormComponent implements OnDestroy {
   logoPreview = '';
   private pendingLogoFile: File | null = null;
   private localPreviewUrl = '';
-  private logoUploadVersion = 0;
 
   ngOnDestroy(): void {
     this.clearLocalPreview();
@@ -136,14 +135,12 @@ export class TeamFormComponent implements OnDestroy {
       return;
     }
 
-    this.logoUploadVersion++;
     this.cropFile = file;
     input.value = '';
   }
 
   async uploadCroppedLogo(file: File): Promise<void> {
     this.cropFile = null;
-    const uploadVersion = ++this.logoUploadVersion;
     this.pendingLogoFile = file;
     this.form.patchValue({ logo: 'pending-upload' });
     this.clearLocalPreview();
@@ -210,6 +207,23 @@ if (!settings) {
         : 0
 
     };
+
+    if (!this.isEdit) {
+      if (!await this.teamService.canAddTeam()) {
+        this.message.warning('Team limit reached. To buy more teams and get unlimited players, contact Saif Ansari: 9823300308 / 9320000308 / 9320006789, Saad Ansari: 9699760242, Noor Ansari: 9689950988, Arif Ansari: 8793669939, Raj Ansari: 9175982907.');
+        return;
+      }
+    }
+
+    const existingTeams = await this.teamService.getTeams(team.auctionId);
+    const normalizedName = team.teamName.trim().toLocaleLowerCase();
+    const duplicate = existingTeams.some(existing =>
+      existing.id !== team.id && existing.teamName.trim().toLocaleLowerCase() === normalizedName
+    );
+    if (duplicate) {
+      this.message.warning('Team already exists.');
+      return;
+    }
 
     if (this.pendingLogoFile) {
       this.uploading = true;
