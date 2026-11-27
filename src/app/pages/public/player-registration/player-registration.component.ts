@@ -160,7 +160,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
         player.photo = this.form.value.photo || '';
       }
 
-      if (this.isFieldVisible('photo') && !player.photo) {
+      if (!player.photo) {
         this.form.controls.photo.markAsTouched();
         this.message.warning('Please select a player photo before submitting.');
         return;
