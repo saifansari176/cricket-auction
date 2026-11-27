@@ -29,7 +29,7 @@
 
                     <div class="col-md-12 text-center mb-3">
 
-                        <img *ngIf="form.value.logo" [src]="form.value.logo" width="120" class="rounded-circle mb-3">
+                        <img *ngIf="logoPreview || form.value.logo" [src]="logoPreview || form.value.logo" width="120" class="rounded-circle mb-3">
 
                         <input type="file" accept="image/*" class="form-control" [disabled]="uploading || saving" (change)="onLogoChange($event)">
                         <app-image-cropper *ngIf="cropFile" [file]="cropFile" label="team logo" outputFileName="team-logo.jpg" (cropped)="uploadCroppedLogo($event)" (cancelled)="cropFile = null" />
