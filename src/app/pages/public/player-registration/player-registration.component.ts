@@ -43,6 +43,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
   photoPreview = '';
   uploadingPhoto = false;
   cropFile: File | null = null;
+  private pendingPhotoFile: File | null = null;
   checkingMobile = false;
   paying = false;
   verifiedPaymentAmount = 0;
@@ -118,7 +119,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
       baseBid: Number(this.getSelectedCategory()?.basePrice ?? this.auction?.basePlayerPrice ?? this.auction?.minimumBid ?? 0),
       bidIncreaseBy: Number(this.getSelectedCategory()?.bidIncreaseBy ?? this.auction?.bidIncreaseBy ?? 0),
       note: this.form.value.note || '',
-      photo: this.form.value.photo || '',
+      photo: '',
       paymentRequired: this.paymentRequired,
       paymentOrderId: this.form.value.paymentOrderId || '',
       paymentId: this.form.value.paymentId || '',
@@ -137,9 +138,36 @@ export class PlayerRegistrationComponent implements OnDestroy {
         return;
       }
 
+      if (await this.playerService.isMobileRegistered(player.auctionId, player.mobile)) {
+        this.message.warning('This mobile number is already registered for this auction. Please use a different mobile number.');
+        return;
+      }
+
+      let uploadedPhotoUrl = '';
+      if (this.pendingPhotoFile) {
+        this.uploadingPhoto = true;
+        try {
+          uploadedPhotoUrl = await this.storageService.uploadPlayerImage(this.pendingPhotoFile);
+          player.photo = uploadedPhotoUrl;
+        } finally {
+          this.uploadingPhoto = false;
+        }
+      } else {
+        player.photo = this.form.value.photo || '';
+      }
+
+      if (!player.photo) {
+        this.form.controls.photo.markAsTouched();
+        this.message.warning('Please select a player photo before submitting.');
+        return;
+      }
+
       const saved = await this.playerService.savePlayer(player);
 
       if (!saved) {
+        if (uploadedPhotoUrl) {
+          await this.deleteUploadedPhoto(uploadedPhotoUrl);
+        }
         this.message.warning('Player with this mobile number already exists.');
         return;
       }
@@ -148,8 +176,12 @@ export class PlayerRegistrationComponent implements OnDestroy {
       this.form.reset();
       this.verifiedPaymentAmount = 0;
       this.photoPreview = '';
+      this.pendingPhotoFile = null;
       this.clearLocalPreview();
     } catch (error: unknown) {
+      if (typeof player !== 'undefined' && player.photo && player.photo.startsWith('https://firebasestorage.googleapis.com/')) {
+        await this.deleteUploadedPhoto(player.photo);
+      }
       const errorMessage = error instanceof Error ? error.message : 'Unable to submit registration. Please try again.';
       if (/already exists|already registered|duplicate/i.test(errorMessage)) {
         const mobileControl = this.form.controls.mobile;
@@ -185,27 +217,9 @@ export class PlayerRegistrationComponent implements OnDestroy {
   async uploadCroppedPhoto(file: File): Promise<void> {
     this.cropFile = null;
     const uploadVersion = ++this.photoUploadVersion;
-    this.form.patchValue({ photo: '' });
+    this.pendingPhotoFile = file;
+    this.form.patchValue({ photo: 'pending-upload' });
     this.setLocalPreview(file);
-    this.uploadingPhoto = true;
-
-    try {
-      const uploadedUrl = await this.storageService.uploadPlayerImage(file);
-      if (uploadVersion === this.photoUploadVersion) {
-        this.form.patchValue({ photo: uploadedUrl });
-        this.photoPreview = uploadedUrl;
-        this.clearLocalPreview();
-      }
-    } catch (error: unknown) {
-      if (uploadVersion === this.photoUploadVersion) {
-        const message = error instanceof Error ? error.message : 'Please try again.';
-        this.message.error('Image upload failed: ' + message);
-      }
-    } finally {
-      if (uploadVersion === this.photoUploadVersion) {
-        this.uploadingPhoto = false;
-      }
-    }
   }
 
   get paymentRequired(): boolean {
@@ -272,6 +286,14 @@ export class PlayerRegistrationComponent implements OnDestroy {
     this.clearLocalPreview();
     this.localPreviewUrl = URL.createObjectURL(file);
     this.photoPreview = this.localPreviewUrl;
+  }
+
+  private async deleteUploadedPhoto(url: string): Promise<void> {
+    try {
+      await this.storageService.deleteUploadedFile(url);
+    } catch (cleanupError) {
+      console.warn('Unable to clean up uploaded player photo:', cleanupError);
+    }
   }
 
   private clearLocalPreview(): void {
