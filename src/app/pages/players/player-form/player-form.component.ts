@@ -193,7 +193,6 @@ export class PlayerFormComponent implements OnDestroy {
 
     this.saving = true;
     let uploadedPhotoUrl = '';
-    let playerSaved = false;
 
     try {
     const player: Player = {
@@ -251,7 +250,6 @@ export class PlayerFormComponent implements OnDestroy {
         return;
       }
       await this.playerService.updatePlayer(player);
-      playerSaved = true;
 
       if (this.existingPlayer?.status === 'Sold' && player.status !== 'Sold') {
         await this.auctionService.deletePlayerBids(this.playerId);
@@ -297,7 +295,7 @@ export class PlayerFormComponent implements OnDestroy {
       const saved = await this.playerService.savePlayer(player);
 
       if (!saved) {
-        if (uploadedPhotoUrl && !playerSaved) await this.deleteUploadedPhoto(uploadedPhotoUrl);
+        if (uploadedPhotoUrl) await this.deleteUploadedPhoto(uploadedPhotoUrl);
         this.message.warning('Player with this mobile number already exists.');
         return;
       }
@@ -311,7 +309,6 @@ export class PlayerFormComponent implements OnDestroy {
     this.clearLocalPreview();
     await this.router.navigate(['/players']);
     } catch (error: unknown) {
-      if (uploadedPhotoUrl && !playerSaved) await this.deleteUploadedPhoto(uploadedPhotoUrl);
       const errorMessage = error instanceof Error ? error.message : 'Unable to save player. Please try again.';
       this.message.error(errorMessage);
     } finally {
