@@ -280,7 +280,7 @@ if (!settings) {
     this.router.navigate(['/teams']);
 
     } catch (error: unknown) {
-      if (uploadedLogoUrl) await this.deleteUploadedLogo(uploadedLogoUrl);
+      if (uploadedLogoUrl && !teamSaved) await this.deleteUploadedLogo(uploadedLogoUrl);
       const errorMessage = error instanceof Error ? error.message : 'Unable to save team. Please try again.';
       this.message.error(errorMessage);
     } finally {
