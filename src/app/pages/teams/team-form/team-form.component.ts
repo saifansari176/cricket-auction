@@ -172,7 +172,6 @@ export class TeamFormComponent implements OnDestroy {
 
     this.saving = true;
     let uploadedLogoUrl = '';
-    let teamSaved = false;
 
     try {
 
@@ -247,14 +246,13 @@ if (!settings) {
         await this.teamService.updateTeam(team);
 
       if (!updated) {
-        if (uploadedLogoUrl && !teamSaved) await this.deleteUploadedLogo(uploadedLogoUrl);
+        if (uploadedLogoUrl) await this.deleteUploadedLogo(uploadedLogoUrl);
         this.message.warning('Team already exists.');
 
         return;
 
       }
 
-      teamSaved = true;
       if (this.existingTeam?.teamName !== team.teamName) {
         await this.auctionService.syncTeamBidDetails(this.teamId, team.teamName);
       }
@@ -285,7 +283,6 @@ if (!settings) {
     this.router.navigate(['/teams']);
 
     } catch (error: unknown) {
-      if (uploadedLogoUrl && !teamSaved) await this.deleteUploadedLogo(uploadedLogoUrl);
       const errorMessage = error instanceof Error ? error.message : 'Unable to save team. Please try again.';
       this.message.error(errorMessage);
     } finally {
