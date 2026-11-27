@@ -1,7 +1,7 @@
 import { nonBlank } from '../../../shared/validation/validators';
 import { FieldErrorComponent } from '../../../shared/validation/field-error.component';
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import {
   FormBuilder,
   ReactiveFormsModule,
@@ -30,7 +30,7 @@ import { ImageCropperComponent } from '../../../shared/image-cropper/image-cropp
   templateUrl: './team-form.component.html',
   styleUrl: './team-form.component.scss'
 })
-export class TeamFormComponent {
+export class TeamFormComponent implements OnDestroy {
 
   fb = inject(FormBuilder);
 
@@ -56,7 +56,14 @@ export class TeamFormComponent {
   uploading = false;
   saving = false;
   cropFile: File | null = null;
+  logoPreview = '';
+  private pendingLogoFile: File | null = null;
+  private localPreviewUrl = '';
   private logoUploadVersion = 0;
+
+  ngOnDestroy(): void {
+    this.clearLocalPreview();
+  }
 
   form = this.fb.group({
 
@@ -95,6 +102,7 @@ export class TeamFormComponent {
     }
 
     this.existingTeam = team;
+    this.logoPreview = team.logo || '';
 
     this.form.patchValue({
 
@@ -136,23 +144,11 @@ export class TeamFormComponent {
   async uploadCroppedLogo(file: File): Promise<void> {
     this.cropFile = null;
     const uploadVersion = ++this.logoUploadVersion;
-    this.uploading = true;
-
-    try {
-
-      const imageUrl =
-        await this.storageService.uploadTeamLogo(file);
-
-      if (uploadVersion === this.logoUploadVersion) this.form.patchValue({ logo: imageUrl });
-
-    }
-    catch (e) {
-
-      if (uploadVersion === this.logoUploadVersion) this.message.error('Logo upload failed.');
-
-    }
-
-    if (uploadVersion === this.logoUploadVersion) this.uploading = false;
+    this.pendingLogoFile = file;
+    this.form.patchValue({ logo: 'pending-upload' });
+    this.clearLocalPreview();
+    this.localPreviewUrl = URL.createObjectURL(file);
+    this.logoPreview = this.localPreviewUrl;
 
   }
 
@@ -173,6 +169,7 @@ export class TeamFormComponent {
     }
 
     this.saving = true;
+    let uploadedLogoUrl = '';
 
     try {
 
@@ -192,7 +189,7 @@ if (!settings) {
         ? this.teamId
         : undefined,
 
-      logo: this.form.value.logo || '',
+      logo: this.pendingLogoFile ? '' : (this.form.value.logo === 'pending-upload' ? '' : (this.form.value.logo || '')),
 
       teamName: this.form.value.teamName!,
 
@@ -214,13 +211,23 @@ if (!settings) {
 
     };
 
+    if (this.pendingLogoFile) {
+      this.uploading = true;
+      try {
+        uploadedLogoUrl = await this.storageService.uploadTeamLogo(this.pendingLogoFile);
+        team.logo = uploadedLogoUrl;
+      } finally {
+        this.uploading = false;
+      }
+    }
+
     if (this.isEdit) {
 
       const updated =
         await this.teamService.updateTeam(team);
 
       if (!updated) {
-
+        if (uploadedLogoUrl) await this.deleteUploadedLogo(uploadedLogoUrl);
         this.message.warning('Team already exists.');
 
         return;
@@ -245,7 +252,7 @@ if (!settings) {
         await this.teamService.saveTeam(team);
 
       if (!saved) {
-
+        if (uploadedLogoUrl) await this.deleteUploadedLogo(uploadedLogoUrl);
         this.message.warning('Team already exists.');
 
         return;
@@ -256,12 +263,33 @@ if (!settings) {
 
     }
 
+    this.pendingLogoFile = null;
+    this.clearLocalPreview();
     this.router.navigate(['/teams']);
 
+    } catch (error: unknown) {
+      if (uploadedLogoUrl) await this.deleteUploadedLogo(uploadedLogoUrl);
+      const errorMessage = error instanceof Error ? error.message : 'Unable to save team. Please try again.';
+      this.message.error(errorMessage);
     } finally {
       this.saving = false;
     }
 
+  }
+
+  private async deleteUploadedLogo(url: string): Promise<void> {
+    try {
+      await this.storageService.deleteUploadedFile(url);
+    } catch (cleanupError) {
+      console.warn('Unable to clean up uploaded team logo:', cleanupError);
+    }
+  }
+
+  private clearLocalPreview(): void {
+    if (this.localPreviewUrl) {
+      URL.revokeObjectURL(this.localPreviewUrl);
+      this.localPreviewUrl = '';
+    }
   }
 
 }
