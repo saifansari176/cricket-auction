@@ -2,6 +2,12 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
+    function isActiveAdmin() {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin'
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.active == true;
+    }
+
     function isImageUnder5Mb() {
       return request.resource.size > 0
         && request.resource.size < 5 * 1024 * 1024
@@ -15,7 +21,8 @@ service firebase.storage {
       allow create: if request.auth != null
         && folder in ['teams', 'auction']
         && isImageUnder5Mb();
-      allow update, delete, list: if false;
+      allow update, list: if false;
+      allow delete: if isActiveAdmin();
     }
   }
 }
