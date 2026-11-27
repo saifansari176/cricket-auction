@@ -153,6 +153,11 @@ export class TeamFormComponent implements OnDestroy {
 
   async save() {
 
+    if (this.cropFile) {
+      this.message.warning('Please finish or cancel logo cropping before saving.');
+      return;
+    }
+
     if (this.saving || this.uploading) {
       return;
     }
