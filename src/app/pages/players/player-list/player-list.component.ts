@@ -1,4 +1,4 @@
-﻿import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { PlayerService } from '../../../core/services/player.service';
 import { RouterLink, RouterModule } from '@angular/router';
 import { Player } from '../../../core/models/player';
@@ -339,6 +339,7 @@ get categories(): string[] {
     let imported = 0;
     let skipped = 0;
     let failed = 0;
+    const importedMobiles = new Set(existingPlayers.map(player => player.mobile.trim()));
 
     for (const row of excelData) {
       const mobile = this.getCellValue(row, 'Mobile').replace('.0', '').trim();
@@ -348,11 +349,11 @@ get categories(): string[] {
         continue;
       }
 
-      const exists = existingPlayers.some(p => p.mobile === mobile);
-      if (exists) {
+      if (importedMobiles.has(mobile)) {
         skipped++;
         continue;
       }
+      importedMobiles.add(mobile);
 
       const player: Player = {
         firstName: this.getCellValue(row, 'First Name'),
