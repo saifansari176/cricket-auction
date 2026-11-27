@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { deleteObject, getDownloadURL, ref, refFromURL, uploadBytes } from 'firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../../../firebase.config';
 import { LoadingService } from './loading.service';
 
@@ -21,7 +21,7 @@ export class StorageService {
 
   async deleteUploadedFile(downloadUrl: string): Promise<void> {
     if (!downloadUrl) return;
-    await deleteObject(refFromURL(downloadUrl, storage));
+    await deleteObject(ref(storage, downloadUrl));
   }
 
   private async uploadRemoteFile(file: File, folder: string): Promise<string> {
