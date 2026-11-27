@@ -174,6 +174,11 @@ export class PlayerFormComponent implements OnDestroy {
 
   async save(): Promise<void> {
 
+    if (this.cropFile) {
+      this.message.warning('Please finish or cancel photo cropping before saving.');
+      return;
+    }
+
     if (this.saving || this.uploadingPhoto) {
       return;
     }
