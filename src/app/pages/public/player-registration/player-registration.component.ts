@@ -135,7 +135,6 @@ export class PlayerRegistrationComponent implements OnDestroy {
 
     this.saving = true;
     let uploadedPhotoUrl = '';
-    let playerSaved = false;
 
     try {
       if (!await this.playerService.canAddPlayer(this.auction?.id || this.auction?.activeAuctionId)) {
@@ -167,7 +166,6 @@ export class PlayerRegistrationComponent implements OnDestroy {
       }
 
       const saved = await this.playerService.savePlayer(player);
-      playerSaved = saved;
 
       if (!saved) {
         if (uploadedPhotoUrl) {
@@ -184,9 +182,6 @@ export class PlayerRegistrationComponent implements OnDestroy {
       this.pendingPhotoFile = null;
       this.clearLocalPreview();
     } catch (error: unknown) {
-      if (uploadedPhotoUrl && !playerSaved) {
-        await this.deleteUploadedPhoto(uploadedPhotoUrl);
-      }
       const errorMessage = error instanceof Error ? error.message : 'Unable to submit registration. Please try again.';
       if (/already exists|already registered|duplicate/i.test(errorMessage)) {
         const mobileControl = this.form.controls.mobile;
