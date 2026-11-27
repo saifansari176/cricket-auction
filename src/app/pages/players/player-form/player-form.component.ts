@@ -306,7 +306,7 @@ export class PlayerFormComponent implements OnDestroy {
     this.clearLocalPreview();
     await this.router.navigate(['/players']);
     } catch (error: unknown) {
-      if (uploadedPhotoUrl) await this.deleteUploadedPhoto(uploadedPhotoUrl);
+      if (uploadedPhotoUrl && !playerSaved) await this.deleteUploadedPhoto(uploadedPhotoUrl);
       const errorMessage = error instanceof Error ? error.message : 'Unable to save player. Please try again.';
       this.message.error(errorMessage);
     } finally {
