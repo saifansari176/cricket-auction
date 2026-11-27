@@ -188,6 +188,7 @@ export class PlayerFormComponent implements OnDestroy {
 
     this.saving = true;
     let uploadedPhotoUrl = '';
+    let playerSaved = false;
 
     try {
     const player: Player = {
@@ -245,6 +246,7 @@ export class PlayerFormComponent implements OnDestroy {
         return;
       }
       await this.playerService.updatePlayer(player);
+      playerSaved = true;
 
       if (this.existingPlayer?.status === 'Sold' && player.status !== 'Sold') {
         await this.auctionService.deletePlayerBids(this.playerId);
@@ -281,7 +283,7 @@ export class PlayerFormComponent implements OnDestroy {
         }
       }
 
-      if (!player.photo) {
+      if (this.isFieldVisible('photo') && !player.photo) {
         this.form.controls.photo.markAsTouched();
         this.message.warning('Please select a player photo before saving.');
         return;
@@ -290,11 +292,12 @@ export class PlayerFormComponent implements OnDestroy {
       const saved = await this.playerService.savePlayer(player);
 
       if (!saved) {
-        if (uploadedPhotoUrl) await this.deleteUploadedPhoto(uploadedPhotoUrl);
+        if (uploadedPhotoUrl && !playerSaved) await this.deleteUploadedPhoto(uploadedPhotoUrl);
         this.message.warning('Player with this mobile number already exists.');
         return;
       }
 
+      playerSaved = true;
       this.message.success('Player saved successfully.');
 
     }
