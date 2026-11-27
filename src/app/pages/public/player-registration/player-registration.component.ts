@@ -149,6 +149,16 @@ export class PlayerRegistrationComponent implements OnDestroy {
       this.verifiedPaymentAmount = 0;
       this.photoPreview = '';
       this.clearLocalPreview();
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unable to submit registration. Please try again.';
+      if (/already exists|already registered|duplicate/i.test(errorMessage)) {
+        const mobileControl = this.form.controls.mobile;
+        mobileControl.setErrors({ ...(mobileControl.errors || {}), duplicate: true });
+        mobileControl.markAsTouched();
+        this.message.warning('This mobile number is already registered for this auction. Please use a different mobile number.');
+      } else {
+        this.message.error(errorMessage || 'Unable to submit registration. Please try again.');
+      }
     } finally {
       this.saving = false;
     }
