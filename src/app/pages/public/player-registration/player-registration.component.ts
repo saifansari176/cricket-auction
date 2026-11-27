@@ -130,6 +130,8 @@ export class PlayerRegistrationComponent implements OnDestroy {
     };
 
     this.saving = true;
+    let uploadedPhotoUrl = '';
+    let playerSaved = false;
 
     try {
       if (!await this.playerService.canAddPlayer(this.auction?.id || this.auction?.activeAuctionId)) {
@@ -142,7 +144,6 @@ export class PlayerRegistrationComponent implements OnDestroy {
         return;
       }
 
-      let uploadedPhotoUrl = '';
       if (this.pendingPhotoFile) {
         this.uploadingPhoto = true;
         try {
@@ -162,6 +163,7 @@ export class PlayerRegistrationComponent implements OnDestroy {
       }
 
       const saved = await this.playerService.savePlayer(player);
+      playerSaved = saved;
 
       if (!saved) {
         if (uploadedPhotoUrl) {
@@ -178,8 +180,8 @@ export class PlayerRegistrationComponent implements OnDestroy {
       this.pendingPhotoFile = null;
       this.clearLocalPreview();
     } catch (error: unknown) {
-      if (typeof player !== 'undefined' && player.photo && player.photo.startsWith('https://firebasestorage.googleapis.com/')) {
-        await this.deleteUploadedPhoto(player.photo);
+      if (uploadedPhotoUrl && !playerSaved) {
+        await this.deleteUploadedPhoto(uploadedPhotoUrl);
       }
       const errorMessage = error instanceof Error ? error.message : 'Unable to submit registration. Please try again.';
       if (/already exists|already registered|duplicate/i.test(errorMessage)) {
