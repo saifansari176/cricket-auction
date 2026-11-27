@@ -145,7 +145,7 @@
           <strong>Amount: ₹{{registrationPaymentAmount}}</strong>
           <span *ngIf="form.value.paymentVerified" class="payment-success">Payment verified</span>
           <button *ngIf="!form.value.paymentVerified" type="button" (click)="payNow()" [disabled]="paying || checkingMobile || uploadingPhoto">
-            {{checkingMobile ? 'Checking mobile...' : (paying ? 'Opening payment...' : 'Pay Now ₹' + registrationPaymentAmount)}}
+            {{uploadingPhoto ? 'Uploading photo...' : (checkingMobile ? 'Checking mobile...' : (paying ? 'Opening payment...' : 'Pay Now ₹' + registrationPaymentAmount))}}
           </button>
         </div>
       </section>
